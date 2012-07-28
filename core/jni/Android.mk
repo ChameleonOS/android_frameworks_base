@@ -149,10 +149,8 @@ LOCAL_SRC_FILES:= \
 	android_animation_PropertyValuesHolder.cpp \
 	com_android_internal_net_NetworkStatsFactory.cpp
 
-ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
-    LOCAL_CFLAGS += -DQCOM_HARDWARE
-    LOCAL_SRC_FILES += \
-	    com_android_internal_app_ActivityTrigger.cpp
+ifeq ($(call is-vendor-board-platform,QCOM),true)
+LOCAL_SRC_FILES += com_android_internal_app_ActivityTrigger.cpp
 endif
 
 LOCAL_C_INCLUDES += \
