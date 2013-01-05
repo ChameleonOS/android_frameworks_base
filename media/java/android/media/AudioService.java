@@ -115,6 +115,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     /** The UI */
     private VolumePanel mVolumePanel;
+    private Handler mHandler;
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -446,6 +447,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     public AudioService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+        mHandler = new Handler();
         mVoiceCapable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_voice_capable);
 
@@ -3981,136 +3983,79 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     private void masterVolumeChanged(final int flags) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postMasterVolumeChanged(flags);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postMasterVolumeChanged(flags);
-                }
-            });
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Context context = mContext;
+                mVolumePanel = new VolumePanel(context, AudioService.this);
+                mVolumePanel.postMasterVolumeChanged(flags);
+            }
+        });
     }
 
     private void masterMuteChanged(final int flags) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postMasterMuteChanged(flags);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postMasterMuteChanged(flags);
-                }
-            });
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Context context = mContext;
+                mVolumePanel = new VolumePanel(context, AudioService.this);
+                mVolumePanel.postMasterMuteChanged(flags);
+            }
+        });
     }
 
     private void remoteSliderVisibility(final boolean hasRemotePlayback) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
-                }
-            });
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Context context = mContext;
+                mVolumePanel = new VolumePanel(context, AudioService.this);
+                mVolumePanel.postRemoteSliderVisibility(hasRemotePlayback);
+            }
+        });
     }
 
     private void showVolumeChangeUi(final int streamType, final int flags) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postVolumeChanged(streamType, flags);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postVolumeChanged(streamType, flags);
-                }
-            });
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Context context = mContext;
+                mVolumePanel = new VolumePanel(context, AudioService.this);
+                mVolumePanel.postVolumeChanged(streamType, flags);
+            }
+        });
     }
 
     private void remoteVolumeChanged(final int streamType, final int flags) {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postRemoteVolumeChanged(streamType, flags);
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postRemoteVolumeChanged(streamType, flags);
-                }
-            });
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Context context = mContext;
+                mVolumePanel = new VolumePanel(context, AudioService.this);
+                mVolumePanel.postRemoteVolumeChanged(streamType, flags);
+            }
+        });
     }
 
     private void displaySafeVolumeWarning() {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postDisplaySafeVolumeWarning();
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postDisplaySafeVolumeWarning();
-                }
-            });
-        }
+        mHandler.post(new Runnable() {
+            @Override
+                final Context context = mContext;
+                mVolumePanel = new VolumePanel(context, AudioService.this);
+                mVolumePanel.postDisplaySafeVolumeWarning();
+            }
+        });
     }
 
     private void hasNewRemotePlaybackInfo() {
-        if (mUiContext != null && mVolumePanel != null) {
-            mVolumePanel.postHasNewRemotePlaybackInfo();
-        } else {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mUiContext == null) {
-                        mUiContext = ThemeUtils.createUiContext(mContext);
-                    }
-
-                    final Context context = mUiContext != null ? mUiContext : mContext;
-                    mVolumePanel = new VolumePanel(context, AudioService.this);
-                    mVolumePanel.postHasNewRemotePlaybackInfo();
-                }
-            });
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                final Context context = mContext;
+                mVolumePanel = new VolumePanel(context, AudioService.this);
+                mVolumePanel.postHasNewRemotePlaybackInfo();
+            }
+        });
     }
 
     //==========================================================================================
