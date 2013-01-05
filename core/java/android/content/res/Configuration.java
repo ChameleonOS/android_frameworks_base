@@ -16,11 +16,15 @@
 
 package android.content.res;
 
+import android.annotation.CosHook;
+import android.annotation.CosHook.CosHookType;
 import android.content.pm.ActivityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
+
+import cos.content.res.ExtraConfiguration;
 
 import java.util.Locale;
 
@@ -35,6 +39,9 @@ import java.util.Locale;
  * <pre>Configuration config = getResources().getConfiguration();</pre>
  */
 public final class Configuration implements Parcelable, Comparable<Configuration> {
+    @CosHook(CosHook.CosHookType.NEW_FIELD)
+    public ExtraConfiguration extraConfig = new ExtraConfiguration();
+
     /** @hide */
     public static final Configuration EMPTY = new Configuration();
 
@@ -542,17 +549,22 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * Construct an invalid Configuration.  You must call {@link #setToDefaults}
      * for this object to be valid.  {@more}
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public Configuration() {
+        extraConfig = new ExtraConfiguration();
         setToDefaults();
     }
 
     /**
      * Makes a deep copy suitable for modification.
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public Configuration(Configuration o) {
+        extraConfig = new ExtraConfiguration();
         setTo(o);
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public void setTo(Configuration o) {
         fontScale = o.fontScale;
         mcc = o.mcc;
@@ -578,6 +590,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenHeightDp = o.compatScreenHeightDp;
         compatSmallestScreenWidthDp = o.compatSmallestScreenWidthDp;
         seq = o.seq;
+        extraConfig.setTo(o.extraConfig);
     }
     
     public String toString() {
@@ -720,6 +733,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * Set this object to the system defaults.
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public void setToDefaults() {
         fontScale = 1;
         mcc = mnc = 0;
@@ -739,6 +753,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         densityDpi = DENSITY_DPI_UNDEFINED;
         seq = 0;
+        extraConfig.setToDefaults();
     }
 
     /** {@hide} */
@@ -754,6 +769,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @return Returns a bit mask of the changed fields, as per
      * {@link #diff}.
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public int updateFrom(Configuration delta) {
         int changed = 0;
         if (delta.fontScale > 0 && fontScale != delta.fontScale) {
@@ -873,8 +889,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.seq != 0) {
             seq = delta.seq;
         }
-        
-        return changed;
+
+        return changed | extraConfig.updateFrom(delta.extraConfig);
     }
 
     /**
@@ -908,6 +924,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link android.content.pm.ActivityInfo#CONFIG_LAYOUT_DIRECTION
      * PackageManager.ActivityInfo.CONFIG_LAYOUT_DIRECTION}.
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public int diff(Configuration delta) {
         int changed = 0;
         if (delta.fontScale > 0 && fontScale != delta.fontScale) {
@@ -979,7 +996,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_DENSITY;
         }
 
-        return changed;
+        return changed | extraConfig.diff(delta.extraConfig);
     }
 
     /**
@@ -993,8 +1010,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * 
      * @return Return true if the resource needs to be loaded, else false.
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public static boolean needNewResources(int configChanges, int interestingChanges) {
-        return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE)) != 0;
+        return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE)) != 0
+                || ExtraConfiguration.needNewResources(configChanges);
     }
     
     /**
@@ -1033,6 +1052,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         return 0;
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeFloat(fontScale);
         dest.writeInt(mcc);
@@ -1067,8 +1087,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
         dest.writeInt(seq);
+        extraConfig.writeToParcel(dest, flags);
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public void readFromParcel(Parcel source) {
         fontScale = source.readFloat();
         mcc = source.readInt();
@@ -1095,6 +1117,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
         seq = source.readInt();
+        extraConfig.readFromParcel(source);
     }
     
     public static final Parcelable.Creator<Configuration> CREATOR
@@ -1111,10 +1134,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * Construct this Configuration object, reading from the Parcel.
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     private Configuration(Parcel source) {
+        extraConfig = new ExtraConfiguration();
         readFromParcel(source);
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public int compareTo(Configuration that) {
         int n;
         float a = this.fontScale;
@@ -1161,8 +1187,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (n != 0) return n;
         n = this.smallestScreenWidthDp - that.smallestScreenWidthDp;
         if (n != 0) return n;
-        n = this.densityDpi - that.densityDpi;
-        //if (n != 0) return n;
+        n = this.extraConfig.compareTo(that.extraConfig);
         return n;
     }
 
@@ -1180,6 +1205,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         return false;
     }
     
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public int hashCode() {
         int result = 17;
         result = 31 * result + Float.floatToIntBits(fontScale);
@@ -1199,6 +1225,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + screenHeightDp;
         result = 31 * result + smallestScreenWidthDp;
         result = 31 * result + densityDpi;
+        result = 31 * result + extraConfig.hashCode();
         return result;
     }
 
