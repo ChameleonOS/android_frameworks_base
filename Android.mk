@@ -115,6 +115,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageManager.aidl \
 	core/java/android/content/pm/IPackageMoveObserver.aidl \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
+    core/java/android/content/res/IThemeManagerService.aidl \
 	core/java/android/database/IContentObserver.aidl \
 	core/java/android/hardware/ISerialManager.aidl \
 	core/java/android/hardware/display/IDisplayManager.aidl \
