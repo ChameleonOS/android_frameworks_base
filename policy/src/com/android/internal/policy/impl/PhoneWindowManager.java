@@ -262,7 +262,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     final Object mLock = new Object();
 
     Context mContext;
-    Context mUiContext;
     IWindowManager mWindowManager;
     WindowManagerFuncs mWindowManagerFuncs;
     PowerManager mPowerManager;
@@ -1858,9 +1857,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 context = context.createPackageContext(packageName, 0);
                 if (theme != context.getThemeResId()) {
                     context.setTheme(theme);
+                } catch (PackageManager.NameNotFoundException e) {
+                    // Ignore
                 }
-            } catch (PackageManager.NameNotFoundException e) {
-                // Ignore
             }
 
             // Construct the Toast
@@ -4218,12 +4217,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 updateRotation(true);
             }
-        }
-    };
-
-    BroadcastReceiver mThemeChangeReceiver = new BroadcastReceiver() {
-        public void onReceive(Context context, Intent intent) {
-            mUiContext = null;
         }
     };
 
