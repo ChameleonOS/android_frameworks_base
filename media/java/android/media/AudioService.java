@@ -4040,6 +4040,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private void displaySafeVolumeWarning() {
         mHandler.post(new Runnable() {
             @Override
+            public void run() {
                 final Context context = mContext;
                 mVolumePanel = new VolumePanel(context, AudioService.this);
                 mVolumePanel.postDisplaySafeVolumeWarning();
