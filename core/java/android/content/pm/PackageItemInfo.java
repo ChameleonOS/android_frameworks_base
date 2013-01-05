@@ -18,6 +18,9 @@ package android.content.pm;
 
 import android.content.res.XmlResourceParser;
 
+import android.annotation.CosHook;
+import android.annotation.CosHook.CosHookType;
+import android.app.ThemeHelper;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -135,9 +138,13 @@ public class PackageItemInfo {
      * item does not have an icon, the item's default icon is returned
      * such as the default activity icon.
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public Drawable loadIcon(PackageManager pm) {
         if (icon != 0) {
-            Drawable dr = pm.getDrawable(packageName, icon, getApplicationInfo());
+            String name = this.name;
+            if (name == null)
+                name = packageName;
+            Drawable dr = ThemeHelper.getDrawable(pm, packageName, icon, getApplicationInfo(), name);
             if (dr != null) {
                 return dr;
             }

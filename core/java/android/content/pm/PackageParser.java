@@ -16,11 +16,14 @@
 
 package android.content.pm;
 
+import android.annotation.CosHook;
+import android.annotation.CosHook.CosHookType;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
+import android.content.res.CosResources;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -471,6 +474,7 @@ public class PackageParser {
         return mParseError;
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public Package parsePackage(File sourceFile, String destCodePath,
             DisplayMetrics metrics, int flags) {
         mParseError = PackageManager.INSTALL_SUCCEEDED;
@@ -497,13 +501,13 @@ public class PackageParser {
 
         XmlResourceParser parser = null;
         AssetManager assmgr = null;
-        Resources res = null;
+        CosResources res = null;
         boolean assetError = true;
         try {
             assmgr = new AssetManager();
             int cookie = assmgr.addAssetPath(mArchiveSourcePath);
             if (cookie != 0) {
-                res = new Resources(assmgr, metrics, null);
+                res = new CosResources(assmgr, metrics, null);
                 assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         Build.VERSION.RESOURCES_SDK_INT);
                 parser = assmgr.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
@@ -901,6 +905,7 @@ public class PackageParser {
         return new Signature(sig);
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     private Package parsePackage(
         Resources res, XmlResourceParser parser, int flags, String[] outError)
         throws XmlPullParserException, IOException {
@@ -3027,6 +3032,7 @@ public class PackageParser {
     private static final String ANDROID_RESOURCES
             = "http://schemas.android.com/apk/res/android";
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     private boolean parseIntent(Resources res,
             XmlPullParser parser, AttributeSet attrs, int flags,
             IntentInfo outInfo, String[] outError, boolean isActivity)

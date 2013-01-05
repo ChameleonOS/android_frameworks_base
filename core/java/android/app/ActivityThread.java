@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.CosHook;
+import android.annotation.CosHook.CosHookType;
 import android.app.backup.BackupAgent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -37,6 +39,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.CosResources;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
@@ -1652,6 +1655,7 @@ public final class ActivityThread {
      * @param compInfo the compability info. It will use the default compatibility info when it's
      * null.
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     Resources getTopLevelResources(String resDir,
             int displayId, Configuration overrideConfiguration,
             CompatibilityInfo compInfo) {
@@ -1702,7 +1706,7 @@ public final class ActivityThread {
         } else {
             config = getConfiguration();
         }
-        r = new Resources(assets, dm, config, compInfo);
+        r = new CosResources(assets, dm, config, compInfo);
         if (false) {
             Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
                     + r.getConfiguration() + " appScale="
@@ -1737,6 +1741,18 @@ public final class ActivityThread {
 
     final Handler getHandler() {
         return mH;
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    Resources getTopLevelResources(String packageName, String resDir, LoadedApk pkgInfo) {
+        return getTopLevelResources(packageName, resDir, pkgInfo.mCompatibilityInfo.get());
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    Resources getTopLevelResources(String packageName, String resDir, CompatibilityInfo compInfo) {
+        Resources resources = getTopLevelResources(resDir, compInfo);
+        ((CosResources)resources).init(packageName);
+        return resources;
     }
 
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
@@ -3817,6 +3833,7 @@ public final class ActivityThread {
         }
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     final boolean applyConfigurationToResourcesLocked(Configuration config,
             CompatibilityInfo compat) {
         if (mResConfiguration == null) {
@@ -3839,6 +3856,8 @@ public final class ActivityThread {
                     | ActivityInfo.CONFIG_SCREEN_SIZE
                     | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
         }
+
+        ThemeHelper.handleExtraConfigurationChanges(changes);
 
         // set it for java, this also affects newly created Resources
         if (config.locale != null) {
