@@ -1744,13 +1744,18 @@ public final class ActivityThread {
     }
 
     @CosHook(CosHook.CosHookType.NEW_METHOD)
-    Resources getTopLevelResources(String packageName, String resDir, LoadedApk pkgInfo) {
-        return getTopLevelResources(packageName, resDir, pkgInfo.mCompatibilityInfo.get());
+    Resources getTopLevelResources(String packageName, String resDir,
+			int displayId, Configuration overrideConfiguration,
+			LoadedApk pkgInfo) {
+        return getTopLevelResources(packageName, resDir, displayId, overrideConfiguration,
+					pkgInfo.mCompatibilityInfo.get());
     }
 
     @CosHook(CosHook.CosHookType.NEW_METHOD)
-    Resources getTopLevelResources(String packageName, String resDir, CompatibilityInfo compInfo) {
-        Resources resources = getTopLevelResources(resDir, compInfo);
+    Resources getTopLevelResources(String packageName, String resDir,
+			int displayId, Configuration overrideConfiguration,
+			CompatibilityInfo compInfo) {
+        Resources resources = getTopLevelResources(resDir, displayId, overrideConfiguration, compInfo);
         ((CosResources)resources).init(packageName);
         return resources;
     }
