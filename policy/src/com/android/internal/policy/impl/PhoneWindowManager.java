@@ -1858,7 +1858,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 context = context.createPackageContext(packageName, 0);
                 if (theme != context.getThemeResId()) {
                     context.setTheme(theme);
-                }
+				}
             } catch (PackageManager.NameNotFoundException e) {
                 // Ignore
             }
