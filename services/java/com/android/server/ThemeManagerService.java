@@ -284,7 +284,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             // restart launcher
             if ((configChange & (ExtraConfiguration.THEME_FLAG_LAUNCHER | ExtraConfiguration.THEME_FLAG_ICON |
                     ExtraConfiguration.THEME_FLAG_FRAMEWORK)) != 0)
-                killProcess("com.cyanogenmod.trebuchet");
+                killProcess(ExtraConfiguration.LAUNCHER_PKG_NAME);
         } catch (Exception e) {}
     }
 
@@ -372,7 +372,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                                 notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
 
                                 // restart launcher
-                                killProcess("com.cyanogenmod.trebuchet");
+                                killProcess(ExtraConfiguration.LAUNCHER_PKG_NAME);
                             } catch (FileNotFoundException e) {
                                 Log.e(TAG, "Exception in ThemeWorkerHandler.handleMessage:", e);
                             } catch (IOException e) {

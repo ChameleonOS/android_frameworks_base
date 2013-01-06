@@ -30,7 +30,7 @@ public class ExtraConfiguration
 {
     public static final String CONTACTS_PKG_NAME = "com.android.contacts";
 
-    public static final String LAUNCHER_PKG_NAME = "com.cyanogenmod.trebuchet";
+    public static final String LAUNCHER_PKG_NAME = "org.chameleonos.chaoslauncher";
 
     public static final String MMS_PKG_NAME = "com.android.mms";
 
