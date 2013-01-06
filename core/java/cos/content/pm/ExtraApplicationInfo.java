@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011, T-Mobile USA, Inc.
+ * Copyright (C) 2012 The ChameleonOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-package android.content.res;
+package cos.content.pm;
 
-/**
- * @hide
- */
-parcelable PackageRedirectionMap;
+
+public class ExtraApplicationInfo {
+
+    public static final int FLAG_ACCESS_CONTROL_HIDE = 0x2000000;
+    public static final int FLAG_ACCESS_CONTROL_PASSWORD = 0x4000000;
+    public static final int FLAG_COMPATIBILITY_MODE = 0x8000000;
+
+    public ExtraApplicationInfo() {
+    }
+}
