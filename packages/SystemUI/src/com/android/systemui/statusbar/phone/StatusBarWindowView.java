@@ -65,6 +65,12 @@ public class StatusBarWindowView extends FrameLayout
         mExpandHelper.setScrollView(mScrollView);
     }
 
+	@Override 
+    public void dispatchWindowFocusChanged(boolean hasFocus) {
+        this.setFocusableInTouchMode(hasFocus);
+        this.requestFocus();
+	}
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
