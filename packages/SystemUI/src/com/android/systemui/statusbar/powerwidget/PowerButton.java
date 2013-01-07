@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.PorterDuff.Mode;
 import android.net.Uri;
 import android.os.Handler;
@@ -15,6 +16,7 @@ import android.os.Vibrator;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.systemui.R;
 
@@ -55,12 +57,41 @@ public abstract class PowerButton {
     private static final String SEPARATOR = "OV=I=XseparatorX=I=VO";
     private static final Mode MASK_MODE = Mode.SCREEN;
 
+    public static final String NAME_BUTTON_WIFI = "WiFi";
+    public static final String NAME_BUTTON_GPS = "GPS";
+    public static final String NAME_BUTTON_BLUETOOTH = "Bluetooth";
+    public static final String NAME_BUTTON_BRIGHTNESS = "Brightness";
+    public static final String NAME_BUTTON_SOUND = "Sound";
+    public static final String NAME_BUTTON_SYNC = "Sync";
+    public static final String NAME_BUTTON_WIFIAP = "WiFi Ap";
+    public static final String NAME_BUTTON_SCREENTIMEOUT = "Timeout";
+    public static final String NAME_BUTTON_MOBILEDATA = "Data";
+    public static final String NAME_BUTTON_LOCKSCREEN = "Lock screen";
+    public static final String NAME_BUTTON_NETWORKMODE = "Network";
+    public static final String NAME_BUTTON_AUTOROTATE = "Rotate";
+    public static final String NAME_BUTTON_AIRPLANE = "Airplane";
+    public static final String NAME_BUTTON_FLASHLIGHT = "Torch";
+    public static final String NAME_BUTTON_SLEEP = "Sleep";
+    public static final String NAME_BUTTON_MEDIA_PLAY_PAUSE = "Play";
+    public static final String NAME_BUTTON_MEDIA_PREVIOUS = "Previous";
+    public static final String NAME_BUTTON_MEDIA_NEXT = "Next";
+    public static final String NAME_BUTTON_LTE = "Lte";
+    public static final String NAME_BUTTON_WIMAX = "WiMAX";
+    public static final String NAME_BUTTON_UNKNOWN = "unknown";
+
     protected int mIcon;
     protected int mState;
     protected View mView;
     protected String mType = BUTTON_UNKNOWN;
 
+    protected TextView mLabelView = null;
+    
+    protected boolean mShowLabel = false;
+
     private ImageView mIconView;
+
+    protected static int sLabelColorOff = 0;
+    protected static int sLabelColorOn = 0;
 
     private View.OnClickListener mExternalClickListener;
     private View.OnLongClickListener mExternalLongClickListener;
@@ -76,6 +107,22 @@ public abstract class PowerButton {
         public void handleMessage(Message msg) {
             if (mIconView != null) {
                 mIconView.setImageResource(mIcon);
+                if (mShowLabel) {
+                    switch (mState) {
+                        case STATE_ENABLED:
+                        case STATE_TURNING_ON:
+                            mLabelView.setTextColor(sLabelColorOn);
+                            break;
+                        case STATE_DISABLED:
+                        case STATE_TURNING_OFF:
+                        case STATE_INTERMEDIATE:
+                        default:
+                            mLabelView.setTextColor(sLabelColorOff);
+                            break;
+                    }
+                    mLabelView.setVisibility(View.VISIBLE);
+                } else
+                    mLabelView.setVisibility(View.GONE);
             }
         }
     };
@@ -114,6 +161,11 @@ public abstract class PowerButton {
         mLongClickPattern = longClickPattern;
     }
 
+    public void setLabel(String label) {
+        mShowLabel = label != null;
+        mLabelView.setText(label);
+    }
+
     protected IntentFilter getBroadcastIntentFilter() {
         return new IntentFilter();
     }
@@ -129,8 +181,13 @@ public abstract class PowerButton {
             mView.setOnClickListener(mClickListener);
             mView.setOnLongClickListener(mLongClickListener);
 
-            mIconView = (ImageView) mView.findViewById(R.id.power_widget_button_image);
+            mIconView = (ImageView) mView.findViewById(R.id.toggle_button_image);
+            mLabelView = (TextView) mView.findViewById(R.id.toggle_button_label);
             mVibrator = (Vibrator) mView.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+            Resources res = mView.getContext().getResources();
+
+            sLabelColorOff = res.getColor(R.color.toggles_button_label_off);
+            sLabelColorOn = res.getColor(R.color.toggles_button_label_on);
         } else {
             mIconView = null;
         }

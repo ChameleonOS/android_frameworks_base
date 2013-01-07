@@ -211,4 +211,10 @@
     <!-- How far to slide the panel out when you touch it -->
     <!-- For phones, this is close_handle_height + header_height -->
     <dimen name="peek_height">84dp</dimen>
+
+    <!-- Height of the brightness slider in the toggles tab -->
+    <dimen name="toggles_slider_panel_height">48dp</dimen>
+
+    <!-- Toggles row height for page layout -->
+    <dimen name="status_bar_toggles_row_height">100dp</dimen>
 </resources>

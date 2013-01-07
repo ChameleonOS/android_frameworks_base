@@ -550,4 +550,7 @@
     <string name="status_bar_settings_battery_meter_min_format" translatable="false">
         <xliff:g id="number">%d</xliff:g>
     </string>
+
+    <string name="notification_tab_notifications">NOTIFICATIONS</string>
+    <string name="notification_tab_toggles">TOGGLES</string>
 </resources>

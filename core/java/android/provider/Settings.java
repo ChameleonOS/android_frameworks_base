@@ -2584,6 +2584,13 @@ public final class Settings {
         public static final String POINTER_SPEED = "pointer_speed";
 
         /**
+         * Type of toggles to use: 0 = none, 1 = compact, 2 = page
+         *
+         * @hide
+         */
+        public static final String TOGGLES_TYPE = "toggles_type";
+
+        /**
          * Quick Settings Panel Tiles to Use
          *
          * @hide

@@ -64,6 +64,7 @@ import android.util.Slog;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -82,6 +83,9 @@ import android.widget.ImageView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.TabHost;
+import android.widget.TabHost.TabSpec;
+import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
@@ -103,7 +107,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.Prefs;
-import com.android.systemui.statusbar.powerwidget.PowerWidget;
+import com.android.systemui.statusbar.powerwidget.StatusBarToggles;
 
 import cos.content.res.ExtraConfiguration;
 
@@ -142,6 +146,11 @@ public class PhoneStatusBar extends BaseStatusBar {
     private static final float BRIGHTNESS_CONTROL_PADDING = 0.15f;
     private static final int BRIGHTNESS_CONTROL_LONG_PRESS_TIMEOUT = 750; // ms
     private static final int BRIGHTNESS_CONTROL_LINGER_THRESHOLD = 20;
+
+    private static final int TOGGLES_TYPE_NONE = 0;
+    private static final int TOGGLES_TYPE_COMPACT = 1;
+    private static final int TOGGLES_TYPE_PAGE = 2;
+
 
     // fling gesture tuning parameters, scaled to display density
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
@@ -251,7 +260,16 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mTrackingPosition; // the position of the top of the tracking view.
 
     // the power widget
-    PowerWidget mPowerWidget;
+    StatusBarToggles mCompactToggles;
+
+    // status bar toggles
+    StatusBarToggles mPageToggles;
+
+    // status bar tabhost
+    TabHost mTabHost;
+
+    // type of toggles
+    int mTogglesType = TOGGLES_TYPE_NONE;
 
     // ticker
     private Ticker mTicker;
@@ -338,6 +356,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.SCREEN_BRIGHTNESS_MODE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.TOGGLES_TYPE), false, this);
             update();
         }
 
@@ -353,9 +373,14 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC;
             mBrightnessControl = !autoBrightness && Settings.System.getInt(
                     resolver, Settings.System.STATUS_BAR_BRIGHTNESS_CONTROL, 0) == 1;
+
+            mTogglesType = Settings.System.getInt(
+                    resolver, Settings.System.TOGGLES_TYPE, TOGGLES_TYPE_NONE);
+            if (mNotificationPanel != null) {
+                setTogglesType(mTogglesType);
+            }
         }
     }
-
 
     // ensure quick settings is disabled until the current user makes it through the setup wizard
     private boolean mUserSetup = false;
@@ -472,6 +497,31 @@ public class PhoneStatusBar extends BaseStatusBar {
             mNotificationPanelDebugText.setVisibility(View.VISIBLE);
         }
 
+        mTabHost = (TabHost) mNotificationPanel.findViewById(R.id.status_bar_tab_host);
+        mTabHost.setup();
+
+        setupTab(R.id.notifications_tab, mContext.getString(R.string.notification_tab_notifications),
+                R.layout.tabs_bg_notifications);
+        setupTab(R.id.toggles_tab, mContext.getString(R.string.notification_tab_toggles),
+                R.layout.tabs_bg_toggles);
+        mTabHost.getTabWidget().setDividerDrawable(R.drawable.tab_divider);
+
+        mTabHost.setCurrentTab(0);
+        setTogglesType(mTogglesType);
+
+        mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                if (mContext.getString(R.string.notification_tab_notifications).equals(tabId)) {
+                    if (mHasFlipSettings) {
+                        if (mFlipSettingsView.getVisibility() == View.VISIBLE) {
+                            flipToNotifications();
+                        }
+                    }
+                }
+            }
+        });
+
         updateShowSearchHoldoff();
 
         try {
@@ -497,6 +547,15 @@ public class PhoneStatusBar extends BaseStatusBar {
         mNotificationIcons.setOverflowIndicator(mMoreIcon);
         mStatusBarContents = (LinearLayout)mStatusBarView.findViewById(R.id.status_bar_contents);
         mTickerView = mStatusBarView.findViewById(R.id.ticker);
+
+        /* Destroy the old widget before recreating the expanded dialog
+           to make sure there are no context issues */
+        if (mRecreating) {
+            if (mCompactToggles != null)
+                mCompactToggles.destroyWidget();
+            if (mPageToggles != null)
+                mPageToggles.destroyWidget();
+        }
 
         mPile = (NotificationRowLayout)mStatusBarWindow.findViewById(R.id.latestItems);
         mPile.setLayoutTransitionsEnabled(false);
@@ -560,23 +619,41 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         // Load the Power widget views and set the listeners
-        mPowerWidget = (PowerWidget)mStatusBarWindow.findViewById(R.id.exp_power_stat);
-        mPowerWidget.setGlobalButtonOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if(Settings.System.getInt(mContext.getContentResolver(),
-                                Settings.System.EXPANDED_HIDE_ONCHANGE, 0) == 1) {
-                            animateCollapsePanels();
+        mPageToggles = (StatusBarToggles)mStatusBarWindow.findViewById(R.id.status_bar_toggles);
+        if (mPageToggles != null) {
+            mPageToggles.setGlobalButtonOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            if(Settings.System.getInt(mContext.getContentResolver(),
+                                    Settings.System.EXPANDED_HIDE_ONCHANGE, 0) == 1) {
+                                animateCollapsePanels();
+                            }
                         }
-                    }
-                });
-        mPowerWidget.setGlobalButtonOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                animateCollapsePanels();
-                return true;
-            }
-        });
+                    });
+            mPageToggles.setGlobalButtonOnLongClickListener(new View.OnLongClickListener() {
+                public boolean onLongClick(View v) {
+                    animateCollapsePanels();
+                    return true;
+                }
+            });
+        }
+
+        mCompactToggles = (StatusBarToggles)mStatusBarWindow.findViewById(R.id.exp_power_stat);
+        if (mCompactToggles != null) {
+            mCompactToggles.setGlobalButtonOnClickListener(new View.OnClickListener() {
+                        public void onClick(View v) {
+                            if(Settings.System.getInt(mContext.getContentResolver(),
+                                    Settings.System.EXPANDED_HIDE_ONCHANGE, 0) == 1) {
+                                animateCollapsePanels();
+                            }
+                        }
+                    });
+            mCompactToggles.setGlobalButtonOnLongClickListener(new View.OnLongClickListener() {
+                public boolean onLongClick(View v) {
+                    animateCollapsePanels();
+                    return true;
+                }
+            });
+        }
 
         mTicker = new MyTicker(context, mStatusBarView);
         TickerView tickerView = (TickerView)mStatusBarView.findViewById(R.id.tickerText);
@@ -717,8 +794,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         // listen for USER_SETUP_COMPLETE setting (per-user)
         resetUserSetupObserver();
 
-        mPowerWidget.setupWidget();
-        mPowerWidget.updateVisibility();
+        mCompactToggles.setupWidget();
+        mPageToggles.setupWidget();
 
         mVelocityTracker = VelocityTracker.obtain();
 
@@ -954,7 +1031,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         StatusBarIconView view = new StatusBarIconView(mContext, slot, null);
         view.set(icon);
         mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
-        mPowerWidget.updateAllButtons();
+        mCompactToggles.updateAllButtons();
+        mPageToggles.updateAllButtons();
     }
 
     @Override
@@ -1577,7 +1655,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mClearButtonAnim != null) mClearButtonAnim.cancel();
 
         // Only show the Power widget if it should be shown
-        mPowerWidget.updateVisibility();
+        if (mTogglesType == TOGGLES_TYPE_COMPACT)
+            mCompactToggles.updateVisibility();
+        else if (mTogglesType == TOGGLES_TYPE_PAGE)
+            mTabHost.setCurrentTab(0);
 
         mScrollView.setVisibility(View.VISIBLE);
         mScrollViewAnim = start(
@@ -1638,7 +1719,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mSettingsButton.setVisibility(View.GONE);
         mScrollView.setVisibility(View.GONE);
         mScrollView.setScaleX(0f);
-        mPowerWidget.setVisibility(View.GONE);
+        mCompactToggles.setVisibility(View.GONE);
         mNotificationButton.setVisibility(View.VISIBLE);
         mNotificationButton.setAlpha(1f);
         mClearButton.setVisibility(View.GONE);
@@ -1650,6 +1731,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mSettingsButtonAnim != null) mSettingsButtonAnim.cancel();
         if (mNotificationButtonAnim != null) mNotificationButtonAnim.cancel();
         if (mClearButtonAnim != null) mClearButtonAnim.cancel();
+
+        if (mTogglesType == TOGGLES_TYPE_PAGE)
+            mTabHost.setCurrentTab(0);
 
         mFlipSettingsView.setVisibility(View.VISIBLE);
         mFlipSettingsView.setScaleX(0f);
@@ -1671,7 +1755,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 ObjectAnimator.ofFloat(mSettingsButton, View.ALPHA, 0f)
                     .setDuration(FLIP_DURATION),
                     mScrollView, View.INVISIBLE));
-        mPowerWidget.setVisibility(View.GONE);
+        mCompactToggles.setVisibility(View.GONE);
         mNotificationButton.setVisibility(View.VISIBLE);
         mNotificationButtonAnim = start(
             ObjectAnimator.ofFloat(mNotificationButton, View.ALPHA, 1f)
@@ -1729,7 +1813,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
             mScrollView.setScaleX(1f);
             mScrollView.setVisibility(View.VISIBLE);
-            mPowerWidget.updateVisibility();
+            if (mTogglesType == TOGGLES_TYPE_COMPACT)
+                mCompactToggles.updateVisibility();
             mSettingsButton.setAlpha(1f);
             mSettingsButton.setVisibility(View.VISIBLE);
             mNotificationPanel.setVisibility(View.GONE);
@@ -1859,6 +1944,12 @@ public class PhoneStatusBar extends BaseStatusBar {
                 editor.apply();
 
                 makeExpandedVisible(true); // enforce visibility in case the shade is still animating closed
+                if (mTogglesType == TOGGLES_TYPE_PAGE) {
+                    if (mNotificationData.size() > 0)
+                        mTabHost.setCurrentTab(0);
+                    else
+                        mTabHost.setCurrentTab(1);
+                }
                 animateExpandNotificationsPanel();
 
                 mSuppressStatusBarDrags = false;
@@ -2733,6 +2824,39 @@ public class PhoneStatusBar extends BaseStatusBar {
         return !isDeviceProvisioned()
                 || mExpandedVisible
                 || (mDisabled & StatusBarManager.DISABLE_SEARCH) != 0;
+    }
+
+
+    private void setTogglesType(int type) {
+        switch (type) {
+            case 0:
+                mNotificationPanel.findViewById(android.R.id.tabs).setVisibility(View.GONE);
+                mNotificationPanel.findViewById(R.id.exp_power_stat).setVisibility(View.GONE);
+                mTabHost.setCurrentTab(0);
+                break;
+            case 1:
+                mNotificationPanel.findViewById(android.R.id.tabs).setVisibility(View.GONE);
+                mNotificationPanel.findViewById(R.id.exp_power_stat).setVisibility(View.VISIBLE);
+                mTabHost.setCurrentTab(0);
+                break;
+            case 2:
+                mNotificationPanel.findViewById(android.R.id.tabs).setVisibility(View.VISIBLE);
+                mNotificationPanel.findViewById(R.id.exp_power_stat).setVisibility(View.GONE);
+        }
+    }
+
+    private void setupTab(final int content, final String tag, final int tabLayout) {
+        View tabView = createTabView(mTabHost.getContext(), tag, tabLayout);
+        TabSpec setContent = mTabHost.newTabSpec(tag).setIndicator(tabView)
+            .setContent(content);
+        mTabHost.addTab(setContent);
+    }
+
+    private static View createTabView(final Context context, final String text, final int tabLayout) {
+        View view = LayoutInflater.from(context).inflate(tabLayout, null);
+        TextView tv = (TextView) view.findViewById(R.id.tabsText);
+        tv.setText(text);
+        return view;
     }
 
     private static class FastColorDrawable extends Drawable {
