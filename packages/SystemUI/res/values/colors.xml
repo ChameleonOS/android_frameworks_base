@@ -42,4 +42,17 @@
     <!-- tabs text colors -->
     <color name="tab_selected_color">#ffffffff</color>
     <color name="tab_deselected_color">#ff808080</color>
+
+    <!-- status bar clock color -->
+    <color name="status_bar_clock_color">@android:color/holo_blue_light</color>
+
+    <!-- extended status bar clock color -->
+    <color name="status_bar_extended_clock_default_color">#ffffff</color>
+    <color name="status_bar_extended_clock_pressed_color">@android:color/holo_blue_light</color>
+    <color name="status_bar_extended_clock_focused_color">@android:color/holo_blue_light</color>
+
+    <!-- extended status bar date color -->
+    <color name="status_bar_extended_date_default_color">#cccccc</color>
+    <color name="status_bar_extended_date_pressed_color">@android:color/holo_blue_light</color>
+    <color name="status_bar_extended_date_focused_color">@android:color/holo_blue_light</color>
 </resources>
