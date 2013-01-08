@@ -2591,6 +2591,13 @@ public final class Settings {
         public static final String TOGGLES_TYPE = "toggles_type";
 
         /**
+         * Whether or not to auto-collapse the volume panel when status bar is collapsed
+         *
+         * @hide
+         */
+        public static final String COLLAPSE_VOLUME_PANEL = "collapse_volume_panel";
+
+        /**
          * Quick Settings Panel Tiles to Use
          *
          * @hide

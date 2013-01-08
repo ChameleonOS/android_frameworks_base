@@ -36,9 +36,11 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 
 import com.android.systemui.R;
@@ -259,6 +261,16 @@ public class StatusBarToggles extends LinearLayout {
         // register our observer
         mObserver = new WidgetSettingsObserver(mHandler);
         mObserver.observe();
+        
+        // paged toggles should be inside a scrollview, so get the scrollview parent
+        // and pass it on to the volume panel so that the scrollview can be scrolled
+        // to the bottom when the volume panel is expanded.
+        ViewParent v = getParent();
+        if (v != null && v instanceof ScrollView) {
+            VolumePanel vp = (VolumePanel)findViewById(R.id.volume_panel);
+            if (vp != null)
+                vp.setScrollView((ScrollView)v);
+        }
     }
 
     private boolean loadButton(String key) {

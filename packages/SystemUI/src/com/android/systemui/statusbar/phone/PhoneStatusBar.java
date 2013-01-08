@@ -108,6 +108,7 @@ import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
 import com.android.systemui.statusbar.policy.Prefs;
 import com.android.systemui.statusbar.powerwidget.StatusBarToggles;
+import com.android.systemui.statusbar.powerwidget.VolumePanel;
 
 import cos.content.res.ExtraConfiguration;
 
@@ -270,6 +271,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // type of toggles
     int mTogglesType = TOGGLES_TYPE_NONE;
+    boolean mCollapseVolumes = false;
 
     // ticker
     private Ticker mTicker;
@@ -358,6 +360,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.SCREEN_BRIGHTNESS_MODE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.TOGGLES_TYPE), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.COLLAPSE_VOLUME_PANEL), false, this);
             update();
         }
 
@@ -379,6 +383,9 @@ public class PhoneStatusBar extends BaseStatusBar {
             if (mNotificationPanel != null) {
                 setTogglesType(mTogglesType);
             }
+
+            mCollapseVolumes = Settings.System.getInt(
+                    resolver, Settings.System.COLLAPSE_VOLUME_PANEL, 0) == 1;
         }
     }
 
@@ -1802,6 +1809,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         // Ensure the panel is fully collapsed (just in case; bug 6765842, 7260868)
         mStatusBarView.collapseAllPanels(/*animate=*/ false);
+        if (mCollapseVolumes)
+            ((VolumePanel)mNotificationPanel.findViewById(R.id.volume_panel)).toggleVolumes(false);
 
         if (mHasFlipSettings) {
             // reset things to their proper state
