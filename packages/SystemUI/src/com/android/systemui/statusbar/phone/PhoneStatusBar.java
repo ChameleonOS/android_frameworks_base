@@ -2867,6 +2867,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         tv.setText(text);
         return view;
     }
+    
+    public void setCurrentTab(int tab) {
+        if (mTogglesType == TOGGLES_TYPE_PAGE)
+            mTabHost.setCurrentTab(tab);
+    }
 
     private static class FastColorDrawable extends Drawable {
         private final int mColor;

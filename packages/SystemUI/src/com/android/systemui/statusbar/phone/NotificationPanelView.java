@@ -22,7 +22,9 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.util.AttributeSet;
-import android.util.Slog;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -93,8 +95,12 @@ public class NotificationPanelView extends PanelView {
         canvas.translate(0, -off);
     }
 
+    private GestureDetector mGdt = new GestureDetector(new NotificationsGestureListener());
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        mGdt.onTouchEvent(event);
+            
         if (PhoneStatusBar.SETTINGS_DRAG_SHORTCUT && mStatusBar.mHasFlipSettings) {
             boolean flip = false;
             switch (event.getActionMasked()) {
@@ -133,5 +139,30 @@ public class NotificationPanelView extends PanelView {
             }
         }
         return mHandleView.dispatchTouchEvent(event);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        Log.d(TAG, "intercepting touch!");
+        mGdt.onTouchEvent(event);
+        return false;
+    }
+
+    private static final int SWIPE_MIN_DISTANCE = 60;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 100;
+    private class NotificationsGestureListener extends SimpleOnGestureListener {
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                mStatusBar.setCurrentTab(1);
+                Log.d(TAG, "switching to tab 1");
+                return true;
+            }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                mStatusBar.setCurrentTab(0);
+                Log.d(TAG, "switching to tab 0");
+                return true;
+            }
+            return false;
+        }
     }
 }
