@@ -2921,6 +2921,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             mTabHost.setCurrentTab(tab);
     }
 
+    public void usesPagedToggles() {
+        return mTogglesType == TOGGLES_TYPE_PAGE;
+    }
+
     private static class FastColorDrawable extends Drawable {
         private final int mColor;
 

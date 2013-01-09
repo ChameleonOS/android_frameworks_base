@@ -191,7 +191,7 @@ public class NotificationPanelView extends PanelView {
                     }
                     mOkToFlip = false;
                 }
-            } else if (mSwipeTriggered) {
+            } else if (!mStatusBar.usesPagedToggles && mSwipeTriggered) {
                 final float deltaX = (event.getX(0) - mGestureStartX) * mSwipeDirection;
                 mStatusBar.partialFlip(mFlipOffset +
                                        deltaX / (getWidth() * STATUS_BAR_SWIPE_MOVE_PERCENTAGE));
