@@ -1760,7 +1760,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mSettingsButton.setAlpha(-progress);
             mScrollView.setVisibility(View.VISIBLE);
             mScrollView.setScaleX(-progress);
-            mPowerWidget.updateVisibility();
+            mCompactToggles.updateVisibility();
             mNotificationButton.setVisibility(View.GONE);
         } else { // settings side
             mFlipSettingsView.setScaleX(progress);
@@ -1768,7 +1768,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mSettingsButton.setVisibility(View.GONE);
             mScrollView.setVisibility(View.GONE);
             mScrollView.setScaleX(0f);
-            mPowerWidget.setVisibility(View.GONE);
+            mCompactToggles.setVisibility(View.GONE);
             mNotificationButton.setVisibility(View.VISIBLE);
             mNotificationButton.setAlpha(progress);
         }
@@ -2918,7 +2918,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mTabHost.setCurrentTab(tab);
     }
 
-    public void usesPagedToggles() {
+    public boolean usesPagedToggles() {
         return mTogglesType == TOGGLES_TYPE_PAGE;
     }
 

@@ -191,7 +191,7 @@ public class NotificationPanelView extends PanelView {
                     }
                     mOkToFlip = false;
                 }
-            } else if (!mStatusBar.usesPagedToggles && mSwipeTriggered) {
+            } else if (!mStatusBar.usesPagedToggles() && mSwipeTriggered) {
                 final float deltaX = (event.getX(0) - mGestureStartX) * mSwipeDirection;
                 mStatusBar.partialFlip(mFlipOffset +
                                        deltaX / (getWidth() * STATUS_BAR_SWIPE_MOVE_PERCENTAGE));
@@ -230,7 +230,6 @@ public class NotificationPanelView extends PanelView {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        Log.d(TAG, "intercepting touch!");
         mGdt.onTouchEvent(event);
         return false;
     }
@@ -240,13 +239,13 @@ public class NotificationPanelView extends PanelView {
     private class NotificationsGestureListener extends SimpleOnGestureListener {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if (!isFullyExpanded())
+                return false;
             if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 mStatusBar.setCurrentTab(1);
-                Log.d(TAG, "switching to tab 1");
                 return true;
             }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                 mStatusBar.setCurrentTab(0);
-                Log.d(TAG, "switching to tab 0");
                 return true;
             }
             return false;
