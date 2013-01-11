@@ -40,4 +40,7 @@
 
     <!-- The fixed height of each tile -->
     <dimen name="quick_settings_cell_height">100dp</dimen>
+
+    <!-- Toggles row height for page layout -->
+    <dimen name="status_bar_toggles_row_height">80dp</dimen>
 </resources>
