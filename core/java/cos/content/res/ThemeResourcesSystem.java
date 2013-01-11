@@ -43,12 +43,17 @@ public final class ThemeResourcesSystem extends ThemeResources
         mThemePath = metaData.themePath;
     }
 
-    private ThemeZipFile.ThemeFileInfo getThemeFileStreamSystemUI(String relativeFilePath, String name) {
+    private ThemeZipFile.ThemeFileInfo getThemeFileStreamMIUI(String relativeFilePath, String name) {
         ThemeZipFile.ThemeFileInfo info = null;
-        if (sSystemUI == null)
-            sSystemUI = ThemeResources.getTopLevelThemeResources(mResources, "com.android.systemui");
-
-        info = sSystemUI.getThemeFileStream(relativeFilePath);
+        if (name.startsWith("lock_screen_")) {
+            info = sLockscreen.getThemeFileStream(relativeFilePath);
+            if (info == null)
+                info = sLockscreen.getThemeFileStream(name);
+        } else if (name.startsWith("status_bar_toggle_")) {
+            if (sSystemUI == null)
+                sSystemUI = ThemeResources.getTopLevelThemeResources(mResources, "com.android.systemui");
+            info = sSystemUI.getThemeFileStream(relativeFilePath);
+        }
 
         return info;
     }
@@ -147,7 +152,7 @@ public final class ThemeResourcesSystem extends ThemeResources
         ThemeZipFile.ThemeFileInfo themefileinfo;
         if (DBG) Log.d(TAG, String.format("getThemeFileStream(%d, %s)", cookieType, relativeFilePath));
         if(2 == cookieType)
-            themefileinfo = getThemeFileStreamSystemUI(relativeFilePath, name);
+            themefileinfo = getThemeFileStreamMIUI(relativeFilePath, name);
         else
             themefileinfo = getThemeFileStreamSystem(relativeFilePath, name);
         return themefileinfo;
