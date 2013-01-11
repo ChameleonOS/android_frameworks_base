@@ -1,9 +1,9 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item android:state_pressed="true"
-          android:color="@android:color/holo_blue_light"/> <!-- pressed -->
+          android:color="@color/status_bar_extended_clock_pressed_color"/> <!-- pressed -->
     <item android:state_focused="true"
-          android:color="@android:color/holo_blue_light"/> <!-- focused -->
-    <item android:color="#ffffff"/>  <!--default -->
+          android:color="@color/status_bar_extended_clock_focused_color"/> <!-- focused -->
+    <item android:color="@color/status_bar_extended_clock_default_color"/>  <!--default -->
 
 </selector>
