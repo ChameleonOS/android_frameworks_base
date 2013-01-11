@@ -41,7 +41,7 @@ public final class CosResources extends Resources {
     public static final String TAG = "CosResources";
 
     public static final int sCookieTypeFramework = 1;
-    public static final int sCookieTypeMiui = 2;
+    public static final int sCookieTypeSystemUI = 2;
     public static final int sCookieTypeOther = 3;
     private SparseArray<CharSequence> mCharSequences = new SparseArray();
     private SparseIntArray mCookieType = new SparseIntArray();
@@ -73,8 +73,8 @@ public final class CosResources extends Resources {
             Log.d(TAG, String.format("cookie name=%s", name));
             if("/system/framework/framework-res.apk".equals(name))
                 type = sCookieTypeFramework;
-            else if("/system/framework/framework-miui-res.apk".equals(name))
-                type = sCookieTypeMiui;
+            else if("/system/app/SystemUI.apk".equals(name))
+                type = sCookieTypeSystemUI;
             else
                 type = sCookieTypeOther;
             mCookieType.put(cookie, type);
