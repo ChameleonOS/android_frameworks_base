@@ -79,6 +79,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.FrameLayout;
@@ -152,6 +153,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     private static final int TOGGLES_TYPE_NONE = 0;
     private static final int TOGGLES_TYPE_COMPACT = 1;
     private static final int TOGGLES_TYPE_PAGE = 2;
+
+	private static final int PAGED_ANIMATION_TIME = 240;
 
 
     // fling gesture tuning parameters, scaled to display density
@@ -269,6 +272,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // status bar tabhost
     TabHost mTabHost;
+    View mCurrentTab;
+    View mPreviousTab;
 
     // type of toggles
     int mTogglesType = TOGGLES_TYPE_NONE;
@@ -516,17 +521,25 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         mTabHost.setCurrentTab(0);
         setTogglesType(mTogglesType);
+        mPreviousTab = mTabHost.getCurrentView();
 
         mTabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             @Override
             public void onTabChanged(String tabId) {
+                mCurrentTab = mTabHost.getCurrentView();
                 if (mContext.getString(R.string.notification_tab_notifications).equals(tabId)) {
+                    mPreviousTab.setAnimation(outToRightAnimation());
+                    mCurrentTab.setAnimation(inFromLeftAnimation());
                     if (mHasFlipSettings) {
                         if (mFlipSettingsView.getVisibility() == View.VISIBLE) {
                             flipToNotifications();
                         }
                     }
+                } else {
+                    mPreviousTab.setAnimation(outToLeftAnimation());
+                    mCurrentTab.setAnimation(inFromRightAnimation());
                 }
+                mPreviousTab = mCurrentTab;
             }
         });
 
@@ -2932,6 +2945,70 @@ public class PhoneStatusBar extends BaseStatusBar {
     public boolean usesPagedToggles() {
         return mTogglesType == TOGGLES_TYPE_PAGE;
     }
+
+	/**
+	 * Custom animation that animates in from right
+	 * 
+	 * @return Animation the Animation object
+	 */
+	private Animation inFromRightAnimation()
+	{
+		Animation inFromRight = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 1.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT,
+				0.0f);
+		return setProperties(inFromRight);
+	}
+ 
+	/**
+	 * Custom animation that animates out to the right
+	 * 
+	 * @return Animation the Animation object
+	 */
+	private Animation outToRightAnimation()
+	{
+		Animation outToRight = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT,
+				1.0f, Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, 0.0f);
+		return setProperties(outToRight);
+	}
+ 
+	/**
+	 * Custom animation that animates in from left
+	 * 
+	 * @return Animation the Animation object
+	 */
+	private Animation inFromLeftAnimation()
+	{
+		Animation inFromLeft = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, -1.0f,
+				Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT,
+				0.0f);
+		return setProperties(inFromLeft);
+	}
+ 
+	/**
+	 * Custom animation that animates out to the left
+	 * 
+	 * @return Animation the Animation object
+	 */
+	private Animation outToLeftAnimation()
+	{
+		Animation outtoLeft = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT,
+				-1.0f, Animation.RELATIVE_TO_PARENT, 0.0f, Animation.RELATIVE_TO_PARENT, 0.0f);
+		return setProperties(outtoLeft);
+	}
+ 
+	/**
+	 * Helper method that sets some common properties
+	 * 
+	 * @param animation
+	 *            the animation to give common properties
+	 * @return the animation with common properties
+	 */
+	private Animation setProperties(Animation animation)
+	{
+		animation.setDuration(PAGED_ANIMATION_TIME);
+		animation.setInterpolator(new AccelerateInterpolator());
+		return animation;
+	}
 
     private static class FastColorDrawable extends Drawable {
         private final int mColor;
