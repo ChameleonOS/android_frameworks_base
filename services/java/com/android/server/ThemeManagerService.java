@@ -140,6 +140,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mHandler.sendMessage(msg);
     }
 
+    public void applyThemeMms() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_APPLY_MMS;
+        mHandler.sendMessage(msg);
+    }
+
     /**
      * Simple copy routine given an input stream and an output stream
      */
@@ -326,6 +332,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_APPLY_LOCKSCREEN = 8;
         private static final int MESSAGE_APPLY_RINGTONES = 9;
         private static final int MESSAGE_APPLY_BOOTANIMATION = 10;
+        private static final int MESSAGE_APPLY_MMS = 11;
 
         @Override
         public void handleMessage(Message msg) {
@@ -440,6 +447,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     break;
                 case MESSAGE_APPLY_BOOTANIMATION:
                     setBootanimation();
+                    break;
+                case MESSAGE_APPLY_MMS:
+                    try {
+                        fixOwnerPermissions(new File(THEME_DIR + "/com.android.mms"));
+                        notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_MMS);
+                    } catch (Exception e) {}
                     break;
             }
         }

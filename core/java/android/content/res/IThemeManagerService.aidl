@@ -30,5 +30,6 @@ interface IThemeManagerService
     void applyThemeRingtones();
     void applyThemeLockscreen();
     void applyThemeBootanimation();
+    void applyThemeMms();
 }
 
