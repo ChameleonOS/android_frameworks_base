@@ -30,5 +30,15 @@ interface IThemeManagerService
     void applyThemeRingtones();
     void applyThemeLockscreen();
     void applyThemeBootanimation();
+    void applyThemeMms();
+
+    void resetThemeIcons();
+    void resetThemeWallpaper();
+    void resetThemeSystemUI();
+    void resetThemeFramework();
+    void resetThemeRingtones();
+    void resetThemeLockscreen();
+    void resetThemeBootanimation();
+    void resetThemeMms();
 }
 

@@ -140,6 +140,60 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mHandler.sendMessage(msg);
     }
 
+    public void applyThemeMms() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_APPLY_MMS;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeIcons() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_ICONS;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeWallpaper() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_WALLPAPER;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeSystemUI() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_SYSTEMUI;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeFramework() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_FRAMEWORK;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeRingtones() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_RINGTONES;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeLockscreen() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_LOCKSCREEN;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeBootanimation() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_BOOTANIMATION;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeMms() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_MMS;
+        mHandler.sendMessage(msg);
+    }
+
     /**
      * Simple copy routine given an input stream and an output stream
      */
@@ -304,6 +358,20 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         }
     }
 
+    private void resetWallpaper() {
+        try {
+            File f = new File(THEME_DIR + "/wallpaper/default_wallpaper.jpg");
+            if (!f.exists())
+                f = new File(THEME_DIR + "/wallpaper/default_wallpaper.png");
+            if (f.exists())
+                delete(f);
+
+            WallpaperManager wm = WallpaperManager.getInstance(mContext);
+            wm.clear();
+        } catch(IOException e) {
+        }
+    }
+
     private void setBootanimation() {
         try {
             fixOwnerPermissions(new File(THEME_DIR + "/boots/bootanimation.zip"));
@@ -311,6 +379,14 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             run(String.format("invoke-as -u root cp %s %s", THEME_DIR + "/boots/bootanimation.zip", "/data/local/bootanimation.zip"));
             run(String.format("invoke-as -u root chown root.root %s", "/data/local"));
             fixOwnerPermissions(new File("/data/local/bootanimation.zip"));
+        } catch (Exception e) {}
+    }
+
+    private void resetBootanimation() {
+        try {
+            run(String.format("invoke-as -u root chown system.system %s", "/data/local"));
+            run(String.format("invoke-as -u root rm %s", "/data/local/bootanimation.zip"));
+            run(String.format("invoke-as -u root chown root.root %s", "/data/local"));
         } catch (Exception e) {}
     }
 
@@ -326,6 +402,15 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_APPLY_LOCKSCREEN = 8;
         private static final int MESSAGE_APPLY_RINGTONES = 9;
         private static final int MESSAGE_APPLY_BOOTANIMATION = 10;
+        private static final int MESSAGE_APPLY_MMS = 11;
+        private static final int MESSAGE_RESET_ICONS = 14;
+        private static final int MESSAGE_RESET_WALLPAPER = 15;
+        private static final int MESSAGE_RESET_SYSTEMUI = 16;
+        private static final int MESSAGE_RESET_FRAMEWORK = 17;
+        private static final int MESSAGE_RESET_LOCKSCREEN = 18;
+        private static final int MESSAGE_RESET_RINGTONES = 19;
+        private static final int MESSAGE_RESET_BOOTANIMATION = 20;
+        private static final int MESSAGE_RESET_MMS = 21;
 
         @Override
         public void handleMessage(Message msg) {
@@ -430,7 +515,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     break;
                 case MESSAGE_APPLY_FRAMEWORK:
                     try {
-                        fixOwnerPermissions(new File(THEME_DIR + "/com.android.systemui"));
+                        fixOwnerPermissions(new File(THEME_DIR + "/framework-res"));
                         notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
                     } catch (Exception e) {}
                     break;
@@ -440,6 +525,62 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     break;
                 case MESSAGE_APPLY_BOOTANIMATION:
                     setBootanimation();
+                    break;
+                case MESSAGE_APPLY_MMS:
+                    try {
+                        fixOwnerPermissions(new File(THEME_DIR + "/com.android.mms"));
+                        notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_MMS);
+                    } catch (Exception e) {}
+                    break;
+                case MESSAGE_RESET_ICONS:
+                    try {
+                        File icons = new File(THEME_DIR + "/icons");
+                        if (icons.exists())
+                            delete(icons);
+                        if (iconsDirExists()) {
+                            // remove the contents of CUSTOMIZED_ICONS_DIR
+                            File file = new File(CUSTOMIZED_ICONS_DIR);
+                            if (file.exists()) {
+                                for (File f : file.listFiles())
+                                    delete(f);
+                            }
+                        }
+                        notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_ICON);
+                    } catch (Exception e) {}
+                    break;
+                case MESSAGE_RESET_WALLPAPER:
+                    resetWallpaper();
+                    break;
+                case MESSAGE_RESET_SYSTEMUI:
+                    try {
+                        File systemUi = new File(THEME_DIR + "/com.android.systemui");
+                        if (systemUi.exists())
+                            delete(systemUi);
+                        notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_STATUSBAR);
+                    } catch (Exception e) {}
+                    break;
+                case MESSAGE_RESET_FRAMEWORK:
+                    try {
+                        File framework = new File(THEME_DIR + "/framework-res");
+                        if (framework.exists())
+                            delete(framework);
+                        notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
+                    } catch (Exception e) {}
+                    break;
+                case MESSAGE_RESET_LOCKSCREEN:
+                    break;
+                case MESSAGE_RESET_RINGTONES:
+                    break;
+                case MESSAGE_RESET_BOOTANIMATION:
+                    resetBootanimation();
+                    break;
+                case MESSAGE_RESET_MMS:
+                    try {
+                        File mms = new File(THEME_DIR + "/com.android.mms");
+                        if (mms.exists())
+                            delete(mms);
+                        notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_MMS);
+                    } catch (Exception e) {}
                     break;
             }
         }
