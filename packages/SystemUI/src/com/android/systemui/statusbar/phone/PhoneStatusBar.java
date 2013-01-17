@@ -27,6 +27,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -114,6 +115,8 @@ import com.android.systemui.statusbar.powerwidget.VolumePanel;
 
 import cos.content.res.ExtraConfiguration;
 
+import java.util.Calendar;
+
 public class PhoneStatusBar extends BaseStatusBar {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
@@ -132,6 +135,11 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
+
+    private static final String ACTION_STATUSBAR_HIDE
+            = "com.android.internal.policy.statusbar.START";
+
+    private static final long AUTO_HIDE_DELAY = 3000;
 
     private static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     private static final int MSG_CLOSE_PANELS = 1001;
@@ -173,6 +181,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                                                     // faster than mSelfCollapseVelocityPx)
 
     PhoneStatusBarPolicy mIconPolicy;
+
+    private TriggerView mStatusBarTrigger;
 
     // These are no longer handled by the policy, because we need custom strategies for them
     BluetoothController mBluetoothController;
@@ -563,6 +573,27 @@ public class PhoneStatusBar extends BaseStatusBar {
             // no window manager? good luck with that
         }
 
+        mStatusBarTrigger = (TriggerView)View.inflate(context, R.layout.trigger_view, null);
+        mWindowManager.addView(mStatusBarTrigger, getTriggerViewLayoutParams());
+
+        // listen for the trigger to show statusbar
+        mStatusBarTrigger.setOnTriggerListener(
+                new TriggerView.OnTriggerListener() {
+                    @Override
+                    public void onTriggered(View v) {
+                        if (v == mStatusBarTrigger) {
+                            try {
+                                if (mWindowManagerService.shouldHideStatusBar()) {
+                                    mWindowManagerService.showStatusBar();
+                                    updateAutoHideTimer();
+                                    mStatusBarView.requestFocus();
+                                }
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    }
+                });
+
         // figure out which pixel-format to use for the status bar.
         mPixelFormat = PixelFormat.OPAQUE;
 
@@ -815,6 +846,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        filter.addAction(ACTION_STATUSBAR_HIDE);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
@@ -1044,6 +1076,23 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.windowAnimations = R.style.Animation_StatusBar_IntruderAlert;
 
         mWindowManager.addView(mIntruderAlertView, lp);
+    }
+
+    private WindowManager.LayoutParams getTriggerViewLayoutParams() {
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                mContext.getResources().getDimensionPixelSize(R.dimen.trigger_view_height),
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
+                    0
+                    | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        lp.setTitle("TriggerView");
+
+        return lp;
     }
 
     @Override
@@ -1575,6 +1624,12 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mTabHost.setCurrentTab(1);
         }
 
+        try {
+            if (mWindowManagerService.shouldHideStatusBar())
+                cancelAutoHideTimer();
+        } catch (RemoteException re) {
+        }
+
         // Updating the window layout will force an expensive traversal/redraw.
         // Kick off the reveal animation after this is complete to avoid animation latency.
         if (revealAfterDraw) {
@@ -1908,6 +1963,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mNavigationBarView != null)
             mNavigationBarView.setSlippery(false);
         visibilityChanged(false);
+
+        try {
+            if (mWindowManagerService.shouldHideStatusBar())
+                updateAutoHideTimer();
+        } catch (RemoteException re) {
+        }
 
         // Shrink the window to the size of the status bar only
         WindowManager.LayoutParams lp = (WindowManager.LayoutParams) mStatusBarContainer.getLayoutParams();
@@ -2679,6 +2740,13 @@ public class PhoneStatusBar extends BaseStatusBar {
                     ts.applyThemeSystemUI();
                 } catch (Exception e) {}
             }
+            else if (ACTION_STATUSBAR_HIDE.equals(action)) {
+                try {
+                    //if (mWindowManagerService.shouldHideStatusBar())
+                        mWindowManagerService.hideStatusBar();
+                } catch (RemoteException re) {
+                }
+            }
         }
     };
 
@@ -3025,4 +3093,28 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+    public void updateAutoHideTimer() {
+        AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(ACTION_STATUSBAR_HIDE);
+
+        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        try {
+            am.cancel(pi);
+        } catch (Exception e) {
+        }
+        Calendar time = Calendar.getInstance();
+        time.setTimeInMillis(System.currentTimeMillis() + AUTO_HIDE_DELAY);
+        am.set(AlarmManager.RTC, time.getTimeInMillis(), pi);
+    }
+
+    public void cancelAutoHideTimer() {
+        AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(ACTION_STATUSBAR_HIDE);
+
+        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        try {
+            am.cancel(pi);
+        } catch (Exception e) {
+        }
+    }
 }

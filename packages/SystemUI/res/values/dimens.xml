@@ -217,4 +217,7 @@
 
     <!-- Toggles row height for page layout -->
     <dimen name="status_bar_toggles_row_height">100dp</dimen>
+
+    <!-- Height of trigger for revealing a hidden status bar or navbar -->
+    <dimen name="trigger_view_height">2dip</dimen>
 </resources>
