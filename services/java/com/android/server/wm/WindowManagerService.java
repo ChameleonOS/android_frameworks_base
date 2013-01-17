@@ -10373,6 +10373,37 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.showAssistant();
     }
 
+    /**
+     * Used to force the status bar to be shown when it is hidden by full screen applications.
+     * Should only be used by the system UI so we check for the required permission.
+     */
+    public void showStatusBar() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mPolicy.showStatusBar();
+    }
+
+    /**
+     * Used to force the status bar to be hidden when an application is full screen.
+     * Should only be used by the system UI so we check for the required permission.
+     */
+    public void hideStatusBar() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mPolicy.hideStatusBar();
+    }
+
+    /**
+     * Returns true when the status bar is, or should be, hidden because of a full screen application.
+     */
+    public boolean shouldHideStatusBar() {
+        return mPolicy.shouldHideStatusBar();
+    }
+
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
         mPolicy.dump("    ", pw, args);
