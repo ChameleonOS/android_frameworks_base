@@ -1081,7 +1081,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private WindowManager.LayoutParams getTriggerViewLayoutParams() {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                mContext.getResources().getDimensionPixelSize(R.dimen.trigger_view_height),
+                mContext.getResources().getDimensionPixelSize(R.dimen.config_trigger_view_height),
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
                     0
                     | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
