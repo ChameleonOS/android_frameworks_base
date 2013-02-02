@@ -23,6 +23,7 @@ interface IThemeManagerService
     void removeTheme();
     void removeThemeAndApply();
     void applyInstalledTheme();
+    void applyInstalledThemeReboot();
     void applyThemeIcons();
     void applyThemeWallpaper();
     void applyThemeSystemUI();
@@ -32,6 +33,7 @@ interface IThemeManagerService
     void applyThemeBootanimation();
     void applyThemeMms();
     void applyThemeFont();
+    void applyThemeFontReboot();
 
     void resetThemeIcons();
     void resetThemeWallpaper();
@@ -42,5 +44,6 @@ interface IThemeManagerService
     void resetThemeBootanimation();
     void resetThemeMms();
     void resetThemeFont();
+    void resetThemeFontReboot();
 }
 

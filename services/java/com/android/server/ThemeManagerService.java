@@ -34,6 +34,8 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.server.power.ShutdownThread;
+
 import cos.content.res.ExtraConfiguration;
 import cos.util.CommandLineUtils;
 
@@ -101,6 +103,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mHandler.sendMessage(msg);
     }
 
+    public void applyInstalledThemeReboot(){
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_APPLY_CURRENT_REBOOT;
+        mHandler.sendMessage(msg);
+    }
+
     public void applyThemeIcons() {
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_APPLY_ICONS;
@@ -155,6 +163,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mHandler.sendMessage(msg);
     }
 
+    public void applyThemeFontReboot() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_APPLY_FONT_REBOOT;
+        mHandler.sendMessage(msg);
+    }
+
     public void resetThemeIcons() {
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_RESET_ICONS;
@@ -206,6 +220,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
     public void resetThemeFont() {
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_RESET_FONT;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeFontReboot() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_FONT_REBOOT;
         mHandler.sendMessage(msg);
     }
 
@@ -431,29 +451,36 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         } catch (Exception e) {}
     }
 
+    private void reboot() {
+        ShutdownThread.reboot(mContext, null, false);
+    }
+
     private class ThemeWorkerHandler extends Handler {
         private static final int MESSAGE_APPLY = 0;
         private static final int MESSAGE_APPLY_CURRENT = 1;
-        private static final int MESSAGE_REMOVE_THEME = 2;
-        private static final int MESSAGE_REMOVE_THEME_APPLY = 3;
-        private static final int MESSAGE_APPLY_ICONS = 4;
-        private static final int MESSAGE_APPLY_WALLPAPER = 5;
-        private static final int MESSAGE_APPLY_SYSTEMUI = 6;
-        private static final int MESSAGE_APPLY_FRAMEWORK = 7;
-        private static final int MESSAGE_APPLY_LOCKSCREEN = 8;
-        private static final int MESSAGE_APPLY_RINGTONES = 9;
-        private static final int MESSAGE_APPLY_BOOTANIMATION = 10;
-        private static final int MESSAGE_APPLY_MMS = 11;
-        private static final int MESSAGE_APPLY_FONT = 12;
-        private static final int MESSAGE_RESET_ICONS = 14;
-        private static final int MESSAGE_RESET_WALLPAPER = 15;
-        private static final int MESSAGE_RESET_SYSTEMUI = 16;
-        private static final int MESSAGE_RESET_FRAMEWORK = 17;
-        private static final int MESSAGE_RESET_LOCKSCREEN = 18;
-        private static final int MESSAGE_RESET_RINGTONES = 19;
-        private static final int MESSAGE_RESET_BOOTANIMATION = 20;
-        private static final int MESSAGE_RESET_MMS = 21;
-        private static final int MESSAGE_RESET_FONT = 22;
+        private static final int MESSAGE_APPLY_CURRENT_REBOOT = 2;
+        private static final int MESSAGE_REMOVE_THEME = 3;
+        private static final int MESSAGE_REMOVE_THEME_APPLY = 4;
+        private static final int MESSAGE_APPLY_ICONS = 5;
+        private static final int MESSAGE_APPLY_WALLPAPER = 6;
+        private static final int MESSAGE_APPLY_SYSTEMUI = 7;
+        private static final int MESSAGE_APPLY_FRAMEWORK = 8;
+        private static final int MESSAGE_APPLY_LOCKSCREEN = 9;
+        private static final int MESSAGE_APPLY_RINGTONES = 10;
+        private static final int MESSAGE_APPLY_BOOTANIMATION = 11;
+        private static final int MESSAGE_APPLY_MMS = 12;
+        private static final int MESSAGE_APPLY_FONT = 13;
+        private static final int MESSAGE_APPLY_FONT_REBOOT = 14;
+        private static final int MESSAGE_RESET_ICONS = 20;
+        private static final int MESSAGE_RESET_WALLPAPER = 21;
+        private static final int MESSAGE_RESET_SYSTEMUI = 22;
+        private static final int MESSAGE_RESET_FRAMEWORK = 23;
+        private static final int MESSAGE_RESET_LOCKSCREEN = 24;
+        private static final int MESSAGE_RESET_RINGTONES = 25;
+        private static final int MESSAGE_RESET_BOOTANIMATION = 26;
+        private static final int MESSAGE_RESET_MMS = 27;
+        private static final int MESSAGE_RESET_FONT = 28;
+        private static final int MESSAGE_RESET_FONT_REBOOT = 29;
 
         @Override
         public void handleMessage(Message msg) {
@@ -521,6 +548,16 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
                     setThemeWallpaper();
                     break;
+                case MESSAGE_APPLY_CURRENT_REBOOT:
+                    // make sure the system user has ownership an that the appropriate permissions are granted
+                    try {
+                        fixOwnerPermissions(new File(THEME_DIR));
+                    } catch (IOException e) {}
+                    setBootanimation();
+                    setThemeWallpaper();
+
+                    reboot();
+                    break;
                 case MESSAGE_REMOVE_THEME:
                     try {
                         removeCurrentTheme();
@@ -578,6 +615,17 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 case MESSAGE_APPLY_FONT:
                     try {
                         fixOwnerPermissions(new File(FONTS_DIR));
+                        // now notifiy activity manager of the configuration change
+                        notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
+
+                        // restart launcher
+                        killProcess(ExtraConfiguration.LAUNCHER_PKG_NAME);
+                    } catch (Exception e) {}
+                    break;
+                case MESSAGE_APPLY_FONT_REBOOT:
+                    try {
+                        fixOwnerPermissions(new File(FONTS_DIR));
+                        reboot();
                     } catch (Exception e) {}
                     break;
                 case MESSAGE_RESET_ICONS:
@@ -640,6 +688,19 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                                     delete(f);
                             }
                         }
+                    } catch (Exception e) {}
+                    break;
+                case MESSAGE_RESET_FONT_REBOOT:
+                    try {
+                        if (fontsDirExists()) {
+                            // remove the contents of FONTS_DIR
+                            File file = new File(FONTS_DIR);
+                            if (file.exists()) {
+                                for (File f : file.listFiles())
+                                    delete(f);
+                            }
+                        }
+                        reboot();
                     } catch (Exception e) {}
                     break;
             }
