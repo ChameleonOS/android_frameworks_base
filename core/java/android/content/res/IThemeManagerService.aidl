@@ -31,6 +31,7 @@ interface IThemeManagerService
     void applyThemeLockscreen();
     void applyThemeBootanimation();
     void applyThemeMms();
+    void applyThemeFont();
 
     void resetThemeIcons();
     void resetThemeWallpaper();
@@ -40,5 +41,6 @@ interface IThemeManagerService
     void resetThemeLockscreen();
     void resetThemeBootanimation();
     void resetThemeMms();
+    void resetThemeFont();
 }
 

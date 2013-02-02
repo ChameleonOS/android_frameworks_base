@@ -49,6 +49,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
 
     public static final String THEME_DIR = "/data/system/theme";
     public static final String CUSTOMIZED_ICONS_DIR = "/data/system/customized_icons";
+    public static final String FONTS_DIR = "/data/fonts";
 
     private static final String TAG = "ThemeService";
     private ThemeWorkerThread mWorker;
@@ -68,6 +69,8 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         createThemeDir();
         // create the customized icon directory if it does not exist
         createIconsDir();
+        // create the fonts directory if it does not exist
+        createFontsDir();
     }
 
     /**
@@ -146,6 +149,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mHandler.sendMessage(msg);
     }
 
+    public void applyThemeFont() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_APPLY_FONT;
+        mHandler.sendMessage(msg);
+    }
+
     public void resetThemeIcons() {
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_RESET_ICONS;
@@ -189,6 +198,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
     }
 
     public void resetThemeMms() {
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_MMS;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeFont() {
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_RESET_MMS;
         mHandler.sendMessage(msg);
@@ -247,6 +262,25 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         }
     }
 
+    /**
+     * Checks if CUSTOMIZED_ICONS_DIR exists and returns true if it does
+     */
+    private boolean fontsDirExists() {
+        return (new File(FONTS_DIR)).exists();
+    }
+
+    private void createFontsDir() {
+        if (!fontsDirExists()) {
+            Log.d(TAG, "Creating fonts directory");
+            File dir = new File(FONTS_DIR);
+            if(dir.mkdir()) {
+                dir.setReadable(true, false);
+                dir.setWritable(true, false);
+                dir.setExecutable(true, false);
+            }
+        }
+    }
+
     private void delete(File file) throws IOException {
         if (file.isDirectory()) {
             for (File f : file.listFiles())
@@ -266,6 +300,13 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         
         // remove the contents of CUSTOMIZED_ICONS_DIR
         file = new File(CUSTOMIZED_ICONS_DIR);
+        if (file.exists()) {
+            for (File f : file.listFiles())
+                delete(f);
+        }
+    
+        // remove the contents of FONTS_DIR
+        file = new File(FONTS_DIR);
         if (file.exists()) {
             for (File f : file.listFiles())
                 delete(f);
@@ -403,6 +444,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_APPLY_RINGTONES = 9;
         private static final int MESSAGE_APPLY_BOOTANIMATION = 10;
         private static final int MESSAGE_APPLY_MMS = 11;
+        private static final int MESSAGE_APPLY_FONT = 12;
         private static final int MESSAGE_RESET_ICONS = 14;
         private static final int MESSAGE_RESET_WALLPAPER = 15;
         private static final int MESSAGE_RESET_SYSTEMUI = 16;
@@ -411,6 +453,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_RESET_RINGTONES = 19;
         private static final int MESSAGE_RESET_BOOTANIMATION = 20;
         private static final int MESSAGE_RESET_MMS = 21;
+        private static final int MESSAGE_RESET_FONT = 21;
 
         @Override
         public void handleMessage(Message msg) {
@@ -532,6 +575,11 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_MMS);
                     } catch (Exception e) {}
                     break;
+                case MESSAGE_APPLY_FONT:
+                    try {
+                        fixOwnerPermissions(new File(FONTS_DIR));
+                    } catch (Exception e) {}
+                    break;
                 case MESSAGE_RESET_ICONS:
                     try {
                         File icons = new File(THEME_DIR + "/icons");
@@ -580,6 +628,18 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         if (mms.exists())
                             delete(mms);
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_MMS);
+                    } catch (Exception e) {}
+                    break;
+                case MESSAGE_RESET_FONTS:
+                    try {
+                        if (fontsDirExists()) {
+                            // remove the contents of FONTS_DIR
+                            File file = new File(FONTS_DIR);
+                            if (file.exists()) {
+                                for (File f : file.listFiles())
+                                    delete(f);
+                            }
+                        }
                     } catch (Exception e) {}
                     break;
             }
