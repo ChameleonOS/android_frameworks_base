@@ -20,8 +20,8 @@ package android.content.res;
 interface IThemeManagerService
 {
     void applyTheme(String themeURI);
-    void removeTheme();
-    void removeThemeAndApply();
+    void removeTheme(boolean removeFonts);
+    void removeThemeAndApply(boolean removeFonts);
     void applyInstalledTheme();
     void applyInstalledThemeReboot();
     void applyThemeIcons();

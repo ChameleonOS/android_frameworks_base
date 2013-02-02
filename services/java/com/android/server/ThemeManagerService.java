@@ -57,6 +57,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
     private ThemeWorkerThread mWorker;
     private ThemeWorkerHandler mHandler;
     private Context mContext;
+    private boolean mRemoveFonts = false;
 
     static Object sLock = new Object();
 
@@ -85,13 +86,15 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mHandler.sendMessage(msg);
     }
 
-    public void removeTheme() {
+    public void removeTheme(boolean removeFonts) {
+        mRemoveFonts = removeFonts;
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_REMOVE_THEME;
         mHandler.sendMessage(msg);
     }
 
-    public void removeThemeAndApply() {
+    public void removeThemeAndApply(boolean removeFonts) {
+        mRemoveFonts = removeFonts;
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_REMOVE_THEME_APPLY;
         mHandler.sendMessage(msg);
@@ -326,10 +329,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         }
     
         // remove the contents of FONTS_DIR
-        file = new File(FONTS_DIR);
-        if (file.exists()) {
-            for (File f : file.listFiles())
-                delete(f);
+        if (mRemoveFonts) {
+            file = new File(FONTS_DIR);
+            if (file.exists()) {
+                for (File f : file.listFiles())
+                    delete(f);
+            }
         }
     
         file = new File("/data/local/bootanimation.zip");
