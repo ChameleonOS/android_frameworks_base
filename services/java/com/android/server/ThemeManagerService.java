@@ -205,7 +205,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
 
     public void resetThemeFont() {
         Message msg = Message.obtain();
-        msg.what = ThemeWorkerHandler.MESSAGE_RESET_MMS;
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_FONT;
         mHandler.sendMessage(msg);
     }
 
@@ -453,7 +453,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_RESET_RINGTONES = 19;
         private static final int MESSAGE_RESET_BOOTANIMATION = 20;
         private static final int MESSAGE_RESET_MMS = 21;
-        private static final int MESSAGE_RESET_FONT = 21;
+        private static final int MESSAGE_RESET_FONT = 22;
 
         @Override
         public void handleMessage(Message msg) {
@@ -630,7 +630,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_MMS);
                     } catch (Exception e) {}
                     break;
-                case MESSAGE_RESET_FONTS:
+                case MESSAGE_RESET_FONT:
                     try {
                         if (fontsDirExists()) {
                             // remove the contents of FONTS_DIR
