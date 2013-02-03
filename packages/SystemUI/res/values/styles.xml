@@ -112,7 +112,7 @@
         <item name="android:drawablePadding">12dp</item>
         <item name="android:textSize">12dp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:textColor">#CCCCCC</item>
+        <item name="android:textColor">@color/quick_settings_text_color</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">marquee</item>
@@ -130,7 +130,7 @@
 
     <style name="TextAppearance.QuickSettings.Alarm" parent="@style/TextAppearance.QuickSettings.TileView">
         <item name="android:textSize">14dp</item>
-        <item name="android:textColor">#ff3a3b39</item>
+        <item name="android:textColor">@color/quick_settings_alarm_text_color</item>
     </style>
 
     <style name="BaseBrightnessDialogContainer">

@@ -55,4 +55,9 @@
     <color name="status_bar_extended_date_default_color">#cccccc</color>
     <color name="status_bar_extended_date_pressed_color">@android:color/holo_blue_light</color>
     <color name="status_bar_extended_date_focused_color">@android:color/holo_blue_light</color>
+
+    <!-- quick settings text color -->
+    <color name="quick_settings_text_color">#cccccc</color>
+    <color name="quick_settings_alarm_text_color">#ff3a3b39</color>
+    <color name="quick_settings_clock_text_color">@android:color/holo_blue_light</color>
 </resources>
