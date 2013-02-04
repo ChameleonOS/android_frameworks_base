@@ -280,4 +280,19 @@ interface IWindowManager
      * Returns true when the status bar is, or should be, hidden because of a full screen application.
      */
     boolean shouldHideStatusBar();
+
+    /**
+     * Used to force the navigation bar to be shown when it is hidden by expanded desktop.
+     */
+    void showNavbar();
+
+    /**
+     * Used to force the navigation bar to be hidden when using expanded desktop.
+     */
+    void hideNavbar();
+
+    /**
+     * Returns true when the navigation bar is, or should be, hidden because of expanded desktop.
+     */
+    boolean shouldHideNavbar();
 }

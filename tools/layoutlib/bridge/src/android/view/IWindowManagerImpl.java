@@ -522,4 +522,23 @@ public class IWindowManagerImpl implements IWindowManager {
         // TODO Auto-generated method stub
         return false;
     }
+
+    @Override
+    public void showNavbar()
+            throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void hideNavbar()
+            throws RemoteException {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public boolean shouldHideNavbar()
+            throws RemoteException {
+        // TODO Auto-generated method stub
+        return false;
+    }
 }

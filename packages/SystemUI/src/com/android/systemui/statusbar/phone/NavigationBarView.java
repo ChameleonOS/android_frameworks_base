@@ -89,6 +89,7 @@ public class NavigationBarView extends LinearLayout {
     
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
+    private BaseStatusBar mStatusBar;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -123,6 +124,7 @@ public class NavigationBarView extends LinearLayout {
 
     public void setBar(BaseStatusBar phoneStatusBar) {
         mDelegateHelper.setBar(phoneStatusBar);
+        mStatusBar = phoneStatusBar;
     }
 
     @Override
@@ -139,6 +141,16 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
+        // if in expanded desktop and user pressed the navbar we should
+        // update the auto hide timer.
+        switch (event.getActionMasked()) {
+            case MotionEvent.ACTION_DOWN:
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (mStatusBar instanceof PhoneStatusBar) {
+                    ((PhoneStatusBar)mStatusBar).updateAutoHideTimer(PhoneStatusBar.ACTION_NAVBAR_HIDE);
+                }
+                break;
+        }
         return mDelegateHelper.onInterceptTouchEvent(event);
     }
 

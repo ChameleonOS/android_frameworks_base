@@ -10404,6 +10404,37 @@ public class WindowManagerService extends IWindowManager.Stub
         return mPolicy.shouldHideStatusBar();
     }
 
+    /**
+     * Used to force the navigation bar to be shown when it is hidden by expanded desktop.
+     * Should only be used by the system UI so we check for the required permission.
+     */
+    public void showNavbar() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mPolicy.showNavbar();
+    }
+
+    /**
+     * Used to force the navigation bar to be hidden when expanded desktop is enabled.
+     * Should only be used by the system UI so we check for the required permission.
+     */
+    public void hideNavbar() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mPolicy.hideNavbar();
+    }
+
+    /**
+     * Returns true when the navigation bar is, or should be, hidden because of expanded desktop.
+     */
+    public boolean shouldHideNavbar() {
+        return mPolicy.shouldHideNavbar();
+    }
+
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
         mPolicy.dump("    ", pw, args);

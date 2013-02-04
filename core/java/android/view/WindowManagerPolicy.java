@@ -1158,4 +1158,19 @@ public interface WindowManagerPolicy {
      * Returns true when the status bar is, or should be, hidden because of a full screen application.
      */
     public boolean shouldHideStatusBar();
+
+    /**
+     * Used to force the status bar to be shown when it is hidden by full screen applications.
+     */
+    public void showNavbar();
+
+    /**
+     * Used to force the status bar to be hidden when an application is full screen.
+     */
+    public void hideNavbar();
+
+    /**
+     * Returns true when the status bar is, or should be, hidden because of a full screen application.
+     */
+    public boolean shouldHideNavbar();
 }

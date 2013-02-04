@@ -470,6 +470,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mForceStatusBar;
     boolean mForceStatusBarFromKeyguard;
     boolean mForceStatusBarFromUI;
+    boolean mForceNavbarFromUI;
     boolean mHideLockScreen;
 
     // States of keyguard dismiss.
@@ -2904,7 +2905,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     int top = displayHeight - mNavigationBarHeightForRotation[displayRotation];
                     mTmpNavigationFrame.set(0, top, displayWidth, displayHeight);
                     mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;
-                    if (navVisible) {
+                    if (navVisible || mForceNavbarFromUI) {
                         mNavigationBar.showLw(true);
                         mDockBottom = mTmpNavigationFrame.top;
                         mRestrictedScreenHeight = mDockBottom - mDockTop;
@@ -2923,7 +2924,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     int left = displayWidth - mNavigationBarWidthForRotation[displayRotation];
                     mTmpNavigationFrame.set(left, 0, displayWidth, displayHeight);
                     mStableRight = mStableFullscreenRight = mTmpNavigationFrame.left;
-                    if (navVisible) {
+                    if (navVisible || mForceNavbarFromUI) {
                         mNavigationBar.showLw(true);
                         mDockRight = mTmpNavigationFrame.left;
                         mRestrictedScreenWidth = mDockRight - mDockLeft;
@@ -5214,8 +5215,30 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean shouldHideStatusBar() {
-        return mForceStatusBarFromUI || mTopIsFullscreen || 
+        return  mTopIsFullscreen || 
                 Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
+    }
+
+    @Override
+    public void showNavbar() {
+        if (mNavigationBar != null && shouldHideNavbar()) {
+            mForceNavbarFromUI = true;
+            mNavigationBar.showLw(true);
+        }
+    }
+
+    @Override
+    public void hideNavbar() {
+        if (mNavigationBar != null) {
+            mForceNavbarFromUI = false;
+            mNavigationBar.hideLw(true);
+        }
+    }
+
+    @Override
+    public boolean shouldHideNavbar() {
+        return  Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
     }
 }
