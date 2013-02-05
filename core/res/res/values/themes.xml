@@ -1012,7 +1012,7 @@ please see themes_device_defaults.xml.
         <item name="windowFullscreen">false</item>
         <item name="windowIsFloating">false</item>
         <item name="windowContentOverlay">@null</item>
-        <item name="windowShowWallpaper">true</item>
+        <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@android:style/WindowTitle.Holo</item>
         <item name="windowTitleSize">25dip</item>
         <item name="windowTitleBackgroundStyle">@android:style/WindowTitleBackground.Holo</item>
@@ -1326,7 +1326,7 @@ please see themes_device_defaults.xml.
         <item name="windowFullscreen">false</item>
         <item name="windowIsFloating">false</item>
         <item name="android:windowContentOverlay">@android:drawable/ab_solid_shadow_holo</item>
-        <item name="windowShowWallpaper">true</item>
+        <item name="windowShowWallpaper">false</item>
         <item name="windowTitleStyle">@android:style/WindowTitle.Holo</item>
         <item name="windowTitleSize">25dip</item>
         <item name="windowTitleBackgroundStyle">@android:style/WindowTitleBackground.Holo</item>
