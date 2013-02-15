@@ -35,6 +35,8 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.hardware.SensorManager;
+import android.hardware.SystemSensorManager;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Binder;
@@ -154,11 +156,6 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Otherwise the user won't get much screen on time before dimming occurs.
     private static final float MAXIMUM_SCREEN_DIM_RATIO = 0.2f;
 
-    // Upper bound on the battery charge percentage in order to consider turning
-    // the screen on when the device starts charging wirelessly.
-    // See point of use for more details.
-    private static final int WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT = 95;
-
     // The name of the boot animation service in init.rc.
     private static final String BOOT_ANIMATION_SERVICE = "bootanim";
 
@@ -183,10 +180,12 @@ public final class PowerManagerService extends IPowerManager.Stub
     private WindowManagerPolicy mPolicy;
     private Notifier mNotifier;
     private DisplayPowerController mDisplayPowerController;
+    private WirelessChargerDetector mWirelessChargerDetector;
     private SettingsObserver mSettingsObserver;
     private DreamManagerService mDreamManager;
     private LightsService.Light mAttentionLight;
     private LightsService.Light mButtonsLight;
+    private LightsService.Light mKeyboardLight;
 
     private final Object mLock = new Object();
 
@@ -342,6 +341,11 @@ public final class PowerManagerService extends IPowerManager.Stub
     // Use -1 to disable.
     private int mScreenBrightnessOverrideFromWindowManager = -1;
 
+    // The button brightness setting override from the window manager
+    // to allow the current foreground activity to override the button brightness.
+    // Use -1 to disable.
+    private int mButtonBrightnessOverrideFromWindowManager = -1;
+
     // The user activity timeout override from the window manager
     // to allow the current foreground activity to override the user activity timeout.
     // Use -1 to disable.
@@ -371,6 +375,7 @@ public final class PowerManagerService extends IPowerManager.Stub
     private static native void nativeSetInteractive(boolean enable);
     private static native void nativeSetAutoSuspend(boolean enable);
     private static native void nativeCpuBoost(int duration);
+    private boolean mKeyboardVisible = false;
 
     public PowerManagerService() {
         synchronized (mLock) {
@@ -429,6 +434,8 @@ public final class PowerManagerService extends IPowerManager.Stub
             mScreenBrightnessSettingMaximum = pm.getMaximumScreenBrightnessSetting();
             mScreenBrightnessSettingDefault = pm.getDefaultScreenBrightnessSetting();
 
+            SensorManager sensorManager = new SystemSensorManager(mHandler.getLooper());
+
             // The notifier runs on the system server's main looper so as not to interfere
             // with the animations and other critical functions of the power manager.
             mNotifier = new Notifier(Looper.getMainLooper(), mContext, mBatteryStats,
@@ -436,14 +443,18 @@ public final class PowerManagerService extends IPowerManager.Stub
                     mScreenOnBlocker, mPolicy);
 
             // The display power controller runs on the power manager service's
-            // own handler thread.
+            // own handler thread to ensure timely operation.
             mDisplayPowerController = new DisplayPowerController(mHandler.getLooper(),
-                    mContext, mNotifier, mLightsService, twilight,
-                    mDisplayBlanker, mDisplayPowerControllerCallbacks, mHandler);
+                    mContext, mNotifier, mLightsService, twilight, sensorManager,
+                    mDisplayManagerService, mDisplayBlanker,
+                    mDisplayPowerControllerCallbacks, mHandler);
 
+            mWirelessChargerDetector = new WirelessChargerDetector(sensorManager,
+                    createSuspendBlockerLocked("PowerManagerService.WirelessChargerDetector"));
             mSettingsObserver = new SettingsObserver(mHandler);
             mAttentionLight = mLightsService.getLight(LightsService.LIGHT_ID_ATTENTION);
             mButtonsLight = mLightsService.getLight(LightsService.LIGHT_ID_BUTTONS);
+            mKeyboardLight = mLightsService.getLight(LightsService.LIGHT_ID_KEYBOARD);
 
             // Register for broadcasts from other components of the system.
             IntentFilter filter = new IntentFilter();
@@ -625,8 +636,19 @@ public final class PowerManagerService extends IPowerManager.Stub
         }
     }
 
+    private static boolean isScreenLock(final WakeLock wakeLock) {
+        switch (wakeLock.mFlags & PowerManager.WAKE_LOCK_LEVEL_MASK) {
+            case PowerManager.FULL_WAKE_LOCK:
+            case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
+            case PowerManager.SCREEN_DIM_WAKE_LOCK:
+                return true;
+        }
+        return false;
+    }
+
     private void applyWakeLockFlagsOnAcquireLocked(WakeLock wakeLock) {
-        if ((wakeLock.mFlags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0) {
+        if ((wakeLock.mFlags & PowerManager.ACQUIRE_CAUSES_WAKEUP) != 0 &&
+                isScreenLock(wakeLock)) {
             wakeUpNoUpdateLocked(SystemClock.uptimeMillis());
         }
     }
@@ -869,6 +891,18 @@ public final class PowerManagerService extends IPowerManager.Stub
             }
         }
         return false;
+    }
+
+    @Override // Binder call
+    public void setKeyboardVisibility(boolean visible) {
+        synchronized (mLock) {
+            if (DEBUG_SPEW) {
+                Slog.d(TAG, "setKeyboardVisibility: " + visible);
+            }
+            if (mKeyboardVisible != visible) {
+                mKeyboardVisible = visible;
+            }
+        }
     }
 
     @Override // Binder call
@@ -1135,55 +1169,51 @@ public final class PowerManagerService extends IPowerManager.Stub
             if (wasPowered != mIsPowered || oldPlugType != mPlugType) {
                 mDirty |= DIRTY_IS_POWERED;
 
+                // Update wireless dock detection state.
+                final boolean dockedOnWirelessCharger = mWirelessChargerDetector.update(
+                        mIsPowered, mPlugType, mBatteryLevel);
+
                 // Treat plugging and unplugging the devices as a user activity.
                 // Users find it disconcerting when they plug or unplug the device
                 // and it shuts off right away.
                 // Some devices also wake the device when plugged or unplugged because
                 // they don't have a charging LED.
                 final long now = SystemClock.uptimeMillis();
-                if (shouldWakeUpWhenPluggedOrUnpluggedLocked(wasPowered, oldPlugType)) {
+                if (shouldWakeUpWhenPluggedOrUnpluggedLocked(wasPowered, oldPlugType,
+                        dockedOnWirelessCharger)) {
                     wakeUpNoUpdateLocked(now);
                 }
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
+
+                // Tell the notifier whether wireless charging has started so that
+                // it can provide feedback to the user.
+                if (dockedOnWirelessCharger) {
+                    mNotifier.onWirelessChargingStarted();
+                }
             }
         }
     }
 
-    private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(boolean wasPowered, int oldPlugType) {
+    private boolean shouldWakeUpWhenPluggedOrUnpluggedLocked(
+            boolean wasPowered, int oldPlugType, boolean dockedOnWirelessCharger) {
         // Don't wake when powered unless configured to do so.
         if (!mWakeUpWhenPluggedOrUnpluggedConfig) {
             return false;
         }
 
-        // FIXME: Need more accurate detection of wireless chargers.
-        //
-        // We are unable to accurately detect whether the device is resting on the
-        // charger unless it is actually receiving power.  This causes us some grief
-        // because the device might not appear to be plugged into the wireless charger
-        // unless it actually charging.
-        //
-        // To avoid spuriously waking the screen, we apply a special policy to
-        // wireless chargers.
-        //
-        // 1. Don't wake the device when unplugged from wireless charger because
-        //    it might be that the device is still resting on the wireless charger
-        //    but is not receiving power anymore because the battery is full.
-        //
-        // 2. Don't wake the device when plugged into a wireless charger if the
-        //    battery already appears to be mostly full.  This situation may indicate
-        //    that the device was resting on the charger the whole time and simply
-        //    wasn't receiving power because the battery was full.  We can't tell
-        //    whether the device was just placed on the charger or whether it has
-        //    been there for half of the night slowly discharging until it hit
-        //    the point where it needed to start charging again.
+        // Don't wake when undocked from wireless charger.
+        // See WirelessChargerDetector for justification.
         if (wasPowered && !mIsPowered
                 && oldPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS) {
             return false;
         }
+
+        // Don't wake when docked on wireless charger unless we are certain of it.
+        // See WirelessChargerDetector for justification.
         if (!wasPowered && mIsPowered
                 && mPlugType == BatteryManager.BATTERY_PLUGGED_WIRELESS
-                && mBatteryLevel >= WIRELESS_CHARGER_TURN_ON_BATTERY_LEVEL_LIMIT) {
+                && !dockedOnWirelessCharger) {
             return false;
         }
 
@@ -1299,9 +1329,16 @@ public final class PowerManagerService extends IPowerManager.Stub
                     if (now < nextTimeout) {
                         if (now > mLastUserActivityTime + BUTTON_ON_DURATION) {
                             mButtonsLight.setBrightness(0);
+                            mKeyboardLight.setBrightness(0);
                         } else {
-                            mButtonsLight.setBrightness(mDisplayPowerRequest.screenBrightness);
-                            nextTimeout = now + BUTTON_ON_DURATION;
+                            int brightness = mButtonBrightnessOverrideFromWindowManager >= 0
+                                    ? mButtonBrightnessOverrideFromWindowManager
+                                    : mDisplayPowerRequest.screenBrightness;
+                            mButtonsLight.setBrightness(brightness);
+                            mKeyboardLight.setBrightness(mKeyboardVisible ? brightness : 0);
+                            if (brightness != 0) {
+                                nextTimeout = now + BUTTON_ON_DURATION;
+                            }
                         }
                         mUserActivitySummary |= USER_ACTIVITY_SCREEN_BRIGHT;
                     } else {
@@ -2045,9 +2082,24 @@ public final class PowerManagerService extends IPowerManager.Stub
      * @param brightness The overridden brightness, or -1 to disable the override.
      */
     public void setButtonBrightnessOverrideFromWindowManager(int brightness) {
-        // Do nothing.
-        // Button lights are not currently supported in the new implementation.
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            setButtonBrightnessOverrideFromWindowManagerInternal(brightness);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private void setButtonBrightnessOverrideFromWindowManagerInternal(int brightness) {
+        synchronized (mLock) {
+            if (mButtonBrightnessOverrideFromWindowManager != brightness) {
+                mButtonBrightnessOverrideFromWindowManager = brightness;
+                mDirty |= DIRTY_SETTINGS;
+                updatePowerStateLocked();
+            }
+        }
     }
 
     /**
@@ -2189,6 +2241,7 @@ public final class PowerManagerService extends IPowerManager.Stub
         pw.println("POWER MANAGER (dumpsys power)\n");
 
         final DisplayPowerController dpc;
+        final WirelessChargerDetector wcd;
         synchronized (mLock) {
             pw.println("Power Manager State:");
             pw.println("  mDirty=0x" + Integer.toHexString(mDirty));
@@ -2270,10 +2323,15 @@ public final class PowerManagerService extends IPowerManager.Stub
             pw.println("Display Blanker: " + mDisplayBlanker);
 
             dpc = mDisplayPowerController;
+            wcd = mWirelessChargerDetector;
         }
 
         if (dpc != null) {
             dpc.dump(pw);
+        }
+
+        if (wcd != null) {
+            wcd.dump(pw);
         }
     }
 

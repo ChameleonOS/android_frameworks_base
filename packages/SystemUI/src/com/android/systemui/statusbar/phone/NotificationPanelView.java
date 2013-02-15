@@ -40,7 +40,7 @@ public class NotificationPanelView extends PanelView {
     private static final float STATUS_BAR_SWIPE_MOVE_PERCENTAGE = 0.2f;
 
     private Drawable mHandleBar;
-    private float mHandleBarHeight;
+    private int mHandleBarHeight;
     private View mHandleView;
     private int mFingers;
     private PhoneStatusBar mStatusBar;
@@ -67,7 +67,7 @@ public class NotificationPanelView extends PanelView {
 
         Resources resources = getContext().getResources();
         mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
-        mHandleBarHeight = resources.getDimension(R.dimen.close_handle_height);
+        mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
         mHandleView = findViewById(R.id.handle);
 
         setContentDescription(resources.getString(R.string.accessibility_desc_notification_shade));
@@ -109,8 +109,11 @@ public class NotificationPanelView extends PanelView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+<<<<<<< HEAD
         mGdt.onTouchEvent(event);
             
+=======
+>>>>>>> 4815d6e5a658bb1b301f7724c8e8fff6bc764bba
         boolean shouldRecycleEvent = false;
         if (PhoneStatusBar.SETTINGS_DRAG_SHORTCUT && mStatusBar.mHasFlipSettings) {
             boolean flip = false;

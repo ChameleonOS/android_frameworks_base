@@ -993,6 +993,18 @@
     <string name="weeks" msgid="6509623834583944518">"semaines"</string>
     <string name="year" msgid="4001118221013892076">"année"</string>
     <string name="years" msgid="6881577717993213522">"années"</string>
+  <plurals name="duration_seconds">
+    <item quantity="one" msgid="6962015528372969481">"1 seconde"</item>
+    <item quantity="other" msgid="1886107766577166786">"<xliff:g id="COUNT">%d</xliff:g> secondes"</item>
+  </plurals>
+  <plurals name="duration_minutes">
+    <item quantity="one" msgid="4915414002546085617">"1 minute"</item>
+    <item quantity="other" msgid="3165187169224908775">"<xliff:g id="COUNT">%d</xliff:g> minutes"</item>
+  </plurals>
+  <plurals name="duration_hours">
+    <item quantity="one" msgid="8917467491248809972">"1 heure"</item>
+    <item quantity="other" msgid="3863962854246773930">"<xliff:g id="COUNT">%d</xliff:g> heures"</item>
+  </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problème vidéo"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Impossible de lire cette vidéo en streaming sur cet appareil."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Impossible de lire la vidéo."</string>
@@ -1082,7 +1094,7 @@
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Volume des notifications"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Sonnerie par défaut"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Sonnerie par défaut (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
-    <string name="ringtone_silent" msgid="4440324407807468713">"Silencieux"</string>
+    <string name="ringtone_silent" msgid="7937634392408977062">"Aucune"</string>
     <string name="ringtone_picker_title" msgid="3515143939175119094">"Sonneries"</string>
     <string name="ringtone_unknown" msgid="5477919988701784788">"Sonnerie inconnue"</string>
   <plurals name="wifi_available">
@@ -1444,4 +1456,43 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accessibilité annulée."</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="owner_name" msgid="2716755460376028154">"Propriétaire"</string>
+
+    <!-- CYANOGENMOD ADDITIONS -->
+
+    <string name="reboot_system" product="tablet">Redémarrage de la tablette</string>
+    <string name="reboot_system" product="default">Redémarrage du téléphone</string>
+    <string name="reboot_reboot">Redémarrer</string>
+    <string name="reboot_recovery">Recovery</string>
+    <string name="reboot_bootloader">Bootloader</string>
+    <string name="reboot_bootmenu">Bootmenu</string>
+    <string name="reboot_fastboot">Fastboot</string>
+    <string name="reboot_download">Download</string>
+    <string name="reboot_confirm" product="tablet">Votre tablette va redémarrer</string>
+    <string name="reboot_confirm" product="default">Votre téléphone va redémarrer</string>
+    <string name="reboot_progress">Redémarrage en cours\u2026</string>
+    <string name="global_action_reboot">Redémarrer</string>
+    <string name="global_action_screenshot">Capture d\'écran</string>
+    <string name="global_action_choose_profile">Profils</string>
+    <string name="global_actions_toggle_expanded_desktop_mode">Bureau étendu</string>
+
+    <!-- label for item that toggles expand desktop mode -->
+    <string name="global_actions_expanded_desktop_mode_on_status">Activé</string>
+    <string name="global_actions_expanded_desktop_mode_off_status">Désactivé</string>
+
+    <!-- Names of default profiles. -->
+    <string name="profileNameDefault">Défaut</string>
+    <string name="profileNameWork">Bureau</string>
+    <string name="profileNameHome">Maison</string>
+    <string name="profileNameSilent">Silencieux</string>
+    <string name="profileNameNight">Nuit</string>
+
+    <!-- Names of application groups. -->
+    <string name="profileGroupPhone">Téléphone</string>
+    <string name="profileGroupCalendar">Agenda</string>
+    <string name="profileGroupGmail">Gmail</string>
+    <string name="profileGroupEmail">Email</string>
+    <string name="profileGroupSMS">SMS</string>
+
+    <!-- Name of wildcard profile. -->
+    <string name="wildcardProfile">Autres</string>
 </resources>

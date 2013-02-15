@@ -27,13 +27,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.ViewGroup;
 
 import com.android.systemui.quicksettings.AirplaneModeTile;
 import com.android.systemui.quicksettings.AlarmTile;
@@ -43,6 +43,7 @@ import com.android.systemui.quicksettings.BluetoothTile;
 import com.android.systemui.quicksettings.BrightnessTile;
 import com.android.systemui.quicksettings.BugReportTile;
 import com.android.systemui.quicksettings.NfcTile;
+import com.android.systemui.quicksettings.QuietHoursTile;
 import com.android.systemui.quicksettings.ScreenTimeoutTile;
 import com.android.systemui.quicksettings.TorchTile;
 import com.android.systemui.quicksettings.GPSTile;
@@ -56,6 +57,7 @@ import com.android.systemui.quicksettings.RingerModeTile;
 import com.android.systemui.quicksettings.SleepScreenTile;
 import com.android.systemui.quicksettings.SyncTile;
 import com.android.systemui.quicksettings.ToggleLockscreenTile;
+import com.android.systemui.quicksettings.UsbTetherTile;
 import com.android.systemui.quicksettings.UserTile;
 import com.android.systemui.quicksettings.WiFiDisplayTile;
 import com.android.systemui.quicksettings.WiFiTile;
@@ -100,6 +102,8 @@ public class QuickSettingsController {
     public static final String TILE_WIMAX = "toggleWimax";
     public static final String TILE_PROFILE = "toggleProfile";
     public static final String TILE_NFC = "toggleNfc";
+    public static final String TILE_USBTETHER = "toggleUsbTether";
+    public static final String TILE_QUIETHOURS = "toggleQuietHours";
 
     private static final String TILE_DELIMITER = "|";
     private static ArrayList<String> TILES_DEFAULT = new ArrayList<String>();
@@ -152,6 +156,8 @@ public class QuickSettingsController {
     public static final int SYNC_TILE = 20;
     public static final int NFC_TILE = 21;
     public static final int SCREENTIMEOUT_TILE = 22;
+    public static final int USBTETHER_TILE = 23;
+    public static final int QUIET_HOURS_TILE = 24;
     public static final int USER_TILE = 99;
     private InputMethodTile IMETile;
 
@@ -249,6 +255,8 @@ public class QuickSettingsController {
                 // Not available yet
             } else if (tile.equals(TILE_LTE)) {
                 // Not available yet
+            } else if (tile.equals(TILE_QUIETHOURS)) {
+                mQuickSettings.add(QUIET_HOURS_TILE);
             }
         }
 
@@ -266,6 +274,9 @@ public class QuickSettingsController {
         }
         if (Settings.System.getInt(resolver, Settings.System.QS_DYNAMIC_IME, 1) == 1) {
             mQuickSettings.add(IME_TILE);
+        }
+        if (deviceSupportsUsbTether() && Settings.System.getInt(resolver, Settings.System.QS_DYNAMIC_USBTETHER, 1) == 1) {
+            mQuickSettings.add(USBTETHER_TILE);
         }
     }
 
@@ -359,6 +370,11 @@ public class QuickSettingsController {
         return (BluetoothAdapter.getDefaultAdapter() != null);
     }
 
+    boolean deviceSupportsUsbTether() {
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        return (cm.getTetherableUsbRegexs().length != 0);
+    }
+
     boolean systemProfilesEnabled(ContentResolver resolver) {
         return (Settings.System.getInt(resolver, Settings.System.SYSTEM_PROFILES_ENABLED, 1) == 1);
     }
@@ -447,6 +463,12 @@ public class QuickSettingsController {
                 break;
             case SCREENTIMEOUT_TILE:
                 qs = new ScreenTimeoutTile(mContext, inflater, mContainerView, this);
+                break;
+            case USBTETHER_TILE:
+                qs = new UsbTetherTile(mContext, inflater, mContainerView, this);
+                break;
+            case QUIET_HOURS_TILE:
+                qs = new QuietHoursTile(mContext, inflater, mContainerView, this);
                 break;
             }
             if (qs != null) {

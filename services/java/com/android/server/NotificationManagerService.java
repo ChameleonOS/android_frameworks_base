@@ -114,6 +114,11 @@ public class NotificationManagerService extends INotificationManager.Stub
     private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10;
     private static final int SCORE_DISPLAY_THRESHOLD = Notification.PRIORITY_MIN * NOTIFICATION_PRIORITY_MULTIPLIER;
 
+    // Notifications with scores below this will not interrupt the user, either via LED or
+    // sound or vibration
+    private static final int SCORE_INTERRUPTION_THRESHOLD =
+            Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
+
     private static final boolean ENABLE_BLOCKED_NOTIFICATIONS = true;
     private static final boolean ENABLE_BLOCKED_TOASTS = true;
 
@@ -630,27 +635,31 @@ public class NotificationManagerService extends INotificationManager.Stub
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
             // LED enabled
-            mNotificationPulseEnabled = Settings.System.getInt(resolver,
-                    Settings.System.NOTIFICATION_LIGHT_PULSE, 0) != 0;
+            mNotificationPulseEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE, 0, UserHandle.USER_CURRENT) != 0;
 
             // LED default color
-            mDefaultNotificationColor = Settings.System.getInt(resolver,
-                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_COLOR, mDefaultNotificationColor);
+            mDefaultNotificationColor = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_COLOR, mDefaultNotificationColor,
+                    UserHandle.USER_CURRENT);
 
             // LED default on MS
-            mDefaultNotificationLedOn = Settings.System.getInt(resolver,
-                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_ON, mDefaultNotificationLedOn);
+            mDefaultNotificationLedOn = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_ON, mDefaultNotificationLedOn,
+                    UserHandle.USER_CURRENT);
 
             // LED default off MS
-            mDefaultNotificationLedOff = Settings.System.getInt(resolver,
-                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_OFF, mDefaultNotificationLedOff);
+            mDefaultNotificationLedOff = Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_DEFAULT_LED_OFF, mDefaultNotificationLedOff,
+                    UserHandle.USER_CURRENT);
 
             // LED custom notification colors
             mNotificationPulseCustomLedValues.clear();
-            if (Settings.System.getInt(resolver,
-                    Settings.System.NOTIFICATION_LIGHT_PULSE_CUSTOM_ENABLE, 0) != 0) {
-                parseNotificationPulseCustomValuesString(Settings.System.getString(resolver,
-                        Settings.System.NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES));
+            if (Settings.System.getIntForUser(resolver,
+                    Settings.System.NOTIFICATION_LIGHT_PULSE_CUSTOM_ENABLE, 0,
+                    UserHandle.USER_CURRENT) != 0) {
+                parseNotificationPulseCustomValuesString(Settings.System.getStringForUser(resolver,
+                        Settings.System.NOTIFICATION_LIGHT_PULSE_CUSTOM_VALUES, UserHandle.USER_CURRENT));
             }
         }
     }
@@ -684,18 +693,18 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         public void update() {
             ContentResolver resolver = mContext.getContentResolver();
-            mQuietHoursEnabled = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_ENABLED, 0) != 0;
-            mQuietHoursStart = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_START, 0);
-            mQuietHoursEnd = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_END, 0);
-            mQuietHoursMute = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_MUTE, 0) != 0;
-            mQuietHoursStill = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_STILL, 0) != 0;
-            mQuietHoursDim = Settings.System.getInt(resolver,
-                    Settings.System.QUIET_HOURS_DIM, 0) != 0;
+            mQuietHoursEnabled = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_ENABLED, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
+            mQuietHoursStart = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_START, 0, UserHandle.USER_CURRENT_OR_SELF);
+            mQuietHoursEnd = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_END, 0, UserHandle.USER_CURRENT_OR_SELF);
+            mQuietHoursMute = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_MUTE, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
+            mQuietHoursStill = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_STILL, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
+            mQuietHoursDim = Settings.System.getIntForUser(resolver,
+                    Settings.System.QUIET_HOURS_DIM, 0, UserHandle.USER_CURRENT_OR_SELF) != 0;
         }
     }
 
@@ -1101,6 +1110,9 @@ public class NotificationManagerService extends INotificationManager.Stub
             return;
         }
 
+        // Should this notification make noise, vibe, or use the LED?
+        final boolean canInterrupt = (score >= SCORE_INTERRUPTION_THRESHOLD);
+
         synchronized (mNotificationList) {
             final boolean inQuietHours = inQuietHours();
 
@@ -1154,7 +1166,8 @@ public class NotificationManagerService extends INotificationManager.Stub
                     long identity = Binder.clearCallingIdentity();
                     try {
                         r.statusBarKey = mStatusBar.addNotification(n);
-                        if ((n.notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0) {
+                        if ((n.notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0
+                                && canInterrupt) {
                             mAttentionLight.pulse();
                         }
                     }
@@ -1197,21 +1210,32 @@ public class NotificationManagerService extends INotificationManager.Stub
                         && (notification.flags & Notification.FLAG_ONLY_ALERT_ONCE) != 0 ))
                     && (r.userId == UserHandle.USER_ALL ||
                         (r.userId == userId && r.userId == currentUser))
+                    && canInterrupt
                     && mSystemReady) {
 
                 final AudioManager audioManager = (AudioManager) mContext
                 .getSystemService(Context.AUDIO_SERVICE);
+
                 // sound
                 final boolean useDefaultSound =
                     (notification.defaults & Notification.DEFAULT_SOUND) != 0;
-                if (!(inQuietHours && mQuietHoursMute)
-                        && (useDefaultSound || notification.sound != null)) {
-                    Uri uri;
-                    if (useDefaultSound) {
-                        uri = Settings.System.DEFAULT_NOTIFICATION_URI;
-                    } else {
-                        uri = notification.sound;
-                    }
+
+                Uri soundUri = null;
+                boolean hasValidSound = false;
+
+                if (!(inQuietHours && mQuietHoursMute) && useDefaultSound) {
+                    soundUri = Settings.System.DEFAULT_NOTIFICATION_URI;
+
+                    // check to see if the default notification sound is silent
+                    ContentResolver resolver = mContext.getContentResolver();
+                    hasValidSound = Settings.System.getString(resolver,
+                           Settings.System.NOTIFICATION_SOUND) != null;
+                } else if (notification.sound != null) {
+                    soundUri = notification.sound;
+                    hasValidSound = (soundUri != null);
+                }
+
+                if (hasValidSound) {
                     boolean looping = (notification.flags & Notification.FLAG_INSISTENT) != 0;
                     int audioStreamType;
                     if (notification.audioStreamType >= 0) {
@@ -1228,7 +1252,7 @@ public class NotificationManagerService extends INotificationManager.Stub
                         try {
                             final IRingtonePlayer player = mAudioService.getRingtonePlayer();
                             if (player != null) {
-                                player.playAsync(uri, user, looping, audioStreamType);
+                                player.playAsync(soundUri, user, looping, audioStreamType);
                             }
                         } catch (RemoteException e) {
                         } finally {
@@ -1242,13 +1266,14 @@ public class NotificationManagerService extends INotificationManager.Stub
                 final boolean hasCustomVibrate = notification.vibrate != null;
 
                 // new in 4.2: if there was supposed to be a sound and we're in vibrate mode,
-                // and no other vibration is specified, we apply the default vibration anyway
+                // and no other vibration is specified, we fall back to vibration
                 final boolean convertSoundToVibration =
                            !hasCustomVibrate
-                        && (useDefaultSound || notification.sound != null)
+                        && hasValidSound
+                        && shouldConvertSoundToVibration()
                         && (audioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE);
 
-                // The DEFAULT_VIBRATE flag trumps any custom vibration.
+                // The DEFAULT_VIBRATE flag trumps any custom vibration AND the fallback.
                 final boolean useDefaultVibrate =
                         (notification.defaults & Notification.DEFAULT_VIBRATE) != 0;
                 if (!(inQuietHours && mQuietHoursStill)
@@ -1260,8 +1285,8 @@ public class NotificationManagerService extends INotificationManager.Stub
                         // does not have the VIBRATE permission.
                         long identity = Binder.clearCallingIdentity();
                         try {
-                            mVibrator.vibrate(convertSoundToVibration ? mFallbackVibrationPattern
-                                                                      : mDefaultVibrationPattern,
+                            mVibrator.vibrate(useDefaultVibrate ? mDefaultVibrationPattern
+                                                                : mFallbackVibrationPattern,
                                 ((notification.flags & Notification.FLAG_INSISTENT) != 0) ? 0: -1);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
@@ -1284,7 +1309,8 @@ public class NotificationManagerService extends INotificationManager.Stub
             }
             //Slog.i(TAG, "notification.lights="
             //        + ((old.notification.lights.flags & Notification.FLAG_SHOW_LIGHTS) != 0));
-            if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0) {
+            if ((notification.flags & Notification.FLAG_SHOW_LIGHTS) != 0
+                    && canInterrupt) {
                 mLights.add(r);
                 updateLightsLocked();
             } else {
@@ -1296,6 +1322,11 @@ public class NotificationManagerService extends INotificationManager.Stub
         }
 
         idOut[0] = id;
+    }
+
+    private boolean shouldConvertSoundToVibration() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.NOTIFICATION_CONVERT_SOUND_TO_VIBRATION, 1) != 0;
     }
 
     private boolean inQuietHours() {

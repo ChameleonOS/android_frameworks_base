@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+<<<<<<< HEAD
 import java.util.ArrayList;
 
 import android.content.BroadcastReceiver;
@@ -95,10 +96,31 @@ public class DockBatteryController extends BroadcastReceiver {
         mLabelViews.add(v);
     }
 
+=======
+import android.content.Context;
+import android.content.Intent;
+import android.os.BatteryManager;
+
+import com.android.systemui.R;
+
+public class DockBatteryController extends BatteryController {
+    private static final String TAG = "StatusBar.DockBatteryController";
+
+    private int mDockBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
+    private boolean mBatteryPlugged = false;
+    private boolean mBatteryPresent = false;
+
+    public DockBatteryController(Context context) {
+        super(context);
+    }
+
+    @Override
+>>>>>>> 4815d6e5a658bb1b301f7724c8e8fff6bc764bba
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
             final int level = intent.getIntExtra(BatteryManager.EXTRA_DOCK_LEVEL, 0);
+<<<<<<< HEAD
             mDockStatus = intent.getIntExtra(BatteryManager.EXTRA_DOCK_STATUS,
                     BatteryManager.DOCK_BATTERY_STATUS_UNKNOWN);
             mDockPresent = intent.getBooleanExtra(BatteryManager.EXTRA_DOCK_PRESENT,
@@ -118,10 +140,19 @@ public class DockBatteryController extends BroadcastReceiver {
                 v.setText(mContext.getString(BATTERY_TEXT_STYLE_MIN, level));
             }
 
+=======
+            mDockBatteryStatus = intent.getIntExtra(
+                                        BatteryManager.EXTRA_DOCK_STATUS,
+                                        BatteryManager.BATTERY_STATUS_UNKNOWN);
+            mBatteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_DOCK_PLUGGED, 0) != 0;
+            mBatteryPresent = intent.getBooleanExtra(BatteryManager.EXTRA_DOCK_PRESENT, false);
+            updateViews(level);
+>>>>>>> 4815d6e5a658bb1b301f7724c8e8fff6bc764bba
             updateBattery();
         }
     }
 
+<<<<<<< HEAD
     private void updateBattery() {
         int icon = View.GONE;
         int text = View.GONE;
@@ -163,4 +194,42 @@ public class DockBatteryController extends BroadcastReceiver {
 
         updateBattery();
     }
+=======
+    @Override
+    public int getIconStyleUnknown() {
+        return R.drawable.stat_sys_kb_battery_unknown;
+    }
+    @Override
+    public int getIconStyleNormal() {
+        return R.drawable.stat_sys_kb_battery;
+    }
+    @Override
+    public int getIconStyleCharge() {
+        return R.drawable.stat_sys_kb_battery_charge;
+    }
+    @Override
+    public int getIconStyleNormalMin() {
+        return R.drawable.stat_sys_kb_battery_min;
+    }
+    @Override
+    public int getIconStyleChargeMin() {
+        return R.drawable.stat_sys_kb_battery_charge_min;
+    }
+
+    @Override
+    protected int getBatteryStatus() {
+        return mDockBatteryStatus;
+    }
+
+    @Override
+    protected boolean isBatteryPlugged() {
+        return mBatteryPlugged;
+    }
+
+    @Override
+    protected boolean isBatteryPresent() {
+        return mBatteryPresent;
+    }
+
+>>>>>>> 4815d6e5a658bb1b301f7724c8e8fff6bc764bba
 }

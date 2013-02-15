@@ -220,4 +220,9 @@
 
     <!-- Height of trigger for revealing a hidden status bar or navbar -->
     <dimen name="trigger_view_height">2dip</dimen>
+
+    <!-- The padding of the items of the battery cluster -->
+    <dimen name="status_bar_battery_cluster_padding">2dip</dimen>
+    <!-- The margin adjusment of the text items of the battery cluster -->
+    <dimen name="status_bar_battery_cluster_text_margin">-1dip</dimen>
 </resources>

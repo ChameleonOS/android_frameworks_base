@@ -872,6 +872,9 @@
   <java-symbol type="plurals" name="abbrev_num_hours_ago" />
   <java-symbol type="plurals" name="abbrev_num_minutes_ago" />
   <java-symbol type="plurals" name="abbrev_num_seconds_ago" />
+  <java-symbol type="plurals" name="duration_hours" />
+  <java-symbol type="plurals" name="duration_minutes" />
+  <java-symbol type="plurals" name="duration_seconds" />
   <java-symbol type="plurals" name="in_num_days" />
   <java-symbol type="plurals" name="in_num_hours" />
   <java-symbol type="plurals" name="in_num_minutes" />
@@ -1112,6 +1115,7 @@
   <java-symbol type="layout" name="keyguard_multi_user_selector_widget" />
   <java-symbol type="layout" name="sms_short_code_confirmation_dialog" />
   <java-symbol type="layout" name="keyguard_add_widget" />
+  <java-symbol type="layout" name="action_bar_up_container" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />
@@ -1840,8 +1844,11 @@
   <java-symbol type="bool" name="config_hasRemovableLid" />
   <java-symbol type="bool" name="config_hasDockBattery" />
   <java-symbol type="bool" name="config_noDelayInATwoDP" />
+<<<<<<< HEAD
   <java-symbol type="string" name="config_deviceKeyHandlerLib" />
   <java-symbol type="string" name="config_deviceKeyHandlerClass" />
+=======
+>>>>>>> 4815d6e5a658bb1b301f7724c8e8fff6bc764bba
 
   <!-- Telephony -->
   <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
@@ -1919,4 +1926,10 @@
   <java-symbol type="layout" name="busy_dlg" />
 
   <java-symbol type="bool" name="config_wifiApFirmwareReload" />
+  <java-symbol type="bool" name="config_wifiApFirmwareReload" />
+
+  <!-- Device specific handlers -->
+  <java-symbol type="string" name="config_deviceHandlersLib" />
+  <java-symbol type="string" name="config_deviceKeyHandlerClass" />
+  <java-symbol type="string" name="config_deviceDockBatteryHandlerClass" />
 </resources>

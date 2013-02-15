@@ -122,6 +122,13 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import com.stericsson.hardware.fm.IFmReceiver;
+import com.stericsson.hardware.fm.IFmTransmitter;
+import com.stericsson.hardware.fm.FmReceiver;
+import com.stericsson.hardware.fm.FmTransmitter;
+import com.stericsson.hardware.fm.FmReceiverImpl;
+import com.stericsson.hardware.fm.FmTransmitterImpl;
+
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
         super(base);
@@ -170,7 +177,7 @@ class ReceiverRestrictedContext extends ContextWrapper {
  * context object for Activity and other application components.
  */
 class ContextImpl extends Context {
-    private final static String TAG = "ApplicationContext";
+    private final static String TAG = "ContextImpl";
     private final static boolean DEBUG = false;
 
     private static final HashMap<String, SharedPreferencesImpl> sSharedPrefs =
@@ -547,6 +554,20 @@ class ContextImpl extends Context {
         registerService(WimaxManagerConstants.WIMAX_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return WimaxHelper.createWimaxService(ctx, ctx.mMainThread.getHandler());
+                }});
+
+        registerService("fm_receiver", new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService("fm_receiver");
+                    IFmReceiver service = IFmReceiver.Stub.asInterface(b);
+                    return new FmReceiverImpl(service);
+                }});
+
+        registerService("fm_transmitter", new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    IBinder b = ServiceManager.getService("fm_transmitter");
+                    IFmTransmitter service = IFmTransmitter.Stub.asInterface(b);
+                    return new FmTransmitterImpl(service);
                 }});
     }
 
@@ -1728,7 +1749,7 @@ class ContextImpl extends Context {
     private void warnIfCallingFromSystemProcess() {
         if (Process.myUid() == Process.SYSTEM_UID) {
             Slog.w(TAG, "Calling a method in the system process without a qualified user: "
-                    + Debug.getCallers(3));
+                    + Debug.getCallers(5));
         }
     }
 
