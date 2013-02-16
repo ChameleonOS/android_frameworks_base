@@ -248,11 +248,7 @@ public class NavbarEditor implements OnTouchListener {
                         ((KeyButtonView) view).setInfo(list.getItem(which).toString(), mVertical);
                     }
                 })
-<<<<<<< HEAD
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-=======
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
->>>>>>> 4815d6e5a658bb1b301f7724c8e8fff6bc764bba
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
@@ -367,20 +363,6 @@ public class NavbarEditor implements OnTouchListener {
         int sCount = visibleCount;
         for (int v = 0; v < viewParent.getChildCount();v++) {
             View cView = viewParent.getChildAt(v);
-<<<<<<< HEAD
-            if (NavigationBarView.getEditMode()) {
-                cView.setVisibility(View.VISIBLE);
-            } else if (cView instanceof KeyButtonView) {
-                View nextPadding = viewParent.getChildAt(v+1);
-                String curTag = (String) cView.getTag();
-                if (curTag == null || curTag.equals(NAVBAR_EMPTY)) {
-                    cView.setVisibility(View.GONE);
-                    if (nextPadding != null) {
-                        nextPadding.setVisibility(View.GONE);
-                    } else {
-                        View prevPadding = viewParent.getChildAt(v-1);
-                        prevPadding.setVisibility(View.GONE);
-=======
             if (cView instanceof KeyButtonView) {
                 View nextPadding = viewParent.getChildAt(v+1);
                 if (nextPadding != null) {
@@ -403,7 +385,6 @@ public class NavbarEditor implements OnTouchListener {
                         sCount--;
                     } else {
                         nextPadding.setVisibility(View.GONE);
->>>>>>> 4815d6e5a658bb1b301f7724c8e8fff6bc764bba
                     }
                 }
             }

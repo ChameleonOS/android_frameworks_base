@@ -514,12 +514,6 @@ public final class BatteryService extends Binder {
             mLastBatteryTemperature = mBatteryTemperature;
             mLastBatteryLevelCritical = mBatteryLevelCritical;
             mLastInvalidCharger = mInvalidCharger;
-
-            if (mHasDockBattery) {
-                mLastDockBatteryLevel = mDockBatteryLevel;
-                mLastDockBatteryStatus = mDockBatteryStatus;
-                mLastDockBatteryPresent = mDockBatteryPresent;
-            }
         }
     }
 
@@ -564,23 +558,6 @@ public final class BatteryService extends Binder {
                     ", Wireless powered:" + mWirelessOnline +
                     ", icon:" + icon  + ", invalid charger:" + mInvalidCharger +
                     dockDebug);
-        }
-
-        if (mHasDockBattery){
-            intent.putExtra(BatteryManager.EXTRA_DOCK_PRESENT, mDockBatteryPresent);
-            intent.putExtra(BatteryManager.EXTRA_DOCK_STATUS, mDockBatteryStatus);
-            intent.putExtra(BatteryManager.EXTRA_DOCK_LEVEL, mDockBatteryLevel);
-        }
-
-        if (false) {
-            Slog.d(TAG, "level:" + mBatteryLevel +
-                    " scale:" + BATTERY_SCALE + " status:" + mBatteryStatus +
-                    " health:" + mBatteryHealth +  " present:" + mBatteryPresent +
-                    " voltage: " + mBatteryVoltage +
-                    " temperature: " + mBatteryTemperature +
-                    " technology: " + mBatteryTechnology +
-                    " AC powered:" + mAcOnline + " USB powered:" + mUsbOnline +
-                    " icon:" + icon  + " invalid charger:" + mInvalidCharger);
         }
 
         mHandler.post(new Runnable() {

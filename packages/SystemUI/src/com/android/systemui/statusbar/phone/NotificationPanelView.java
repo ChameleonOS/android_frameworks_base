@@ -109,11 +109,8 @@ public class NotificationPanelView extends PanelView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-<<<<<<< HEAD
         mGdt.onTouchEvent(event);
             
-=======
->>>>>>> 4815d6e5a658bb1b301f7724c8e8fff6bc764bba
         boolean shouldRecycleEvent = false;
         if (PhoneStatusBar.SETTINGS_DRAG_SHORTCUT && mStatusBar.mHasFlipSettings) {
             boolean flip = false;
