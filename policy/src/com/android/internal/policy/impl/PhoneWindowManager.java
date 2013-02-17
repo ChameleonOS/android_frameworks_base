@@ -1521,6 +1521,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void changeNavbarSize(boolean shouldHide) {
+        if (shouldHide) {
+            // Set the navigation bar's dimensions to 0 in expanded desktop mode
+            mNavigationBarWidthForRotation[mPortraitRotation]
+                    = mNavigationBarWidthForRotation[mUpsideDownRotation]
+                    = mNavigationBarWidthForRotation[mLandscapeRotation]
+                    = mNavigationBarWidthForRotation[mSeascapeRotation]
+                    = mNavigationBarHeightForRotation[mPortraitRotation]
+                    = mNavigationBarHeightForRotation[mUpsideDownRotation]
+                    = mNavigationBarHeightForRotation[mLandscapeRotation]
+                    = mNavigationBarHeightForRotation[mSeascapeRotation] = 0;
+        } else {
+            // Height of the navigation bar when presented horizontally at bottom
+            mNavigationBarHeightForRotation[mPortraitRotation] =
+            mNavigationBarHeightForRotation[mUpsideDownRotation] =
+                    mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_height);
+            mNavigationBarHeightForRotation[mLandscapeRotation] =
+            mNavigationBarHeightForRotation[mSeascapeRotation] =
+                    mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_height_landscape);
+
+            // Width of the navigation bar when presented vertically along one side
+            mNavigationBarWidthForRotation[mPortraitRotation] =
+            mNavigationBarWidthForRotation[mUpsideDownRotation] =
+            mNavigationBarWidthForRotation[mLandscapeRotation] =
+            mNavigationBarWidthForRotation[mSeascapeRotation] =
+                    mContext.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.navigation_bar_width);
+        }
+        updateRotation(false);
+    }
+
     private void enablePointerLocation() {
         if (mPointerLocationView == null) {
             mPointerLocationView = new PointerLocationView(mContext);
@@ -5299,6 +5332,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void showNavbar() {
         if (mNavigationBar != null && shouldHideNavbar()) {
             mForceNavbarFromUI = true;
+            changeNavbarSize(false);
             mNavigationBar.showLw(true);
         }
     }
@@ -5307,6 +5341,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void hideNavbar() {
         if (mNavigationBar != null) {
             mForceNavbarFromUI = false;
+            changeNavbarSize(true);
             mNavigationBar.hideLw(true);
         }
     }
