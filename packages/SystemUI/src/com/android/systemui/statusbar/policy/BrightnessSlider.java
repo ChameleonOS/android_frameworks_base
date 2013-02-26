@@ -77,6 +77,8 @@ public class BrightnessSlider implements SeekBar.OnSeekBarChangeListener {
     }
 
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (!fromUser)
+            return;
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE, 
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
@@ -114,7 +116,8 @@ public class BrightnessSlider implements SeekBar.OnSeekBarChangeListener {
 
         @Override
         public void onChange(boolean selfChange) {
-            update();
+            if (!selfChange)
+                update();
         }
 
         public void update() {
