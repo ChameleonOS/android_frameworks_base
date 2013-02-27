@@ -834,6 +834,13 @@ public final class ContactsContract {
         public static final String CUSTOM_RINGTONE = "custom_ringtone";
 
         /**
+         * URI for a custom notification associated with the contact. If null or missing,
+         * the default notification is used.
+         * <P>Type: TEXT (URI to the notification)</P>
+         */
+        public static final String CUSTOM_NOTIFICATION = "custom_notification";
+
+        /**
          * Whether the contact should always be sent to voicemail. If missing,
          * defaults to false.
          * <P>Type: INTEGER (0 for false, 1 for true)</P>
