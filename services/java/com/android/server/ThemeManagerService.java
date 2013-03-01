@@ -41,6 +41,7 @@ import cos.util.CommandLineUtils;
 
 import java.io.*;
 import java.lang.Process;
+import java.lang.RuntimeException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -360,8 +361,14 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         return result;
     }
 
+    private static boolean isSymbolicLink(File f) throws IOException {
+        return !f.getAbsolutePath().equals(f.getCanonicalPath());
+    }
 
     private void fixOwnerPermissions(File file) throws IOException {
+        if (isSymbolicLink(file)) {
+            throw new RuntimeException("Cannot change permissions on a symbolic link!");
+        }
         if (file.isDirectory()) {
             for (File f : file.listFiles())
                 fixOwnerPermissions(f);
