@@ -365,21 +365,6 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         return !f.getAbsolutePath().equals(f.getCanonicalPath());
     }
 
-    private void fixOwnerPermissions(File file) throws IOException {
-        if (isSymbolicLink(file)) {
-            throw new RuntimeException("Cannot change permissions on a symbolic link!");
-        }
-        if (file.isDirectory()) {
-            for (File f : file.listFiles())
-                fixOwnerPermissions(f);
-            run(String.format("invoke-as -u root chown system.system %s", file.getAbsolutePath()));
-            run(String.format("invoke-as -u root chmod 0777 %s", file.getAbsolutePath()));
-        } else {
-            run(String.format("invoke-as -u root chown system.system %s", file.getAbsolutePath()));
-            run(String.format("invoke-as -u root chmod 0666 %s", file.getAbsolutePath()));
-        }
-    }
-
     private class ThemeWorkerThread extends Thread {
         public ThemeWorkerThread(String name) {
             super(name);
@@ -447,11 +432,9 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
 
     private void setBootanimation() {
         try {
-            fixOwnerPermissions(new File(THEME_DIR + "/boots/bootanimation.zip"));
             run(String.format("invoke-as -u root chown system.system %s", "/data/local"));
             run(String.format("invoke-as -u root cp %s %s", THEME_DIR + "/boots/bootanimation.zip", "/data/local/bootanimation.zip"));
             run(String.format("invoke-as -u root chown root.root %s", "/data/local"));
-            fixOwnerPermissions(new File("/data/local/bootanimation.zip"));
         } catch (Exception e) {}
     }
 
@@ -551,20 +534,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     }
                     break;
                 case MESSAGE_APPLY_CURRENT:
-                    // make sure the system user has ownership an that the appropriate permissions are granted
-                    try {
-                        fixOwnerPermissions(new File(THEME_DIR));
-                    } catch (IOException e) {}
                     setBootanimation();
 
                     notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
                     setThemeWallpaper();
                     break;
                 case MESSAGE_APPLY_CURRENT_REBOOT:
-                    // make sure the system user has ownership an that the appropriate permissions are granted
-                    try {
-                        fixOwnerPermissions(new File(THEME_DIR));
-                    } catch (IOException e) {}
                     setBootanimation();
                     setThemeWallpaper();
 
@@ -584,7 +559,6 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     break;
                 case MESSAGE_APPLY_ICONS:
                     try {
-                        fixOwnerPermissions(new File(THEME_DIR + "/icons"));
                         if (iconsDirExists()) {
                             // remove the contents of CUSTOMIZED_ICONS_DIR
                             File file = new File(CUSTOMIZED_ICONS_DIR);
@@ -601,13 +575,11 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     break;
                 case MESSAGE_APPLY_SYSTEMUI:
                     try {
-                        fixOwnerPermissions(new File(THEME_DIR + "/com.android.systemui"));
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_STATUSBAR);
                     } catch (Exception e) {}
                     break;
                 case MESSAGE_APPLY_FRAMEWORK:
                     try {
-                        fixOwnerPermissions(new File(THEME_DIR + "/framework-res"));
                         notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
                     } catch (Exception e) {}
                     break;
@@ -620,13 +592,11 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     break;
                 case MESSAGE_APPLY_MMS:
                     try {
-                        fixOwnerPermissions(new File(THEME_DIR + "/com.android.mms"));
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_MMS);
                     } catch (Exception e) {}
                     break;
                 case MESSAGE_APPLY_FONT:
                     try {
-                        fixOwnerPermissions(new File(FONTS_DIR));
                         // now notifiy activity manager of the configuration change
                         notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
 
@@ -636,7 +606,6 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     break;
                 case MESSAGE_APPLY_FONT_REBOOT:
                     try {
-                        fixOwnerPermissions(new File(FONTS_DIR));
                         reboot();
                     } catch (Exception e) {}
                     break;
