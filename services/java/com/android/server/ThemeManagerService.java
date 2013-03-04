@@ -553,8 +553,11 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 case MESSAGE_REMOVE_THEME_APPLY:
                     try {
                         removeCurrentTheme();
+                        if (mRemoveFonts)
+                            reboot();
                         // now notifiy activity manager of the configuration change
-                        notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
+                        else
+                            notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
                     } catch (IOException e) {}
                     break;
                 case MESSAGE_APPLY_ICONS:
