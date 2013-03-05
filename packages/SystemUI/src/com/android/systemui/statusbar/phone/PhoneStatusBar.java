@@ -550,12 +550,14 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Animation togglesOutAnimation = AnimationUtils.loadAnimation(mContext, R.anim.toggles_page_out);
                     mPreviousTab.setAnimation(togglesOutAnimation);
                     mCurrentTab.setAnimation(notificationsInAnimation);
+                    mSettingsButton.setImageResource(R.drawable.ic_notify_quicksettings);
                     if (mHasFlipSettings) {
                         if (mFlipSettingsView.getVisibility() == View.VISIBLE) {
                             flipToNotifications();
                         }
                     }
                 } else {
+                    mSettingsButton.setImageResource(R.drawable.ic_notify_settings);
                     Animation notificationsOutAnimation = AnimationUtils.loadAnimation(mContext, R.anim.notifications_page_out);
                     Animation togglesInAnimation = AnimationUtils.loadAnimation(mContext, R.anim.toggles_page_in);
                     mPreviousTab.setAnimation(notificationsOutAnimation);
@@ -2804,7 +2806,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private final View.OnClickListener mSettingsButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (mHasSettingsPanel) {
+            if (mHasSettingsPanel && mTabHost.getCurrentTab() == 0) {
                 animateExpandSettingsPanel();
             } else {
                 startActivityDismissingKeyguard(
