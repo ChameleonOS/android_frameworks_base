@@ -515,7 +515,7 @@ public class StatusBarToggles extends LinearLayout {
     public void updateVisibility() {
         // now check if we need to display the widget still
         boolean displayPowerWidget = Settings.System.getInt(mContext.getContentResolver(),
-                   Settings.System.EXPANDED_VIEW_WIDGET, 1) == 1;
+                   Settings.System.TOGGLES_TYPE, 0) != 0;
         if(!displayPowerWidget) {
             setVisibility(View.GONE);
         } else {
