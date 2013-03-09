@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import android.annotation.CosHook;
 import android.content.pm.ApplicationInfo;
 
 import java.util.HashSet;
@@ -25,19 +26,34 @@ class GrantedPermissions {
 
     HashSet<String> grantedPermissions = new HashSet<String>();
 
+    @CosHook(CosHook.CosHookType.NEW_FIELD)
+    HashSet<String> revokedPermissions = new HashSet<String>();
+
+    @CosHook(CosHook.CosHookType.NEW_FIELD)
+    HashSet<String> effectivePermissions = new HashSet<String>();
+
     int[] gids;
+
+    @CosHook(CosHook.CosHookType.NEW_FIELD)
+    int[] revokedGids;
 
     GrantedPermissions(int pkgFlags) {
         setFlags(pkgFlags);
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     @SuppressWarnings("unchecked")
     GrantedPermissions(GrantedPermissions base) {
         pkgFlags = base.pkgFlags;
         grantedPermissions = (HashSet<String>) base.grantedPermissions.clone();
+        revokedPermissions = (HashSet<String>) base.revokedPermissions.clone();
+        effectivePermissions = (HashSet<String>) base.effectivePermissions.clone();
 
         if (base.gids != null) {
             gids = base.gids.clone();
+        }
+        if (base.revokedGids != null) {
+            revokedGids = base.revokedGids.clone();
         }
     }
 

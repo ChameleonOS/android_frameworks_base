@@ -4872,6 +4872,8 @@ public final class Settings {
          */
         public static final String KILL_APP_LONGPRESS_BACK = "kill_app_longpress_back";
 
+        public static final String ENABLE_PERMISSIONS_MANAGEMENT = "enable_permissions_management";
+
         /**
          * This are the settings to be backed up.
          *
