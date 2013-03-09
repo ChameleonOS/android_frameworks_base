@@ -69,7 +69,7 @@ public class SoundButton extends PowerButton {
                 mState = STATE_DISABLED;
                 break;
             case 1:
-                mIcon = R.drawable.stat_vibrate_off;
+                mIcon = R.drawable.stat_vibrate_on;
                 mState = STATE_DISABLED;
                 break;
             case 2:
