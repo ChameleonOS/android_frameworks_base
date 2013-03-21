@@ -565,7 +565,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mCompatFrame.scale(mInvGlobalScale);
         }
 
-        if (mIsWallpaper && (fw != frame.width() || fh != frame.height())) {
+        if (mIsWallpaper) {
             final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
             mService.updateWallpaperOffsetLocked(this, displayInfo.appWidth, displayInfo.appHeight,
                     false);

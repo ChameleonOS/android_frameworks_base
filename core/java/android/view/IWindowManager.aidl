@@ -315,4 +315,9 @@ interface IWindowManager
      * Returns true when the navigation bar is, or should be, hidden because of expanded desktop.
      */
     boolean shouldHideNavbar();
+
+    /**
+     * Update the application display metrics
+     */
+    void updateDisplayMetrics();
 }
