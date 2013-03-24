@@ -5323,7 +5323,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean shouldHideStatusBar() {
-        return  mTopIsFullscreen || 
+        return  mForceStatusBarFromUI || mTopIsFullscreen || 
                 Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1;
     }
