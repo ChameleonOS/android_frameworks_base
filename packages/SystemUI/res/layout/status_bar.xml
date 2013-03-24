@@ -23,13 +23,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/status_bar"
-    android:background="@drawable/status_bar_background"
+    android:background="@drawable/status_bar_background_transparent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
     android:fitsSystemWindows="true"
     >
+
+    <!-- This view holds the actual background seen in the status bar -->
+    <!-- Themers only need to modify status_bar_background.9.png -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/status_bar_background" />
 
     <ImageView
         android:id="@+id/notification_lights_out"

@@ -1049,6 +1049,9 @@ public class TabletStatusBar extends BaseStatusBar implements
         animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
+    public void opaqueStatusBar(boolean opaque) {
+    }
+
     public void animateCollapsePanels(int flags) {
         if ((flags & CommandQueue.FLAG_EXCLUDE_NOTIFICATION_PANEL) == 0) {
             mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PANEL);

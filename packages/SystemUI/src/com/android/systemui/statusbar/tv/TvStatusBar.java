@@ -145,4 +145,8 @@ public class TvStatusBar extends BaseStatusBar {
     @Override
     public void animateExpandSettingsPanel() {
     }
+
+    @Override
+    public void opaqueStatusBar(boolean opaque) {
+    }
 }

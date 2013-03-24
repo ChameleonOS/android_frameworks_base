@@ -152,6 +152,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
+    public void opaqueStatusBar(boolean opaque) {
+        if (mBar != null) {
+            try {
+                mBar.opaqueStatusBar(opaque);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
     public void disable(int what, IBinder token, String pkg) {
         disableInternal(mCurrentUserId, what, token, pkg);
     }

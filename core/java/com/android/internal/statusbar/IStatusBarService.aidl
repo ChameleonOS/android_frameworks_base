@@ -35,6 +35,9 @@ interface IStatusBarService
     void expandSettingsPanel();
     void setCurrentUser(int newUserId);
 
+    // added for ChameleonOS transparent status bar compatibility
+    void opaqueStatusBar(boolean opaque);
+
     // ---- Methods below are for use by the status bar policy services ----
     // You need the STATUS_BAR_SERVICE permission
     void registerStatusBar(IStatusBar callbacks, out StatusBarIconList iconList,

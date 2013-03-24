@@ -38,5 +38,8 @@ oneway interface IStatusBar
     void toggleRecentApps();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
+
+    // added for ChameleonOS transparent status bar compatibility
+    void opaqueStatusBar(boolean opaque);
 }
 

@@ -3582,6 +3582,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 topIsFullscreen = (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0
                         || (mLastSystemUiFlags & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
+                final boolean allowTransparency = 
+                        (lp.flags & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0
+                        || topIsFullscreen || 
+                        (Settings.System.getInt(mContext.getContentResolver(),
+                         Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1 &&
+                         Settings.System.getInt(mContext.getContentResolver(),
+                         Settings.System.EXPANDED_DESKTOP_STYLE, 0) == 2);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                    try {
+                        IStatusBarService statusbar = getStatusBarService();
+                        if (statusbar != null) {
+                            statusbar.opaqueStatusBar(!allowTransparency);
+                        }
+                    } catch (RemoteException ex) {
+                    }
+                }});
                 // The subtle difference between the window for mTopFullscreenOpaqueWindowState
                 // and mTopIsFullscreen is that that mTopIsFullscreen is set only if the window
                 // has the FLAG_FULLSCREEN set.  Not sure if there is another way that to be the

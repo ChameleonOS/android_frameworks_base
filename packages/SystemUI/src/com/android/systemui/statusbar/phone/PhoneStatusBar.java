@@ -1723,6 +1723,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
     }
 
+    public void opaqueStatusBar(boolean opaque) {
+        mStatusBarView.setBackgroundResource(opaque ? 
+                R.drawable.status_bar_background_opaque :
+                R.drawable.status_bar_background_transparent);
+    }
+
     @Override
     public void animateCollapsePanels(int flags) {
         if (SPEW) {
