@@ -2876,7 +2876,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 // do not load on boot (like status_bar_background or notification_panel_bg)
                 IThemeManagerService ts = IThemeManagerService.Stub.asInterface(ServiceManager.getService("ThemeService"));
                 try {
-                    ts.applyThemeSystemUI();
+                    ts.updateSystemUI();
                 } catch (Exception e) {}
             }
             else if (ACTION_STATUSBAR_HIDE.equals(action)) {

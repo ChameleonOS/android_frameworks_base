@@ -19,31 +19,34 @@ package android.content.res;
 /** {@hide} */
 interface IThemeManagerService
 {
-    void applyTheme(String themeURI);
+    void applyTheme(String themeURI, boolean applyFont, boolean scaleBoot);
     void removeTheme(boolean removeFonts);
     void removeThemeAndApply(boolean removeFonts);
     void applyInstalledTheme();
     void applyInstalledThemeReboot();
-    void applyThemeIcons();
-    void applyThemeWallpaper();
-    void applyThemeSystemUI();
-    void applyThemeFramework();
-    void applyThemeRingtones();
-    void applyThemeLockscreen();
-    void applyThemeBootanimation();
-    void applyThemeMms();
-    void applyThemeFont();
-    void applyThemeFontReboot();
+    void applyThemeIcons(String themeURI);
+    void applyThemeWallpaper(String themeURI);
+    void applyThemeSystemUI(String themeURI);
+    void applyThemeFramework(String themeURI);
+    void applyThemeRingtone(String themeURI);
+    void applyThemeLockscreen(String themeURI);
+    void applyThemeBootanimation(String themeURI, boolean scale);
+    void applyThemeMms(String themeURI);
+    void applyThemeFont(String themeURI);
+    void applyThemeFontReboot(String themeURI);
+    void applyThemeContacts(String themeURI);
+    void updateSystemUI();
 
     void resetThemeIcons();
     void resetThemeWallpaper();
     void resetThemeSystemUI();
     void resetThemeFramework();
-    void resetThemeRingtones();
+    void resetThemeRingtone();
     void resetThemeLockscreen();
     void resetThemeBootanimation();
     void resetThemeMms();
     void resetThemeFont();
     void resetThemeFontReboot();
+    void resetThemeContacts();
 }
 
