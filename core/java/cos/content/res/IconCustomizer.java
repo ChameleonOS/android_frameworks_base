@@ -67,6 +67,7 @@ public class IconCustomizer
     public static final int sCustomizedIconWidth = scalePixel(90);
     private static Boolean sExcludeAll;
     private static Set<String> sExcludes;
+    private static Map<String, String> sIconMapping;
     private static final int sIconWidth = scalePixel(72);
     private static final int sIconHeight = scalePixel(72);
     private static final Rect sOldBounds = new Rect();
@@ -80,6 +81,27 @@ public class IconCustomizer
         sCache = new HashMap();
         i = !(SystemProperties.getInt("sys.ui.app-icon-background", 1) == 1);
         sExcludeAll = Boolean.valueOf(i);
+        sIconMapping = new HashMap();
+        sIconMapping.put("com.android.contacts.activities.TwelveKeyDialer.png", "com.android.contacts.TwelveKeyDialer.png");
+        sIconMapping.put("com.android.contacts.activities.DialtactsActivity.png", "com.android.phone.png");
+        sIconMapping.put("com.miui.weather2.png", "com.miui.weather.png");
+        sIconMapping.put("com.miui.gallery.png", "com.android.gallery.png");
+        sIconMapping.put("com.android.gallery3d.png", "com.cooliris.media.png");
+        sIconMapping.put("com.xiaomi.market.png", "com.miui.supermarket.png");
+        sIconMapping.put("com.wali.miui.networkassistant.png", "com.android.monitor.png");
+        sIconMapping.put("com.android.camera.CameraEntry.png", "com.miui.camera.png");
+        sIconMapping.put("com.htc.album.png", "com.miui.gallery.png");
+        sIconMapping.put("com.htc.fm.activity.FMRadioMain.png", "com.miui.fmradio.png");
+        sIconMapping.put("com.htc.fm.FMRadio.png", "com.miui.fmradio.png");
+        sIconMapping.put("com.sec.android.app.camera.Camera.png", "com.miui.camera.png");
+        sIconMapping.put("com.sec.android.app.fm.png", "com.miui.fmradio.png");
+        sIconMapping.put("com.android.hwcamera.png", "com.miui.camera.png");
+        sIconMapping.put("com.huawei.android.FMRadio.png", "com.miui.fmradio.png");
+        sIconMapping.put("com.sonyericsson.android.camera.png", "com.miui.camera.png");
+        sIconMapping.put("com.sonyericsson.fmradio.png", "com.miui.fmradio.png");
+        sIconMapping.put("com.motorola.Camera.Camera.png", "com.miui.camera.png");
+        sIconMapping.put("com.lge.camera.png", "com.miui.camera.png");
+        sIconMapping.put("com.oppo.camera.OppoCamera.png", "com.miui.camera.png");
     }
 
     private static int RGBToColor(int[] rgb) {
@@ -282,6 +304,13 @@ public class IconCustomizer
         Bitmap localBitmap = getThemeIcon(fileName);
         if (localBitmap == null)
         {
+            String str2 = (String)sIconMapping.get(fileName);
+            if (str2 != null) {
+                localBitmap = getThemeIcon(str2);
+            } 
+        } 
+        if (localBitmap == null)
+        {
             String str1 = "/data/system/customized_icons/" + fileName;
             File localFile = new File(str1);
             if (localFile.exists())
@@ -300,7 +329,12 @@ public class IconCustomizer
         if (className == null) {
 			fileName = String.format("%s.png", packageName);
 		} else if (className.startsWith(packageName)) {
-  			fileName = String.format("%s.png", packageName);
+			fileName = String.format("%s.png", className);
+            String mapped = (String)sIconMapping.get(fileName);
+            if (mapped != null)
+                fileName = mapped;
+            else
+    			fileName = String.format("%s.png", packageName);
 		} else {
 			fileName = String.format("%s@%s.png", className, packageName);
 		}
@@ -391,6 +425,20 @@ public class IconCustomizer
               sExcludes.add("com.android.stk");
               sExcludes.add("com.android.thememanager");
               sExcludes.add("com.android.updater");
+              sExcludes.add("com.miui.antispam");
+              sExcludes.add("com.miui.backup");
+              sExcludes.add("com.miui.bugreport");
+              sExcludes.add("com.miui.camera");
+              sExcludes.add("com.miui.cit");
+              sExcludes.add("com.miui.compass");
+              sExcludes.add("com.miui.fmradio");
+              sExcludes.add("com.miui.lockv4");
+              sExcludes.add("com.miui.notes");
+              sExcludes.add("com.miui.player");
+              sExcludes.add("com.xiaomi.market");
+              sExcludes.add("com.miui.uac");
+              sExcludes.add("com.miui.userbook");
+              sExcludes.add("com.miui.weather2");
           }
       }
 
