@@ -87,6 +87,15 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         createFontsDir();
     }
 
+    public void applyDefaultTheme() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_THEME_SERVICE, null);
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_APPLY_DEFAULT;
+        msg.arg1 = 0;
+        mHandler.sendMessage(msg);
+    }
+
     /**
      * Apply the theme specified by the URI string provided
      */
@@ -359,6 +368,11 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             if(dir.mkdir()) {
                 run(String.format("invoke-as -u root chmod 0775 %s", THEME_DIR));
             }
+
+            Message msg = Message.obtain();
+            msg.what = ThemeWorkerHandler.MESSAGE_APPLY_DEFAULT;
+            msg.arg1 = 1;
+            mHandler.sendMessage(msg);
         }
     }
 
@@ -746,6 +760,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_APPLY_FONT = 13;
         private static final int MESSAGE_APPLY_FONT_REBOOT = 14;
         private static final int MESSAGE_APPLY_CONTACTS = 15;
+        private static final int MESSAGE_APPLY_DEFAULT = 16;
         private static final int MESSAGE_RESET_ICONS = 20;
         private static final int MESSAGE_RESET_WALLPAPER = 21;
         private static final int MESSAGE_RESET_SYSTEMUI = 22;
@@ -838,6 +853,49 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         }
                     } catch (Exception e) {
                         notifyThemeNotApplied();
+                    }
+                    break;
+                case MESSAGE_APPLY_DEFAULT:
+                    boolean isSystemCall = msg.arg1 == 1;
+                    try {
+                        // clear out the old theme first
+                        removeCurrentTheme();
+
+                        ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream("/system/media/default.ctz")));
+                        ZipEntry ze = null;
+                        while ((ze = zip.getNextEntry()) != null) {
+                            if (ze.isDirectory()) {
+                                // Assume directories are stored parents first then children
+                                File dir = new File("/data/system/theme/" + ze.getName());
+                                dir.mkdir();
+                                dir.setReadable(true, false);
+                                dir.setWritable(true, false);
+                                dir.setExecutable(true, false);
+                                zip.closeEntry();
+                                continue;
+                            }
+                                        
+                            copyInputStream(zip,
+                                    new BufferedOutputStream(
+                                    new FileOutputStream("/data/system/theme/" + ze.getName())));
+                            (new File("/data/system/theme/" + ze.getName())).setReadable(true, false);
+                            zip.closeEntry();
+                        }
+            
+                        zip.close();
+                        setBootanimation();
+                        setThemeWallpaper();
+
+                        if (!isSystemCall) {
+                            // now notifiy activity manager of the configuration change
+                            notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
+                        }
+
+                        // restart launcher
+                        killProcess(ExtraConfiguration.LAUNCHER_PKG_NAME);
+                    } catch (Exception e) {
+                        if (!isSystemCall) 
+                            notifyThemeNotApplied();
                     }
                     break;
                 case MESSAGE_APPLY_CURRENT:
