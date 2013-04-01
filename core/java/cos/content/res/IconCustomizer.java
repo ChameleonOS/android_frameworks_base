@@ -84,24 +84,6 @@ public class IconCustomizer
         sIconMapping = new HashMap();
         sIconMapping.put("com.android.contacts.activities.TwelveKeyDialer.png", "com.android.contacts.TwelveKeyDialer.png");
         sIconMapping.put("com.android.contacts.activities.DialtactsActivity.png", "com.android.phone.png");
-        sIconMapping.put("com.miui.weather2.png", "com.miui.weather.png");
-        sIconMapping.put("com.miui.gallery.png", "com.android.gallery.png");
-        sIconMapping.put("com.android.gallery3d.png", "com.cooliris.media.png");
-        sIconMapping.put("com.xiaomi.market.png", "com.miui.supermarket.png");
-        sIconMapping.put("com.wali.miui.networkassistant.png", "com.android.monitor.png");
-        sIconMapping.put("com.android.camera.CameraEntry.png", "com.miui.camera.png");
-        sIconMapping.put("com.htc.album.png", "com.miui.gallery.png");
-        sIconMapping.put("com.htc.fm.activity.FMRadioMain.png", "com.miui.fmradio.png");
-        sIconMapping.put("com.htc.fm.FMRadio.png", "com.miui.fmradio.png");
-        sIconMapping.put("com.sec.android.app.camera.Camera.png", "com.miui.camera.png");
-        sIconMapping.put("com.sec.android.app.fm.png", "com.miui.fmradio.png");
-        sIconMapping.put("com.android.hwcamera.png", "com.miui.camera.png");
-        sIconMapping.put("com.huawei.android.FMRadio.png", "com.miui.fmradio.png");
-        sIconMapping.put("com.sonyericsson.android.camera.png", "com.miui.camera.png");
-        sIconMapping.put("com.sonyericsson.fmradio.png", "com.miui.fmradio.png");
-        sIconMapping.put("com.motorola.Camera.Camera.png", "com.miui.camera.png");
-        sIconMapping.put("com.lge.camera.png", "com.miui.camera.png");
-        sIconMapping.put("com.oppo.camera.OppoCamera.png", "com.miui.camera.png");
     }
 
     private static int RGBToColor(int[] rgb) {
