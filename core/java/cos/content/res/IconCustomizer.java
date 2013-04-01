@@ -129,7 +129,7 @@ public class IconCustomizer
         Bitmap background = getCachedThemeIcon("icon_background.png");
         if (background != null) {
             if (DBG) Log.d(TAG, "composeIcon() drawing background");
-            drawBackground(canvas, background, baseWidth, baseHeight, basePixels);
+            canvas.drawBitmap(background, 0, 0, null);
             isComposed = true;
         }
 
@@ -196,80 +196,6 @@ public class IconCustomizer
         }
     }
 
-    /* TODO: This is a mess and should be analyzed to understand what it really does */
-    private static void drawBackground(Canvas canvas, Bitmap background, int baseWidth, int baseHeight, int[] basePixels) {
-        int sum = 0;
-        int[] sumRGB = new int[3];
-        sumRGB[0] = 0;
-        sumRGB[1] = 0;
-        sumRGB[2] = 0;
-        for (int j = -1 + baseWidth * baseHeight; j >= 0; j--)
-        {
-            int i8 = 0xFFFFFF & basePixels[j];
-            if (i8 > 0)
-            {
-                int[] arrayOfInt6 = colorToRGB(i8);
-                sumRGB[0] += arrayOfInt6[0];
-                sumRGB[1] += arrayOfInt6[1];
-                sumRGB[2] += arrayOfInt6[2];
-                sum++;
-            } 
-        } 
-        if (sum > 0)
-        {
-            sumRGB[0] /= sum;
-            sumRGB[1] /= sum;
-            sumRGB[2] /= sum;
-        } 
-        int color = RGBToColor(sumRGB);
-        if (getSaturation(color) < 0.02D) {}
-        int i3 = background.getWidth();;
-        int i4 = background.getHeight();
-        int[] arrayOfInt5 = new int[i3 * i4];
-        float f;
-        int i2 = 0;
-        for (int z = 0;z < 2; z++)
-        {
-            int[] arrayOfInt4 = colorToRGB(i2);
-            background.getPixels(arrayOfInt5, 0, i3, 0, 0, i3, i4);
-            for (int i5 = -1 + i3 * i4; i5 >= 0; i5--)
-            {
-                int i6 = arrayOfInt5[i5];
-                arrayOfInt5[i5] = (0xFF000000 & i6 | 0xFF0000 & (0xFF0000 & i6) * arrayOfInt4[0] >>> 8 | 0xFF00 & (0xFF00 & i6) * arrayOfInt4[1] >>> 8 | 0xFF & (i6 & 0xFF) * arrayOfInt4[2] >>> 8);
-            } 
-            int[][] arrayOfInt = new int[2][];
-            int[] arrayOfInt2 = new int[2];
-            arrayOfInt2[0] = 100;
-            arrayOfInt2[1] = 110;
-            arrayOfInt[0] = arrayOfInt2;
-            int[] arrayOfInt3 = new int[2];
-            arrayOfInt3[0] = 190;
-            arrayOfInt3[1] = 275;
-            arrayOfInt[1] = arrayOfInt3;
-            int m = 0;
-            for (int n = 0; n < arrayOfInt.length; n++) {
-                m += arrayOfInt[n][1] - arrayOfInt[n][0];
-            } 
-            f = getHue(color) * m / 360.0F;
-            int i1 = 0;
-            while (i1 < arrayOfInt.length)
-            {
-                int i7 = arrayOfInt[i1][1] - arrayOfInt[i1][0];
-                if (f > i7)
-                {
-                    f -= i7;
-                    i1++;
-                }
-                else
-                {
-                    f += arrayOfInt[i1][0];
-                } 
-            } 
-            i2 = setSaturation(setValue(setHue(color, f), 0.6F), 0.4F);
-        } 
-        canvas.drawBitmap(arrayOfInt5, 0, i3, 0, 0, i3, i4, true, null);
-    }
- 
     private static Bitmap drawableToBitmap(Drawable drawable) {
         Canvas canvas = sCanvas;
         int i = sIconWidth;
