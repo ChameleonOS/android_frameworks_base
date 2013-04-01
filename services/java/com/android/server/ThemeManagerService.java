@@ -887,7 +887,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 case MESSAGE_APPLY_WALLPAPER:
                     themeURI = (String)msg.obj;
                     try {
-                        extractDirectoryFromTheme(themeURI, "wallpaper", THEME_DIR);
+                        extractDirectoryFromTheme(themeURI, "wallpaper/", THEME_DIR);
                         setThemeWallpaper();
                         notifyThemeApplied();
                     } catch (Exception e) {
@@ -932,7 +932,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     themeURI = (String)msg.obj;
                     boolean scaleBoot = msg.arg1 == 1;
                     try {
-                        extractBootAnimationFromTheme(themeURI, "boots", THEME_DIR, scaleBoot);
+                        extractBootAnimationFromTheme(themeURI, "boots/", THEME_DIR, scaleBoot);
                         setBootanimation();
                         notifyThemeApplied();
                     } catch (Exception e) {
@@ -952,7 +952,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 case MESSAGE_APPLY_FONT:
                     try {
                         themeURI = (String)msg.obj;
-                        extractDirectoryFromTheme(themeURI, "fonts", "/data/");
+                        extractDirectoryFromTheme(themeURI, "fonts/", "/data/");
                         removeBadFonts();
                         // now notifiy activity manager of the configuration change
                         notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
@@ -966,7 +966,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 case MESSAGE_APPLY_FONT_REBOOT:
                     try {
                         themeURI = (String)msg.obj;
-                        extractDirectoryFromTheme(themeURI, "fonts", "/data/");
+                        extractDirectoryFromTheme(themeURI, "fonts/", "/data/");
                         removeBadFonts();
                         notifyThemeApplied();
                         reboot();
