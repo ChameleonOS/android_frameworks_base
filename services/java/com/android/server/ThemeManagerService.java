@@ -571,9 +571,8 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         Uri uri = Uri.parse(themeUri);
         ParcelFileDescriptor file = null;
         file = mContext.getContentResolver().openFileDescriptor(uri, "r");
-        FileDescriptor fd = file.getFileDescriptor();
 
-        return new FileInputStream(fd);
+        return new ParcelFileDescriptor.AutoCloseInputStream(file);
     }
 
     private void extractFileFromTheme(String themeUri, String file, String dstPath)
