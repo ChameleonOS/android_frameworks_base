@@ -776,7 +776,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
 
         @Override
         public void handleMessage(Message msg) {
-            String themeURI;
+            String themeURI = "";
             boolean done = false;
             switch(msg.what) {
                 case MESSAGE_APPLY:
@@ -845,9 +845,8 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
 
                                 // restart launcher
                                 killProcess(ExtraConfiguration.LAUNCHER_PKG_NAME);
-                            } catch (FileNotFoundException e) {
-                                notifyThemeNotApplied();
-                            } catch (IOException e) {
+                            } catch (Exception e) {
+                                Log.e(TAG, "applyTheme failed " +themeURI, e);
                                 notifyThemeNotApplied();
                             }
                         }
@@ -894,6 +893,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         // restart launcher
                         killProcess(ExtraConfiguration.LAUNCHER_PKG_NAME);
                     } catch (Exception e) {
+                        Log.e(TAG, "applyDefaultTheme failed " +themeURI, e);
                         if (!isSystemCall) 
                             notifyThemeNotApplied();
                     }
@@ -939,6 +939,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         }
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_ICON);
                     } catch (Exception e) {
+                        Log.e(TAG, "applyThemeIcons failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -949,6 +950,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         setThemeWallpaper();
                         notifyThemeApplied();
                     } catch (Exception e) {
+                        Log.e(TAG, "applyThemeWallpaper failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -958,6 +960,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         extractFileFromTheme(themeURI, "com.android.systemui", THEME_DIR);
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_STATUSBAR);
                     } catch (Exception e) {
+                        Log.e(TAG, "applyThemeSystemUI failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -967,6 +970,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         extractFileFromTheme(themeURI, "framework-res", THEME_DIR);
                         notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
                     } catch (Exception e) {
+                        Log.e(TAG, "applyThemeFramework failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -983,6 +987,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         (new File(THEME_DIR + fileName)).setReadable(true, false);
                         notifyThemeApplied();
                     } catch (Exception e) {
+                        Log.e(TAG, "applyThemeRingtone failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -994,7 +999,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         setBootanimation();
                         notifyThemeApplied();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "applyThemeBootanimation failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -1004,6 +1009,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         extractFileFromTheme(themeURI, "com.android.mms", THEME_DIR);
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_MMS);
                     } catch (Exception e) {
+                        Log.e(TAG, "applyThemeMms failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -1018,6 +1024,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         // restart launcher
                         killProcess(ExtraConfiguration.LAUNCHER_PKG_NAME);
                     } catch (Exception e) {
+                        Log.e(TAG, "applyThemeFont failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -1029,6 +1036,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         notifyThemeApplied();
                         reboot();
                     } catch (Exception e) {
+                        Log.e(TAG, "applyThemeFontReboot failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -1038,6 +1046,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         extractFileFromTheme(themeURI, "com.android.contacts", THEME_DIR);
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_CONTACT);
                     } catch (Exception e) {
+                        Log.e(TAG, "applyThemeContacts failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
