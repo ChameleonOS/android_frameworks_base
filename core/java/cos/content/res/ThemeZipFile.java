@@ -43,7 +43,7 @@ public final class ThemeZipFile
     private static final String ALTERNATIVE_THEME_VALUE_FILE = "theme_values%s.xml";
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
-    static boolean DBG = false;
+    static boolean DBG = ThemeResources.DEBUG_THEMES;
     static String TAG = "ThemeZipFile";
     private static final String TAG_BOOLEAN = "bool";
     private static final String TAG_COLOR = "color";

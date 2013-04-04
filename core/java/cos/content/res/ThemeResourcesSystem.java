@@ -26,7 +26,7 @@ import java.io.InputStream;
 
 public final class ThemeResourcesSystem extends ThemeResources
 {
-    private static final boolean DBG = false;
+    private static final boolean DBG = ThemeResources.DEBUG_THEMES;
     private static final String TAG = "ThemeResourcesSystem";
     private static ThemeResources sIcons;
     private static ThemeResources sLockscreen;

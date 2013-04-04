@@ -53,7 +53,7 @@ import cos.util.DisplayUtils;
 
 public class IconCustomizer
 {
-    private static final boolean DBG = false;
+    private static final boolean DBG = ThemeResources.DEBUG_THEMES;
     private static final String TAG = "IconCustomizer";
 
     private static final int sAlphaShift = 24;

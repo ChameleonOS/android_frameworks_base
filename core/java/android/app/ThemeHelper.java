@@ -40,7 +40,7 @@ import cos.content.res.ThemeResourcesSystem;
 import java.io.File;
 
 public class ThemeHelper {
-    private static final boolean DBG = true;
+    private static final boolean DBG = ThemeResources.DEBUG_THEMES;
 
     // TODO: change out framework-miui-res.apk for our own if needed
     public static final String MIUI_RES_PATH = "/system/framework/framework-miui-res.apk";
