@@ -38,25 +38,16 @@ public class ThemeResources
     public static final String FRAMEWORK_NAME = "framework-res";
     public static final String FRAMEWORK_PACKAGE = "android";
     public static final String ICONS_NAME = "icons";
-    public static final String LANGUAGE_THEME_PATH = "/data/system/language/";
     public static final String LOCKSCREEN_NAME = "lockscreen";
     public static final String LOCKSCREEN_WALLPAPER_NAME = "lock_wallpaper";
 
-    // TODO: we probably won't be needing this once we get settled in
-    public static final String MIUI_NAME = "framework-miui-res";
-
-    // TODO: we probably won't be needing this once we get settled in
-    public static final String MIUI_PACKAGE = "miui";
-
-    public static final String SYSTEM_LANGUAGE_THEME_PATH = "/system/language/";
     public static final String SYSTEM_THEME_PATH = "/system/media/theme/default/";
     public static final String THEME_PATH = "/data/system/theme/";
     public static final MetaData[] THEME_PATHS = {
-            new MetaData(SYSTEM_THEME_PATH, true, true, true), 
             new MetaData(THEME_PATH, true, true, true) };
 
     public static final String WALLPAPER_NAME = "wallpaper";
-    public static final String sAppliedLockstyleConfigPath = "/data/system/theme/" + File.separator + "config.config";
+    public static final String sAppliedLockstyleConfigPath = THEME_PATH + File.separator + "config.config";
     private static Drawable sLockWallpaperCache;
     private static long sLockWallpaperModifiedTime;
     private static ThemeResourcesSystem sSystem;

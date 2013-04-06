@@ -117,7 +117,6 @@ public final class ThemeZipFile
     }
 
     private static final String getPackageName(String componentName) {
-        // TODO: change out miui related stuff when ready
         if (!"framework-res".equals(componentName) && !"icons".equals(componentName)) {
             if ("framework-miui-res".equals(componentName) || "lockscreen".equals(componentName))
                 componentName = "miui";

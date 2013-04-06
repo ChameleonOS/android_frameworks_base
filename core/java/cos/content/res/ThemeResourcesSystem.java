@@ -31,8 +31,6 @@ public final class ThemeResourcesSystem extends ThemeResources
     private static ThemeResources sIcons;
     private static ThemeResources sLockscreen;
 
-    // TODO: change this variable to match our project
-    private static ThemeResources sMiui;
     private static ThemeResources sSystemUI;
     protected String mThemePath;
 
@@ -68,8 +66,6 @@ public final class ThemeResourcesSystem extends ThemeResources
     public static ThemeResourcesSystem getTopLevelThemeResources(Resources resources) {
         sIcons = ThemeResources.getTopLevelThemeResources(resources, "icons");
         sLockscreen = ThemeResources.getTopLevelThemeResources(resources, "lockscreen");
-        // TODO: replace framework-miui-res once we figure out how we will be implementing themes
-        sMiui = ThemeResources.getTopLevelThemeResources(resources, "framework-miui-res");
         ThemeResourcesSystem themeresourcessystem = null;
         for(int i = 0; i < THEME_PATHS.length; i++) {
             themeresourcessystem = new ThemeResourcesSystem(themeresourcessystem, resources, THEME_PATHS[i]);
@@ -81,7 +77,6 @@ public final class ThemeResourcesSystem extends ThemeResources
     public boolean checkUpdate() {
         sIcons.checkUpdate();
         sLockscreen.checkUpdate();
-        sMiui.checkUpdate();
         if (sSystemUI != null)
             sSystemUI.checkUpdate();
         return super.checkUpdate();
@@ -141,8 +136,6 @@ public final class ThemeResourcesSystem extends ThemeResources
     public CharSequence getThemeCharSequence(int id) {
         CharSequence charsequence = sLockscreen.getThemeCharSequence(id);
         if(charsequence == null)
-            charsequence = sMiui.getThemeCharSequence(id);
-        if(charsequence == null)
             charsequence = getThemeCharSequenceInner(id);
         return charsequence;
     }
@@ -161,8 +154,6 @@ public final class ThemeResourcesSystem extends ThemeResources
     public Integer getThemeInt(int id) {
         Integer ret = sLockscreen.getThemeInt(id);
         if (ret == null)
-            ret = sMiui.getThemeInt(id);
-        if (ret == null)
             ret = getThemeIntInner(id);
         return ret;
     }
@@ -176,7 +167,7 @@ public final class ThemeResourcesSystem extends ThemeResources
     }
 
     public boolean hasValues() {
-        return (super.hasValues() || sLockscreen.hasValues() || sMiui.hasValues());
+        return (super.hasValues() || sLockscreen.hasValues());
     }
 
     public void resetIcons() {

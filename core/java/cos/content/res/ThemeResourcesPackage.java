@@ -71,9 +71,7 @@ public final class ThemeResourcesPackage extends ThemeResources
             if (info == null)
                 info = getSystem().getThemeFileStream(cookieType, fileName);
         } else if (2 == cookieType) {
-            info = getThemeFileStream("framework-miui-res/" + fileName);
-            if (info == null)
-                info = getSystem().getThemeFileStream(cookieType, fileName);
+            info = getSystem().getThemeFileStream(cookieType, fileName);
         } else
             info = getThemeFileStream(fileName);
         return info;
