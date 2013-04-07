@@ -1810,6 +1810,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         mNotificationPanel.expand();
+        try {
+            mWindowManagerService.showStatusBar();
+        } catch (RemoteException e) {
+        }
         if (mHasFlipSettings && mScrollView.getVisibility() != View.VISIBLE) {
             flipToNotifications();
         }
