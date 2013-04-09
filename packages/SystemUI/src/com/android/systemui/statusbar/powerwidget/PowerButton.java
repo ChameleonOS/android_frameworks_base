@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.AnimationDrawable;
 import android.graphics.PorterDuff.Mode;
 import android.net.Uri;
 import android.os.Handler;
@@ -53,6 +55,7 @@ public abstract class PowerButton {
     public static final String BUTTON_MEDIA_NEXT = "toggleMediaNext";
     public static final String BUTTON_LTE = "toggleLte";
     public static final String BUTTON_WIMAX = "toggleWimax";
+    public static final String BUTTON_MEDIA_SCAN = "toggleMediaScan";
     public static final String BUTTON_UNKNOWN = "unknown";
     private static final String SEPARATOR = "OV=I=XseparatorX=I=VO";
     private static final Mode MASK_MODE = Mode.SCREEN;
@@ -77,6 +80,7 @@ public abstract class PowerButton {
     public static final String NAME_BUTTON_MEDIA_NEXT = "Next";
     public static final String NAME_BUTTON_LTE = "Lte";
     public static final String NAME_BUTTON_WIMAX = "WiMAX";
+    public static final String NAME_BUTTON_MEDIA_SCAN = "Scan media";
     public static final String NAME_BUTTON_UNKNOWN = "unknown";
 
     protected int mIcon;
@@ -107,6 +111,12 @@ public abstract class PowerButton {
         public void handleMessage(Message msg) {
             if (mIconView != null) {
                 mIconView.setImageResource(mIcon);
+                // check if the drawable is an AnimationDrawable and start
+                // the animation if it is.  This allows for animated toggles.
+                Drawable d = mIconView.getDrawable();
+                if (d != null && d instanceof AnimationDrawable) {
+                    ((AnimationDrawable)d).start();
+                }
                 if (mShowLabel) {
                     switch (mState) {
                         case STATE_ENABLED:
