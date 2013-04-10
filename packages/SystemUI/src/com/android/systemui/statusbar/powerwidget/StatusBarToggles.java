@@ -134,6 +134,8 @@ public class StatusBarToggles extends LinearLayout {
             new Pair<String, Class<? extends PowerButton>>(PowerButton.NAME_BUTTON_WIMAX, WimaxButton.class));
         sPossibleButtons.put(PowerButton.BUTTON_LTE,
             new Pair<String, Class<? extends PowerButton>>(PowerButton.NAME_BUTTON_LTE, LTEButton.class));
+        sPossibleButtons.put(PowerButton.BUTTON_MEDIA_SCAN,
+            new Pair<String, Class<? extends PowerButton>>(PowerButton.NAME_BUTTON_MEDIA_SCAN, MediaScanButton.class));
     }
 
     // this is a list of our currently loaded buttons
@@ -465,6 +467,15 @@ public class StatusBarToggles extends LinearLayout {
                     filter.addAction(action);
                 }
             }
+
+            // cycle through these data schemes, and see if we need them
+            num = tmp.countDataSchemes();
+            for (int i = 0; i < num; i++) {
+                String scheme = tmp.getDataScheme(i);
+                if(!filter.hasDataScheme(scheme)) {
+                    filter.addDataScheme(scheme);
+                }
+            }
         }
 
         // return our merged filter
@@ -564,6 +575,7 @@ public class StatusBarToggles extends LinearLayout {
                 recreateButtonLayout();
             } else {
                 // handle the intent through our power buttons
+                Log.i(TAG, action);
                 for (PowerButton button : mButtons.values()) {
                     // call "onReceive" on those that matter
                     if (button.getBroadcastIntentFilter().hasAction(action)) {
