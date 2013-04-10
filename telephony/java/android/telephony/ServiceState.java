@@ -455,7 +455,6 @@ public class ServiceState implements Parcelable {
                 rtString = "LTE";
                 break;
             case RIL_RADIO_TECHNOLOGY_HSPAP:
-            case RIL_RADIO_TECHNOLOGY_DCHSPAP:
                 rtString = "HSPAP";
                 break;
             case RIL_RADIO_TECHNOLOGY_DCHSPAP:
@@ -692,7 +691,6 @@ public class ServiceState implements Parcelable {
         case ServiceState.RIL_RADIO_TECHNOLOGY_LTE:
             return TelephonyManager.NETWORK_TYPE_LTE;
         case ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP:
-        case ServiceState.RIL_RADIO_TECHNOLOGY_DCHSPAP:
             return TelephonyManager.NETWORK_TYPE_HSPAP;
         case ServiceState.RIL_RADIO_TECHNOLOGY_DCHSPAP:
             return TelephonyManager.NETWORK_TYPE_DCHSPAP;
