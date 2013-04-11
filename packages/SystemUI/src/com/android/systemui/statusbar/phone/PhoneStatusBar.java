@@ -1087,8 +1087,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         
         Configuration config = mContext.getResources().getConfiguration();
         boolean isPortrait = config.orientation == Configuration.ORIENTATION_PORTRAIT;
-        mNavbarTriggerPortrait.setVisibility(isPortrait ? View.VISIBLE : View.GONE);
-        mNavbarTriggerLandscape.setVisibility(isPortrait ? View.GONE : View.VISIBLE);
+        boolean isPhone = NavbarEditor.isDevicePhone(mContext);
+        mNavbarTriggerPortrait.setVisibility((isPortrait || !isPhone) ? View.VISIBLE : View.GONE);
+        mNavbarTriggerLandscape.setVisibility((isPortrait || !isPhone) ? View.GONE : View.VISIBLE);
     }
 
     private void notifyNavigationBarScreenOn(boolean screenOn) {
