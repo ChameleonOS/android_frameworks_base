@@ -62,7 +62,7 @@ public final class ThemeZipFile
     private SparseArray<Integer> mIntegers = new SparseArray();
     private long mLastModifyTime = -1L;
     private ThemeResources.MetaData mMetaData;
-    private String mPackageName;
+    public String mPackageName;
     private String mPath;
     private Resources mResources;
     private ZipFile mZipFile;
