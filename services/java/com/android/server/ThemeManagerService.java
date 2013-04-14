@@ -500,6 +500,14 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             if ((configChange & (ExtraConfiguration.THEME_FLAG_LAUNCHER | ExtraConfiguration.THEME_FLAG_ICON |
                     ExtraConfiguration.THEME_FLAG_FRAMEWORK)) != 0)
                 killProcess(ExtraConfiguration.LAUNCHER_PKG_NAME);
+            // restart mms if needed
+            if ((configChange & (ExtraConfiguration.THEME_FLAG_MMS |
+                    ExtraConfiguration.THEME_FLAG_FRAMEWORK)) != 0)
+                killProcess(ExtraConfiguration.MMS_PKG_NAME);
+            // restart contacts if needed
+            if ((configChange & (ExtraConfiguration.THEME_FLAG_CONTACT |
+                    ExtraConfiguration.THEME_FLAG_FRAMEWORK)) != 0)
+                killProcess(ExtraConfiguration.CONTACTS_PKG_NAME);
             notifyThemeApplied();
         } catch (Exception e) {
             notifyThemeNotApplied();
@@ -1043,6 +1051,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     try {
                         themeURI = (String)msg.obj;
                         extractFileFromTheme(themeURI, "com.android.contacts", THEME_DIR);
+                        extractFileFromTheme(themeURI, "com.android.phone", THEME_DIR);
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_CONTACT);
                     } catch (Exception e) {
                         Log.e(TAG, "applyThemeContacts failed " +themeURI, e);
@@ -1132,6 +1141,9 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 case MESSAGE_RESET_CONTACTS:
                     try {
                         File contacts = new File(THEME_DIR + "/com.android.contacts");
+                        if (contacts.exists())
+                            delete(contacts);
+                        contacts = new File(THEME_DIR + "/com.android.phone");
                         if (contacts.exists())
                             delete(contacts);
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_CONTACT);
