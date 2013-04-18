@@ -105,5 +105,8 @@
 
     <!-- configurable height dimension for the status bar trigger -->
     <dimen name="config_trigger_view_height">4dip</dimen>
+
+    <!-- configurable width dimension for the app sidebar trigger area -->
+    <dimen name="config_app_sidebar_trigger_width">10dip</dimen>
 </resources>
 

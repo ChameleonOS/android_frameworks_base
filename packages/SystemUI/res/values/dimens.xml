@@ -227,4 +227,6 @@
     <dimen name="status_bar_battery_cluster_text_margin">-1dip</dimen>
 
     <dimen name="wifi_combo_margin_right">-6dp</dimen>
+
+    <dimen name="app_sidebar_item_height">64dp</dimen>
 </resources>

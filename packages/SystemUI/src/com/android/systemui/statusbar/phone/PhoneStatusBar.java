@@ -96,6 +96,7 @@ import android.widget.TextView;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarNotification;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.AppSidebar;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.GestureRecorder;
@@ -193,6 +194,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     private TriggerView mStatusBarTrigger;
     private TriggerView mNavbarTriggerPortrait;
     private TriggerView mNavbarTriggerLandscape;
+
+    private AppSidebar mAppSidebar;
 
     private boolean mUseCenterClock = false;
 
@@ -633,6 +636,13 @@ public class PhoneStatusBar extends BaseStatusBar {
                         }
                     }
                 });
+
+        if (mRecreating) {
+            if (mAppSidebar != null)
+                mWindowManager.removeView(mAppSidebar);
+        }
+        mAppSidebar = (AppSidebar)View.inflate(context, R.layout.app_sidebar, null);
+        mWindowManager.addView(mAppSidebar, getAppSidebarLayoutParams());
 
         // figure out which pixel-format to use for the status bar.
         mPixelFormat = PixelFormat.OPAQUE;
@@ -1184,6 +1194,24 @@ public class PhoneStatusBar extends BaseStatusBar {
             lp.gravity = Gravity.RIGHT | Gravity.FILL_VERTICAL;
         }
         lp.setTitle("NavbarTriggerView");
+
+        return lp;
+    }
+
+    private WindowManager.LayoutParams getAppSidebarLayoutParams() {
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
+                0
+                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.TOP | Gravity.LEFT | Gravity.FILL_VERTICAL;
+        lp.setTitle("AppSidebar");
 
         return lp;
     }
