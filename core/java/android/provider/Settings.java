@@ -2539,11 +2539,18 @@ public final class Settings {
         public static final String APP_SIDEBAR_SORT_TYPE = "app_sidebar_sort_type";
 
         /**
-         * How to sort and order the items in the app sidebar
+         * User defined transparency level for sidebar
          *
          * @hide
          */
         public static final String APP_SIDEBAR_TRANSPARENCY = "app_sidebar_transparency";
+
+        /**
+         * Width and height of items in sidebar
+         *
+         * @hide
+         */
+        public static final String APP_SIDEBAR_ITEM_SIZE = "app_sidebar_item_size";
 
         /**
          * Quick Settings Panel Tiles to Use

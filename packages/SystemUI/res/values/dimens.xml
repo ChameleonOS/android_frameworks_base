@@ -228,5 +228,7 @@
 
     <dimen name="wifi_combo_margin_right">-6dp</dimen>
 
-    <dimen name="app_sidebar_item_height">64dp</dimen>
+    <dimen name="app_sidebar_item_size">60dp</dimen>
+
+    <dimen name="app_sidebar_item_padding">2dp</dimen>
 </resources>
