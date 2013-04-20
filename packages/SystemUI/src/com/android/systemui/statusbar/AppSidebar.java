@@ -99,9 +99,6 @@ public class AppSidebar extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_HIDE_APP_CONTAINER);
-        getContext().registerReceiver(mBroadcastReceiver, filter);
         if (DEBUG_LAYOUT)
             setBackgroundColor(0xffff0000);
         getInstalledAppsList();
