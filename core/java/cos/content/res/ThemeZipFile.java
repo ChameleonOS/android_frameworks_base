@@ -37,6 +37,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import static cos.content.res.ThemeResources.CHAOS_FRAMEWORK_PACKAGE;
+
 
 public final class ThemeZipFile
 {
@@ -62,7 +64,7 @@ public final class ThemeZipFile
     private SparseArray<Integer> mIntegers = new SparseArray();
     private long mLastModifyTime = -1L;
     private ThemeResources.MetaData mMetaData;
-    private String mPackageName;
+    public String mPackageName;
     private String mPath;
     private Resources mResources;
     private ZipFile mZipFile;
@@ -121,7 +123,7 @@ public final class ThemeZipFile
             if ("framework-miui-res".equals(componentName) || "lockscreen".equals(componentName))
                 componentName = "miui";
         } else {
-            componentName = "android";
+            componentName = CHAOS_FRAMEWORK_PACKAGE;
         }
 
         return componentName;
@@ -249,6 +251,12 @@ public final class ThemeZipFile
                                 pkg = mPackageName;
 
                             int resId = mResources.getIdentifier(attr, tag, pkg);
+                            // to allow overriding system values on a per-app basis we will check
+                            // if the resource name has a resource id in the android package and
+                            // if it does we'll use that id for indexing the resource value
+                            if (resId == 0) {
+                                resId = mResources.getIdentifier(attr, tag, CHAOS_FRAMEWORK_PACKAGE);
+                            }
                             if (resId > 0) {
                                 if (tag.equals(TAG_BOOLEAN)) {
                                     if (DBG)
