@@ -67,12 +67,10 @@ public class AppSidebar extends FrameLayout {
     private float mBarAlpha = 1f;
     private float mBarSizeScale = 1f;
     private boolean mFirstTouch = false;
-<<<<<<< HEAD
 
     private List<String> mExcludedList;
-=======
->>>>>>> 2f3fca006f9002fcc0719334a1cfc188a53b8153
 
+    private List<String> mExcludedList;
     private IUsageStats mUsageStatsService;
     private Context mContext;
     private SettingsObserver mSettingsObserver;
