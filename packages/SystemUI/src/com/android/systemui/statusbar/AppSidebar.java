@@ -48,7 +48,7 @@ public class AppSidebar extends FrameLayout {
     private static final LinearLayout.LayoutParams SCROLLVIEW_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.MATCH_PARENT,
-            1.0f    );
+            1.0f );
 
     private static LinearLayout.LayoutParams ITEM_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
