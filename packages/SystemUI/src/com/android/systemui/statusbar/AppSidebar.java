@@ -15,10 +15,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
-<<<<<<< HEAD
 import android.text.TextUtils;
-=======
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.*;
@@ -69,13 +66,10 @@ public class AppSidebar extends FrameLayout {
     private int mSortType = SORT_TYPE_AZ;
     private float mBarAlpha = 1f;
     private float mBarSizeScale = 1f;
-<<<<<<< HEAD
     private boolean mFirstTouch = false;
 
     private List<String> mExcludedList;
-=======
 
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
     private IUsageStats mUsageStatsService;
     private Context mContext;
     private SettingsObserver mSettingsObserver;
@@ -104,12 +98,9 @@ public class AppSidebar extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-<<<<<<< HEAD
-=======
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_HIDE_APP_CONTAINER);
         getContext().registerReceiver(mBroadcastReceiver, filter);
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
         if (DEBUG_LAYOUT)
             setBackgroundColor(0xffff0000);
         getInstalledAppsList();
@@ -123,7 +114,6 @@ public class AppSidebar extends FrameLayout {
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mSettingsObserver.observe();
-<<<<<<< HEAD
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_HIDE_APP_CONTAINER);
         getContext().registerReceiver(mBroadcastReceiver, filter);
@@ -132,19 +122,14 @@ public class AppSidebar extends FrameLayout {
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         filter.addDataScheme("package");
         getContext().registerReceiver(mAppChangeReceiver, filter);
-=======
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mSettingsObserver.unobserve();
-<<<<<<< HEAD
         mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.unregisterReceiver(mAppChangeReceiver);
-=======
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
     }
 
     @Override
@@ -161,11 +146,8 @@ public class AppSidebar extends FrameLayout {
                 if (ev.getX() <= mTriggerWidth && mState == SIDEBAR_STATE.CLOSED) {
                     showAppContainer(true);
                     cancelAutoHideTimer();
-<<<<<<< HEAD
                     mScrollView.onTouchEvent(ev);
                     mFirstTouch = true;
-=======
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -332,7 +314,6 @@ public class AppSidebar extends FrameLayout {
         }
     }
 
-<<<<<<< HEAD
     private final BroadcastReceiver mAppChangeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -344,8 +325,6 @@ public class AppSidebar extends FrameLayout {
         }
     };
 
-=======
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -417,7 +396,6 @@ public class AppSidebar extends FrameLayout {
         ITEM_LAYOUT_PARAMS.width = desiredHeight;
 
         for (ImageView icon : mInstalledPackages) {
-<<<<<<< HEAD
             AppInfo ai = (AppInfo)icon.getTag();
             if (!mExcludedList.contains(new ComponentName(ai.mPackageName,
                     ai.mClassName).flattenToString())) {
@@ -427,13 +405,11 @@ public class AppSidebar extends FrameLayout {
                 icon.setOnTouchListener(mItemTouchedListener);
                 icon.setClickable(true);
             }
-=======
             icon.setPadding(0, padding, 0, padding);
             mAppContainer.addView(icon, ITEM_LAYOUT_PARAMS);
             icon.setOnClickListener(mItemClickedListener);
             icon.setOnTouchListener(mItemTouchedListener);
             icon.setClickable(true);
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
         }
 
         // we need our horizontal scroll view to wrap the linear layout
@@ -461,11 +437,8 @@ public class AppSidebar extends FrameLayout {
     private OnClickListener mItemClickedListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
-<<<<<<< HEAD
             if (mState != SIDEBAR_STATE.OPENED || mFirstTouch)
-=======
             if (mState != SIDEBAR_STATE.OPENED)
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
                 return;
 
             launchApplication((AppInfo)view.getTag());
@@ -534,10 +507,7 @@ public class AppSidebar extends FrameLayout {
             if (action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_UP) {
                 showInfoBubble(false);
                 mSnapTrigger = true;
-<<<<<<< HEAD
                 mFirstTouch = false;
-=======
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
                 updateAutoHideTimer();
                 if (mState != SIDEBAR_STATE.OPENED)
                     return false;
@@ -546,7 +516,6 @@ public class AppSidebar extends FrameLayout {
                         mInfoBubble.getVisibility() == View.VISIBLE) {
                     launchApplication((AppInfo)mSelectedItem.getTag());
                 }
-<<<<<<< HEAD
             } else if (action == MotionEvent.ACTION_DOWN) {
                 mSnapTrigger = false;
                 // see if we touched on a child and if so show info bubble
@@ -563,8 +532,8 @@ public class AppSidebar extends FrameLayout {
                         break;
                     }
                 }
-=======
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
+            } else if (action == MotionEvent.ACTION_DOWN) {
+                mSnapTrigger = false;
             }
             return super.onTouchEvent(ev);
         }
@@ -585,11 +554,8 @@ public class AppSidebar extends FrameLayout {
                     Settings.System.APP_SIDEBAR_TRANSPARENCY), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.APP_SIDEBAR_ITEM_SIZE), false, this);
-<<<<<<< HEAD
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.APP_SIDEBAR_EXCLUDE_LIST), false, this);
-=======
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
             update();
         }
 
@@ -637,7 +603,6 @@ public class AppSidebar extends FrameLayout {
                 mBarSizeScale = size;
                 layoutItems();
             }
-<<<<<<< HEAD
 
             String excluded = Settings.System.getString(resolver,
                     Settings.System.APP_SIDEBAR_EXCLUDE_LIST);
@@ -646,8 +611,6 @@ public class AppSidebar extends FrameLayout {
                 if(mScrollView != null)
                     layoutItems();
             }
-=======
->>>>>>> 995eb255818ecf249a3017bccee693fc28587979
         }
     }
 
