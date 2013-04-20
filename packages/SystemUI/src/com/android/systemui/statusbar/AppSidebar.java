@@ -67,6 +67,7 @@ public class AppSidebar extends FrameLayout {
     private float mBarAlpha = 1f;
     private float mBarSizeScale = 1f;
     private boolean mFirstTouch = false;
+    private boolean mHideScrollTrack = false;
 
     private List<String> mExcludedList;
     private IUsageStats mUsageStatsService;
@@ -407,8 +408,9 @@ public class AppSidebar extends FrameLayout {
         if (mScrollView == null) {
             mScrollView = new SnappingScrollView(mContext);
             // make the fading edge the size of a button (makes it more noticible that we can scroll
-            mScrollView.setScrollBarStyle(View.SCROLLBARS_OUTSIDE_INSET);
+            mScrollView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
             mScrollView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            mScrollView.setVerticalScrollBarEnabled(!mHideScrollTrack);
             mScrollView.setBackgroundResource(R.drawable.app_sidebar_background);
         }
         mScrollView.removeAllViews();
@@ -544,6 +546,8 @@ public class AppSidebar extends FrameLayout {
                     Settings.System.APP_SIDEBAR_ITEM_SIZE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.APP_SIDEBAR_EXCLUDE_LIST), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.APP_SIDEBAR_HIDE_SCROLL_TRACK), false, this);
             update();
         }
 
@@ -573,7 +577,8 @@ public class AppSidebar extends FrameLayout {
                         Collections.sort(mInstalledPackages, mDescendingComparator);
                         break;
                 }
-                layoutItems();
+                if (mScrollView != null)
+                    layoutItems();
             }
             mSortType = sortType;
 
@@ -589,7 +594,8 @@ public class AppSidebar extends FrameLayout {
                     Settings.System.APP_SIDEBAR_ITEM_SIZE, 100) / 100f;
             if (mBarSizeScale != size) {
                 mBarSizeScale = size;
-                layoutItems();
+                if (mScrollView != null)
+                    layoutItems();
             }
 
             String excluded = Settings.System.getString(resolver,
@@ -599,6 +605,11 @@ public class AppSidebar extends FrameLayout {
                 if(mScrollView != null)
                     layoutItems();
             }
+
+            mHideScrollTrack = Settings.System.getInt(resolver,
+                    Settings.System.APP_SIDEBAR_HIDE_SCROLL_TRACK, 0) == 1;
+            if (mScrollView != null)
+                mScrollView.setVerticalScrollBarEnabled(!mHideScrollTrack);
         }
     }
 
