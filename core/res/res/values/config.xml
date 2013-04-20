@@ -1127,4 +1127,6 @@
          Requires config_hasDockBattery set to true. -->
     <string name="config_deviceDockBatteryHandlerLib" translatable="false"></string>
 
+    <!-- Boolean to enable Stylus gestures -->
+    <bool name="config_stylusGestures">false</bool>
 </resources>
