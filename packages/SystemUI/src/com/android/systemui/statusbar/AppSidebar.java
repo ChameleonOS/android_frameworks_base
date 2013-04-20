@@ -48,7 +48,7 @@ public class AppSidebar extends FrameLayout {
     private static final LinearLayout.LayoutParams SCROLLVIEW_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.MATCH_PARENT,
-            1.0f    );
+            1.0f );
 
     private static LinearLayout.LayoutParams ITEM_LAYOUT_PARAMS = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -67,8 +67,6 @@ public class AppSidebar extends FrameLayout {
     private float mBarAlpha = 1f;
     private float mBarSizeScale = 1f;
     private boolean mFirstTouch = false;
-
-    private List<String> mExcludedList;
 
     private List<String> mExcludedList;
     private IUsageStats mUsageStatsService;
@@ -395,7 +393,7 @@ public class AppSidebar extends FrameLayout {
 
         for (ImageView icon : mInstalledPackages) {
             AppInfo ai = (AppInfo)icon.getTag();
-            if (!mExcludedList.contains(new ComponentName(ai.mPackageName,
+            if (mExcludedList == null || !mExcludedList.contains(new ComponentName(ai.mPackageName,
                     ai.mClassName).flattenToString())) {
                 icon.setPadding(0, padding, 0, padding);
                 mAppContainer.addView(icon, ITEM_LAYOUT_PARAMS);
@@ -403,11 +401,6 @@ public class AppSidebar extends FrameLayout {
                 icon.setOnTouchListener(mItemTouchedListener);
                 icon.setClickable(true);
             }
-            icon.setPadding(0, padding, 0, padding);
-            mAppContainer.addView(icon, ITEM_LAYOUT_PARAMS);
-            icon.setOnClickListener(mItemClickedListener);
-            icon.setOnTouchListener(mItemTouchedListener);
-            icon.setClickable(true);
         }
 
         // we need our horizontal scroll view to wrap the linear layout
@@ -436,7 +429,6 @@ public class AppSidebar extends FrameLayout {
         @Override
         public void onClick(View view) {
             if (mState != SIDEBAR_STATE.OPENED || mFirstTouch)
-            if (mState != SIDEBAR_STATE.OPENED)
                 return;
 
             launchApplication((AppInfo)view.getTag());
@@ -530,8 +522,6 @@ public class AppSidebar extends FrameLayout {
                         break;
                     }
                 }
-            } else if (action == MotionEvent.ACTION_DOWN) {
-                mSnapTrigger = false;
             }
             return super.onTouchEvent(ev);
         }
