@@ -84,6 +84,9 @@ public class IconCustomizer
         sIconMapping = new HashMap();
         sIconMapping.put("com.android.contacts.activities.TwelveKeyDialer.png", "com.android.contacts.TwelveKeyDialer.png");
         sIconMapping.put("com.android.contacts.activities.DialtactsActivity.png", "com.android.phone.png");
+        sIconMapping.put("com.android.phone.png", "com.android.contacts.TwelveKeyDialer.png");
+        sIconMapping.put("com.android.camera.Camera.png", "com.android.camera.png");
+        sIconMapping.put("com.android.camera.CameraLauncher.png", "com.android.camera.png");
     }
 
     private static int RGBToColor(int[] rgb) {

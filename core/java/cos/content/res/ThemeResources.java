@@ -67,7 +67,11 @@ public class ThemeResources
     protected static Map<String, String> sMiuiToChaosPackageMappings;
     static {
         sMiuiToChaosPackageMappings = new HashMap();
+        sMiuiToChaosPackageMappings.put("framework-res", "framework-miui-res");
+        sMiuiToChaosPackageMappings.put("android", "com.android.systemui");
         sMiuiToChaosPackageMappings.put("com.android.contacts", "com.android.phone");
+        sMiuiToChaosPackageMappings.put("com.android.mms", "framework-miui-res");
+        sMiuiToChaosPackageMappings.put("com.android.systemui", "framework-miui-res");
     }
 
     // To offer better support for MIUI themes we will create a map of resources
@@ -128,11 +132,49 @@ public class ThemeResources
         map.put("notification_panel_bg.9.png", "tracking_view_list_style_bg.9.png");
         map.put("ic_brightness_max.png", "brightness_max.png");
         map.put("ic_brightness_min.png", "brightness_min.png");
+        map.put("ic_qs_vibrate_on.png", "status_bar_toggle_vibrate_on.png");
+        map.put("ic_qs_vibrate_off.png", "status_bar_toggle_vibrate_off.png");
+        map.put("ic_qs_torch_on.png", "status_bar_toggle_torch_on.png");
+        map.put("ic_qs_torch_off.png", "status_bar_toggle_torch_off.png");
+        map.put("ic_qs_sync_on.png", "status_bar_toggle_sync_on.png");
+        map.put("ic_qs_sync_off.png", "status_bar_toggle_sync_off.png");
+        map.put("ic_qs_orientation_on.png", "status_bar_toggle_rotate_on.png");
+        map.put("ic_qs_orientation_off.png", "status_bar_toggle_rotate_off.png");
+        map.put("ic_qs_silent.png", "status_bar_toggle_mute_on.png");
+        map.put("ic_qs_ring_on.png", "status_bar_toggle_mute_off.png");
+        map.put("ic_qs_ring_vibrate_on.png", "status_bar_toggle_mute_off.png");
+        map.put("ic_qs_airplane_on.png", "status_bar_toggle_flight_mode_on.png");
+        map.put("ic_qs_airplane_off.png", "status_bar_toggle_flight_mode_off.png");
+        map.put("ic_qs_brightness_auto_off.png", "status_bar_toggle_brightness_on.png");
+        map.put("ic_qs_brightness_auto_on.png", "status_bar_toggle_brightness_auto.png");
+        map.put("ic_qs_bluetooth_on.png", "status_bar_toggle_bluetooth_on.png");
+        map.put("ic_qs_bluetooth_neutral.png", "status_bar_toggle_bluetooth_on.png");
+        map.put("ic_qs_bluetooth_not_connected.png", "status_bar_toggle_bluetooth_on.png");
+        map.put("ic_qs_bluetooth_off.png", "status_bar_toggle_bluetooth_off.png");
+        map.put("ic_qs_gps_on.png", "status_bar_toggle_gps_on.png");
+        map.put("ic_qs_gps_neutral.png", "status_bar_toggle_gps_on.png");
+        map.put("ic_qs_location.png", "status_bar_toggle_gps_on.png");
+        map.put("ic_qs_gps_off.png", "status_bar_toggle_gps_off.png");
+        map.put("ic_notify_quicksettings_pressed.png", "toggle_settings_p.png");
+        map.put("ic_notify_quicksettings_normal.png", "toggle_settings_n.png");
+        map.put("ic_notify_open_pressed.png", "toggle_settings_p.png");
+        map.put("ic_notify_open_normal.png", "toggle_settings_n.png");
         sMiuiToChaosResourceMappings.put("com.android.systemui", map);
         map = new HashMap();
         map.put("dial_num_0_wht.png", "dial_num_0_no_plus_wht.png");
         map.put("dial_num_1_wht.png", "dial_num_1_no_vm_wht.png");
         sMiuiToChaosResourceMappings.put("com.android.contacts", map);
+        map = new HashMap();
+        map.put("ic_menu_call.png", "call_btn_n.png");
+        map.put("ic_dialog_attach.png", "insert_attachment_button_n.png");
+        map.put("ic_menu_search_holo_dark.png", "ic_btn_search.png");
+        sMiuiToChaosResourceMappings.put("com.android.mms", map);
+        map = new HashMap();
+        map.put("notification_bg_normal.9.png", "notification_item_bg_n.9.png");
+        map.put("notification_bg_low_normal.9.png", "notification_item_bg_n.9.png");
+        map.put("notification_bg_pressed.9.png", "notification_item_bg_p.9.png");
+        map.put("notification_bg_low_pressed.9.png", "notification_item_bg_p.9.png");
+        sMiuiToChaosResourceMappings.put("framework-res", map);
     }
 
     protected ThemeResources(ThemeResources wrapped, Resources resources, String componentName, MetaData metaData) {
@@ -241,7 +283,7 @@ public class ThemeResources
 
     public ThemeZipFile.ThemeFileInfo getThemeFileStream(String relativeFilePath) {
         ThemeZipFile.ThemeFileInfo info = getThemeFileStreamInner(relativeFilePath);
-        if (info == null && !(this instanceof ThemeResourcesSystem)) {
+        if (info == null) {
             int index = relativeFilePath.indexOf("dpi/");
             if(index > 0) {
                 String fileName = relativeFilePath.substring(index + 4);

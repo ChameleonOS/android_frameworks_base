@@ -39,10 +39,6 @@ public final class ThemeResourcesSystem extends ThemeResources
         if (DBG)
             Log.d(TAG, String.format("Creating ThemeResourcesSystem for %s", metaData.themePath));
         mThemePath = metaData.themePath;
-        if (DBG)
-            Log.i(TAG, "Loading wrapper framework-miui-res for framework-res");
-        mWrapped = new ThemeResourcesPackage(null, resources, "framework-miui-res", metaData);
-        mSupportWrapper = true;
     }
 
     private ThemeZipFile.ThemeFileInfo getThemeFileStreamMIUI(String relativeFilePath, String name) {
