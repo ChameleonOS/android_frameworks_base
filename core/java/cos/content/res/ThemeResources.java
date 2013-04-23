@@ -283,6 +283,7 @@ public class ThemeResources
 
     public ThemeZipFile.ThemeFileInfo getThemeFileStream(String relativeFilePath) {
         ThemeZipFile.ThemeFileInfo info = getThemeFileStreamInner(relativeFilePath);
+
         if (info == null) {
             int index = relativeFilePath.indexOf("dpi/");
             if(index > 0) {
@@ -296,6 +297,16 @@ public class ThemeResources
                         Log.i(TAG, "Mapping " + fileName + " to " + mapping.get(fileName));
                     info = getThemeFileStreamInner(prefix + mapping.get(fileName));
                 }
+            }
+        }
+
+        if (info == null && !(this instanceof ThemeResourcesSystem)) {
+            int index = relativeFilePath.indexOf("framework-res/");
+            if(index >= 0) {
+                String fileName = relativeFilePath.substring(index + 14);
+                if (DBG)
+                    Log.i(TAG, "Checking for overridden framework-res drawable " + fileName);
+                info = getThemeFileStreamInner(fileName);
             }
         }
 
