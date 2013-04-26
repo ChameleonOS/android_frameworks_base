@@ -13,13 +13,12 @@
         android:clickable="false"
         android:background="@android:color/transparent" />
 
-    <TextView
-        android:id="@+id/info_bubble"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/app_sidebar_info_bubble"
-        style="@style/TextAppearance.AppSidebarInfo"
-        android:alpha="0"
-        android:visibility="gone" />
+    <ImageView
+        android:id="@+id/tab"
+        android:layout_width="24dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|left"
+        android:scaleType="fitXY"
+        android:src="@drawable/tab_left" />
 
 </com.android.systemui.statusbar.AppSidebar>
