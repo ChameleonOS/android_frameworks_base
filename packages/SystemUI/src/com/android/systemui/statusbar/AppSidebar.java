@@ -37,6 +37,7 @@ import android.provider.Settings;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.TranslateAnimation;
@@ -314,10 +315,13 @@ public class AppSidebar extends FrameLayout {
         if (mScrollView == null)
             return;
         mState = show ? SIDEBAR_STATE.OPENING : SIDEBAR_STATE.CLOSING;
-        if (show)
+        if (show) {
             mScrollView.setVisibility(View.VISIBLE);
-        else {
+            enableKeyEvents();
+        } else {
             cancelAutoHideTimer();
+            dismissFolderView();
+            disableKeyEvents();
         }
         mScrollView.startAnimation(show ? mSlideIn : mSlideOut);
     }
@@ -423,6 +427,28 @@ public class AppSidebar extends FrameLayout {
         }
     };
 
+    private void enableKeyEvents() {
+        WindowManager.LayoutParams params = (WindowManager.LayoutParams) getLayoutParams();
+        params.flags =
+                0
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+        mWm.updateViewLayout(this, params);
+    }
+
+    private void disableKeyEvents() {
+        WindowManager.LayoutParams params = (WindowManager.LayoutParams) getLayoutParams();
+        params.flags =
+                0
+                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+        mWm.updateViewLayout(this, params);
+    }
+
     private void setupAppContainer() {
         post(new Runnable() {
             public void run() {
@@ -487,6 +513,14 @@ public class AppSidebar extends FrameLayout {
         addView(mScrollView, SCROLLVIEW_LAYOUT_PARAMS);
         mScrollView.setAlpha(mBarAlpha);
         mScrollView.setVisibility(View.GONE);
+        mAppContainer.setFocusable(true);
+    }
+
+    @Override
+    public boolean dispatchKeyEventPreIme(KeyEvent event) {
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN)
+            showAppContainer(false);
+        return super.dispatchKeyEventPreIme(event);
     }
 
     private void launchApplication(AppItemInfo ai) {
