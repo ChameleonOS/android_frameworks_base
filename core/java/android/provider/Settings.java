@@ -2553,25 +2553,32 @@ public final class Settings {
         public static final String APP_SIDEBAR_POSITION = "app_sidebar_position";
 
         /**
-         * Position of app sidebar
+         * Width of the appbar trigger
          *
          * @hide
          */
-        public static final String APP_SIDEBAR_USE_TAB = "app_sidebar_use_tab";
+        public static final String APP_SIDEBAR_TRIGGER_WIDTH = "app_sidebar_trigger_width";
 
         /**
-         * Position of app sidebar
+         * Position of appbar trigger
          *
          * @hide
          */
-        public static final String APP_SIDEBAR_TAB_POSITION = "app_sidebar_tab_position";
+        public static final String APP_SIDEBAR_TRIGGER_TOP = "app_sidebar_trigger_top";
 
         /**
-         * Position of app sidebar
+         * Height of the appbar trigger
          *
          * @hide
          */
-        public static final String APP_SIDEBAR_TAB_SCALE = "app_sidebar_tab_scale";
+        public static final String APP_SIDEBAR_TRIGGER_HEIGHT = "app_sidebar_trigger_height";
+
+        /**
+         * Whether to display the trigger region or not
+         *
+         * @hide
+         */
+        public static final String APP_SIDEBAR_SHOW_TRIGGER = "app_sidebar_show_trigger";
 
         /**
          * Quick Settings Panel Tiles to Use

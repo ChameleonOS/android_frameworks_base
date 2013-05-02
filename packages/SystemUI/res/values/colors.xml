@@ -63,7 +63,6 @@
     <color name="quick_settings_alarm_text_color">#ff3a3b39</color>
     <color name="quick_settings_clock_text_color">#ff33b5e5</color>
 
-    <!-- app sidebar info bubble text color -->
-    <color name="app_sidebar_info_bubble_text_color">#ff0099cc</color>
-    <color name="app_sidebar_info_bubble_text_shadow_color">#ff333333</color>
+    <!-- app sidebar trigger region color -->
+    <color name="trigger_region_color">#8015a0e5</color>
 </resources>

@@ -47,7 +47,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -67,16 +66,6 @@ public class AppSidebar extends FrameLayout {
     // Sidebar positions
     public static final int SIDEBAR_POSITION_LEFT = 0;
     public static final int SIDEBAR_POSITION_RIGHT = 1;
-
-    // Tab positions
-    public static final int TAB_POSITION_TOP = 0;
-    public static final int TAB_POSITION_MIDDLE = 1;
-    public static final int TAB_POSITION_BOTTOM = 2;
-
-    // Tab scales
-    public static final float TAB_SCALE_SMALL = 1.0f;
-    public static final float TAB_SCALE_MEDIUM = 1.5f;
-    public static final float TAB_SCALE_LARGE = 2.0f;
 
     private static final String ACTION_HIDE_APP_CONTAINER
             = "com.android.internal.policy.statusbar.HIDE_APP_CONTAINER";
@@ -99,7 +88,9 @@ public class AppSidebar extends FrameLayout {
     );
 
     private int mTriggerWidth;
-    private ImageView mTab;
+    private int mTriggerTop;
+    private int mTriggerBottom;
+    private int mTriggerColor;
     private LinearLayout mAppContainer;
     private SnappingScrollView mScrollView;
     private List<View> mContainerItems;
@@ -139,8 +130,12 @@ public class AppSidebar extends FrameLayout {
         mFolderWidth = resources.getDimensionPixelSize(R.dimen.folder_width);
         int iconSize = resources.getDimensionPixelSize(R.dimen.app_sidebar_item_size) - mItemTextSize;
         mIconBounds = new Rect(0, 0, iconSize, iconSize);
+        mTriggerColor = resources.getColor(R.color.trigger_region_color);
         mPm = context.getPackageManager();
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Rect r = new Rect();
+        getWindowVisibleDisplayFrame(r);
+        mBarHeight = r.bottom - r.top;
     }
 
     @Override
@@ -150,13 +145,6 @@ public class AppSidebar extends FrameLayout {
             setBackgroundColor(0xffff0000);
         setupAppContainer();
         mSettingsObserver = new SettingsObserver(new Handler());
-    }
-
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        mBarHeight = h;
-        setupTab(h);
     }
 
     @Override
@@ -199,7 +187,8 @@ public class AppSidebar extends FrameLayout {
                     cancelAutoHideTimer();
                     mScrollView.onTouchEvent(ev);
                     mFirstTouch = true;
-                }
+                } else
+                    updateAutoHideTimer(AUTO_HIDE_DELAY);
                 break;
             case MotionEvent.ACTION_MOVE:
                 cancelAutoHideTimer();
@@ -216,6 +205,45 @@ public class AppSidebar extends FrameLayout {
                 break;
         }
         return false;
+    }
+
+    private void showTriggerRegion() {
+        setBackgroundResource(R.drawable.trigger_region);
+    }
+
+    private void hideTriggerRegion() {
+        setBackgroundColor(0x00000000);
+    }
+
+    private void setTopPercentage(float value) {
+        WindowManager.LayoutParams params = (WindowManager.LayoutParams)this.getLayoutParams();
+        mTriggerTop = (int)(mBarHeight * value);
+        params.y = mTriggerTop;
+        params.height = mTriggerBottom;
+        try {
+            mWm.updateViewLayout(this, params);
+        } catch (Exception e) {
+        }
+    }
+
+    private void setBottomPercentage(float value) {
+        WindowManager.LayoutParams params = (WindowManager.LayoutParams)this.getLayoutParams();
+        mTriggerBottom = (int)(mBarHeight * value);
+        params.height = mTriggerBottom;
+        try {
+            mWm.updateViewLayout(this, params);
+        } catch (Exception e) {
+        }
+    }
+
+    private void setTriggerWidth(int value) {
+        WindowManager.LayoutParams params = (WindowManager.LayoutParams)this.getLayoutParams();
+        mTriggerWidth = value;
+        params.width = mTriggerWidth;
+        try {
+            mWm.updateViewLayout(this, params);
+        } catch (Exception e) {
+        }
     }
 
     @Override
@@ -265,63 +293,16 @@ public class AppSidebar extends FrameLayout {
         mSlideOut.setAnimationListener(mAnimListener);
     }
 
-    private void setupTab(int parentHeight) {
-        mTab = (ImageView) findViewById(R.id.tab);
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)mTab.getLayoutParams();
-        ContentResolver cr = mContext.getContentResolver();
-        Resources res = mContext.getResources();
-        float tabScale =Settings.System.getFloat(cr, Settings.System.APP_SIDEBAR_TAB_SCALE, TAB_SCALE_MEDIUM);
-        int width = (int)(res.getDimensionPixelSize(R.dimen.tab_width) * tabScale);
-        int height = (int)(res.getDimensionPixelSize(R.dimen.tab_height) * tabScale);
-        params.width = width;
-        params.height = height;
-        int position = Settings.System.getInt(cr, Settings.System.APP_SIDEBAR_TAB_POSITION, TAB_POSITION_TOP);
-        if (position == TAB_POSITION_MIDDLE)
-            params.topMargin = parentHeight /2 - height / 2;
-        else if (position == TAB_POSITION_BOTTOM)
-            params.topMargin = parentHeight - height;
-        else
-            params.topMargin = 0;
-        if (mPosition == SIDEBAR_POSITION_LEFT) {
-            params.gravity = Gravity.TOP | Gravity.LEFT;
-            mTab.setImageResource(R.drawable.tab_left);
-        } else {
-            params.gravity = Gravity.TOP | Gravity.RIGHT;
-            mTab.setImageResource(R.drawable.tab_right);
-        }
-
-        mTab.setLayoutParams(params);
-        mUseTab = Settings.System.getInt(cr, Settings.System.APP_SIDEBAR_USE_TAB, 0) == 1;
-        mTab.setVisibility(mUseTab ? View.VISIBLE : View.GONE);
-        mTab.setOnTouchListener(new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent ev) {
-                if (isKeyguardEnabled())
-                    return false;
-                if (mState == SIDEBAR_STATE.CLOSED) {
-                    showAppContainer(true);
-                    cancelAutoHideTimer();
-                    mScrollView.onTouchEvent(ev);
-                    mFirstTouch = true;
-                    if (mUseTab)
-                        mTab.setVisibility(View.GONE);
-                }
-                return false;
-            }
-        });
-    }
-
     private void showAppContainer(boolean show) {
         if (mScrollView == null)
             return;
         mState = show ? SIDEBAR_STATE.OPENING : SIDEBAR_STATE.CLOSING;
         if (show) {
             mScrollView.setVisibility(View.VISIBLE);
-            enableKeyEvents();
+            expandFromTriggerRegion();
         } else {
             cancelAutoHideTimer();
             dismissFolderView();
-            disableKeyEvents();
         }
         mScrollView.startAnimation(show ? mSlideIn : mSlideOut);
     }
@@ -339,26 +320,11 @@ public class AppSidebar extends FrameLayout {
                 case CLOSING:
                     mState = SIDEBAR_STATE.CLOSED;
                     mScrollView.setVisibility(View.GONE);
-                    // we need to delay showing the tab since the main frame layout is not
-                    // resized immediately after the bar is hidden when on the right side.
-                    if (mUseTab) {
-                        if (mPosition == SIDEBAR_POSITION_RIGHT)
-                            postDelayed(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    mTab.setVisibility(View.VISIBLE);
-                                }
-                            }, 250);
-                        else
-                            mTab.setVisibility(View.VISIBLE);
-                    }
+                    reduceToTriggerRegion();
                     break;
                 case OPENING:
                     mState = SIDEBAR_STATE.OPENED;
                     mScrollView.setVisibility(View.VISIBLE);
-                    if (mUseTab)
-                        mTab.setVisibility(View.GONE);
                     break;
             }
         }
@@ -427,25 +393,40 @@ public class AppSidebar extends FrameLayout {
         }
     };
 
-    private void enableKeyEvents() {
-        WindowManager.LayoutParams params = (WindowManager.LayoutParams) getLayoutParams();
-        params.flags =
-                0
+    private int enableKeyEvents() {
+        return (0
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
-        mWm.updateViewLayout(this, params);
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH);
     }
 
-    private void disableKeyEvents() {
-        WindowManager.LayoutParams params = (WindowManager.LayoutParams) getLayoutParams();
-        params.flags =
-                0
+    private int disableKeyEvents() {
+        return (0
                 | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
                 | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                 | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                 | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH);
+    }
+
+    private void expandFromTriggerRegion() {
+        WindowManager.LayoutParams params = (WindowManager.LayoutParams) getLayoutParams();
+        params.y = 0;
+        Rect r = new Rect();
+        getWindowVisibleDisplayFrame(r);
+        mBarHeight = r.bottom - r.top;
+        params.height = mBarHeight;
+        params.width = LayoutParams.WRAP_CONTENT;
+        params.flags = enableKeyEvents();
+        mWm.updateViewLayout(this, params);
+    }
+
+    private void reduceToTriggerRegion() {
+        WindowManager.LayoutParams params = (WindowManager.LayoutParams) getLayoutParams();
+        params.y = mTriggerTop;
+        params.height = mTriggerBottom;
+        params.width = mTriggerWidth;
+        params.flags = disableKeyEvents();
         mWm.updateViewLayout(this, params);
     }
 
@@ -478,8 +459,8 @@ public class AppSidebar extends FrameLayout {
         int desiredHeight = mContext.getResources().
                 getDimensionPixelSize(R.dimen.app_sidebar_item_size) +
                 padding * 2;
-        int numItems = (int)Math.floor(getHeight() / desiredHeight);
-        ITEM_LAYOUT_PARAMS.height = getHeight() / numItems;
+        int numItems = (int)Math.floor(mBarHeight / desiredHeight);
+        ITEM_LAYOUT_PARAMS.height = mBarHeight / numItems;
         ITEM_LAYOUT_PARAMS.width = desiredHeight;
 
         for (View icon : mContainerItems) {
@@ -611,11 +592,13 @@ public class AppSidebar extends FrameLayout {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.APP_SIDEBAR_DISABLE_LABELS), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.APP_SIDEBAR_USE_TAB), false, this);
+                    Settings.System.APP_SIDEBAR_TRIGGER_WIDTH), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.APP_SIDEBAR_TAB_POSITION), false, this);
+                    Settings.System.APP_SIDEBAR_TRIGGER_TOP), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.APP_SIDEBAR_TAB_SCALE), false, this);
+                    Settings.System.APP_SIDEBAR_TRIGGER_HEIGHT), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.APP_SIDEBAR_SHOW_TRIGGER), false, this);
             update();
         }
 
@@ -657,7 +640,19 @@ public class AppSidebar extends FrameLayout {
                     setupAppContainer();
             }
 
-            setupTab(mBarHeight);
+            int width = Settings.System.getInt(
+                    resolver, Settings.System.APP_SIDEBAR_TRIGGER_WIDTH, 10);
+            if (mTriggerWidth != width)
+                setTriggerWidth(width);
+            setTopPercentage(Settings.System.getInt(
+                    resolver, Settings.System.APP_SIDEBAR_TRIGGER_TOP, 0) / 100f);
+            setBottomPercentage(Settings.System.getInt(
+                    resolver, Settings.System.APP_SIDEBAR_TRIGGER_HEIGHT, 100) / 100f);
+            if (Settings.System.getInt(
+                    resolver, Settings.System.APP_SIDEBAR_SHOW_TRIGGER, 0) == 1)
+                showTriggerRegion();
+            else
+                hideTriggerRegion();
         }
     }
 

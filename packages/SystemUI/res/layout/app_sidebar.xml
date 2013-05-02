@@ -6,19 +6,4 @@
     android:layout_height="match_parent"
     android:background="@android:color/transparent"   >
 
-    <View
-        android:layout_width="@dimen/config_app_sidebar_trigger_width"
-        android:layout_height="match_parent"
-        android:focusable="false"
-        android:clickable="false"
-        android:background="@android:color/transparent" />
-
-    <ImageView
-        android:id="@+id/tab"
-        android:layout_width="24dp"
-        android:layout_height="48dp"
-        android:layout_gravity="top|left"
-        android:scaleType="fitXY"
-        android:src="@drawable/tab_left" />
-
 </com.android.systemui.statusbar.AppSidebar>
