@@ -235,6 +235,9 @@
     <string name="quick_settings_wifiap">Hotspot</string>
     <string name="quick_settings_wifiap_off">Hotspot aus</string>
 
+    <string name="notification_tab_notifications">Benachrichtigungen</string>
+    <string name="notification_tab_toggles">Schalter</string>
+
     <!-- Dialog title for navigation bar button selection -->
     <string name="navbar_dialog_title">Funktion zuweisen</string>
     <string name="navbar_home_button">Home</string>
@@ -247,4 +250,12 @@
     <string name="navbar_menu_big_button">Menü</string>
 
     <!-- **** CYANOGENMOD ADDITIONS END **** -->
+
+    <!-- App sidebar -->
+    <string name="default_folder_text">Ordner</string>
+    <string name="title_activity_sidebar_configuration">\@ppbar Inhalts Einstellung</string>
+    <string name="action_save">Speichern</string>
+    <string name="toast_items_saved">\@ppbar Icons sind gespeichert.</string>
+    <string name="content_setup_instructions">Um Icons der \@ppbar zuzufügen - lange ein icon auf der rechten Seite drücken und es in über die \@ppbar ziehen.\n\n Um einen Ordner erstellen einfach ein neues Icon über ein vorhandenes ziehen.\n\nIcons einfach durch rausziehen aus der \@appbar entfernen.</string>
+    <string name="content_setup_dismiss">Weiter</string>
 </resources>

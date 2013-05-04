@@ -602,6 +602,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Ermöglicht der App, Netzwerkrichtlinien zu verwalten und anwendungsspezifische Regeln festzulegen"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"Zuordnung für Netzwerknutzung ändern"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Ermöglicht der App, die Art und Weise zu ändern, wie der Netzwerkverbrauch im Hinblick auf Apps berechnet wird. Nicht für normale Apps vorgesehen."</string>
+    <string name="permlab_revokePermissions">Ermöglicht sehen und bearbeiten von widerrufenen Berechtigungen. Nicht für normale Anwendungen.</string>
+    <string name="permdesc_revokePermissions">Ermöglicht lesen und schreiben von widerrufenen Berechtigungen. Nicht für normale Anwendungen.</string>
+    <string name="permlab_accessThemeService">Erlaubt dem Theme Manager zugriff auf services. Nicht für normale Andwendungen.</string>
+    <string name="permdesc_accessThemeService">Erlaubt Anwendungen setzen/löschen von Themen. Nicht für normale Anwendungen.</string>   
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Zulässige Länge und Zeichen für Passwörter zum Entsperren des Bildschirms festlegen"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Versuche zum Entsperren des Displays überwachen"</string>
@@ -1046,6 +1050,9 @@
     <string name="aerr_title" msgid="1905800560317137752"></string>
     <string name="aerr_application" msgid="932628488013092776">"\"<xliff:g id="APPLICATION">%1$s</xliff:g>\" wurde beendet."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Der Prozess <xliff:g id="PROCESS">%1$s</xliff:g> wurde beendet."</string>
+    <string name="aerr_revoked_application">Die Anwendung <xliff:g id="application">%1$s</xliff:g>
+        (process <xliff:g id="process">%2$s</xliff:g>) wurde unerwartet beendet.\nWARNING!\nDiese Anwendung verlangt eine oder mehrere Berechtigungen die widerrufen wurden, dies kann zu einer Fehlfunktion führen. Bitte erteilen Sie die Berechtigungen und versuchen Sie es erneut.</string> 
+    <string name="aerr_revoked_process">Der Prozess <xliff:g id="process">%1$s</xliff:g> wurde unerwartet beendet.\nWARNING!\nDieser Prozess verlangt eine oder mehrere Berechtigungen die widerrufen wurden, dies kann zu einer Fehlfunktion führen. Bitte erteilen Sie die Berechtigungen und versuchen Sie es erneut.</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
     <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> reagiert nicht."\n\n"Möchten Sie die App schließen?"</string>
     <string name="anr_activity_process" msgid="5776209883299089767">"Aktivität \"<xliff:g id="ACTIVITY">%1$s</xliff:g>\" reagiert nicht."\n\n"Möchten Sie sie beenden?"</string>
@@ -1054,6 +1061,7 @@
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Bericht"</string>
     <string name="wait" msgid="7147118217226317732">"Warten"</string>
+    <string name="reset_perms">Berechtigungen zurücksetzten</string> 
     <string name="webpage_unresponsive" msgid="3272758351138122503">"Die Seite reagiert nicht mehr."\n\n"Möchten Sie die Seite schließen?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"App umgeleitet"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> wird jetzt ausgeführt."</string>
