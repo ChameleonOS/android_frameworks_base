@@ -5980,6 +5980,39 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @CosHook(CosHook.CosHookType.NEW_METHOD)
+    public boolean isThemeCompatibilityModeEnabled(final String pkgName) {
+        boolean result = false;
+        synchronized (mPackages) {
+            final PackageParser.Package p = mPackages.get(pkgName);
+            if (p != null && p.mExtras != null) {
+                final PackageSetting ps = (PackageSetting)p.mExtras;
+                if (ps.sharedUser != null) {
+                    result = ps.sharedUser.isThemeCompatibilityEnabled;
+                } else {
+                    result = ps.isThemeCompatibilityEnabled;
+                }
+            }
+        }
+        return result;
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    public void setThemeCompatibilityMode(final String pkgName, final boolean compatEnabled) {
+        synchronized (mPackages) {
+            final PackageParser.Package p = mPackages.get(pkgName);
+            if (p != null && p.mExtras != null) {
+                final PackageSetting ps = (PackageSetting)p.mExtras;
+                if (ps.sharedUser != null) {
+                    ps.sharedUser.isThemeCompatibilityEnabled = compatEnabled;
+                } else {
+                    ps.isThemeCompatibilityEnabled = compatEnabled;
+                }
+                mSettings.writeLPr();
+            }
+        }
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
     private static void updateEffectivePermissions(final GrantedPermissions gp) {
         gp.effectivePermissions.clear();
         gp.effectivePermissions.addAll(gp.grantedPermissions);

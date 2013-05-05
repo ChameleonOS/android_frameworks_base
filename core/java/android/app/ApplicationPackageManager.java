@@ -1310,6 +1310,26 @@ final class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    @Override
+    public boolean isThemeCompatibilityModeEnabled(String packageName) {
+        try {
+            return mPM.isThemeCompatibilityModeEnabled(packageName);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+        return false;
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    @Override
+    public void setThemeCompatibilityMode(String packageName, boolean compatEnabled) {
+        try {
+            mPM.setThemeCompatibilityMode(packageName, compatEnabled);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
     /**
      * @hide
      */

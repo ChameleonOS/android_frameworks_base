@@ -49,6 +49,7 @@ public final class CosResources extends Resources {
     private SparseArray<Integer> mIntegers = new SparseArray();
     private SparseArray<Boolean> mSkipFiles = new SparseArray();
     private ThemeResources mThemeResources;
+    private boolean mIsThemeCompatibilityModeEnabled = false;
 
     CosResources() {
         init(null);
@@ -83,7 +84,7 @@ public final class CosResources extends Resources {
     }
 
     private TypedArray replaceTypedArray(TypedArray array) {
-        if(mThemeResources == null || mHasValues) {
+        if((mThemeResources == null || mHasValues) && !mIsThemeCompatibilityModeEnabled) {
             int data[] = array.mData;
             int index = 0;
             while(index < data.length)  {
@@ -147,6 +148,8 @@ public final class CosResources extends Resources {
     public void getValue(int id, TypedValue outValue, boolean resolveRefs)
             throws Resources.NotFoundException {
         super.getValue(id, outValue, resolveRefs);
+        if (mIsThemeCompatibilityModeEnabled)
+            return;
         if((outValue.type >= TypedValue.TYPE_FIRST_INT && outValue.type <= TypedValue.TYPE_LAST_INT)
                 || outValue.type == TypedValue.TYPE_DIMENSION) {
             Integer integer = getThemeInt(id);
@@ -166,9 +169,21 @@ public final class CosResources extends Resources {
         mHasValues = mThemeResources.hasValues();
     }
 
+    public void init(String packageName, boolean isThemeCompatibilityModeEnabled) {
+        if(TextUtils.isEmpty(packageName) || "android".equals(packageName) || "miui".equals(packageName)) {
+            mThemeResources = ThemeResources.getSystem(this);
+        } else {
+            if (DBG)
+                Log.d(TAG, String.format("Getting ThemeResourcesPackages.getThemeResources() for %s", packageName));
+            mThemeResources = ThemeResourcesPackage.getThemeResources(this, packageName);
+        }
+        mHasValues = mThemeResources.hasValues();
+        mIsThemeCompatibilityModeEnabled = isThemeCompatibilityModeEnabled;
+    }
+
     Drawable loadOverlayDrawable(TypedValue value, int id) {
         if (DBG) Log.d(TAG, String.format("loadOverlayDrawable(%d, %d)", value.type, id));
-        if(mSkipFiles.get(id) != null && mSkipFiles.get(id).equals(Boolean.TRUE))
+        if(mSkipFiles.get(id) != null && mSkipFiles.get(id).equals(Boolean.TRUE) || mIsThemeCompatibilityModeEnabled)
             return null;
 
         Drawable drawable = null;
