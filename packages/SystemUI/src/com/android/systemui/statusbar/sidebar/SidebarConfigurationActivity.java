@@ -309,6 +309,7 @@ public class SidebarConfigurationActivity extends Activity {
                 ItemInfo ai = (ItemInfo) view.getTag();
                 if (ai.container == ItemInfo.CONTAINER_FOLDER) {
                     mFolder.getInfo().remove((AppItemInfo) ai);
+                    ai.container = ItemInfo.CONTAINER_SIDEBAR;
                     if (mFolder.getItemCount() == 1) {
                         int folderPos = mSidebarContents.indexOfChild(mFolderIcon);
                         AppItemInfo finalItem = (AppItemInfo)mFolder.getItemsInReadingOrder().get(0).getTag();
