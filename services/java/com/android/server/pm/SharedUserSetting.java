@@ -26,6 +26,8 @@ final class SharedUserSetting extends GrantedPermissions {
 
     int userId;
 
+    boolean isThemeCompatibilityEnabled;
+
     final HashSet<PackageSetting> packages = new HashSet<PackageSetting>();
 
     final PackageSignatures signatures = new PackageSignatures();

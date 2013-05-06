@@ -2979,6 +2979,25 @@ public abstract class PackageManager {
     public abstract void setRevokedPermissions(String packageName, String[] perms);
 
     /**
+     * Returns whether theme compatibility is on for given package.
+     *
+     * @param packageName Name of the package
+     * @hide
+     */
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    public abstract boolean isThemeCompatibilityModeEnabled(String packageName);
+
+    /**
+     * Returns whether theme compatibility is on for given package.
+     *
+     * @param packageName Name of the package
+     * @param compatOn true if compatibility mode is to be used, false otherwise
+     * @hide
+     */
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    public abstract void setThemeCompatibilityMode(String packageName, boolean compatOn);
+
+    /**
      * Returns the device identity that verifiers can use to associate their scheme to a particular
      * device. This should not be used by anything other than a package verifier.
      * 

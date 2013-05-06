@@ -388,4 +388,7 @@ interface IPackageManager {
 
     String[] getRevokedPermissions(String packageName);
     void setRevokedPermissions(String packageName, in String[] perms);
+
+    boolean isThemeCompatibilityModeEnabled(String packageName);
+    void setThemeCompatibilityMode(String packageName, boolean compatEnabled);
 }

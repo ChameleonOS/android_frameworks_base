@@ -57,6 +57,7 @@ class PackageSettingBase extends GrantedPermissions {
     long firstInstallTime;
     long lastUpdateTime;
     int versionCode;
+    boolean isThemeCompatibilityEnabled;
 
     boolean uidError;
 
@@ -103,6 +104,7 @@ class PackageSettingBase extends GrantedPermissions {
         firstInstallTime = base.firstInstallTime;
         lastUpdateTime = base.lastUpdateTime;
         versionCode = base.versionCode;
+        isThemeCompatibilityEnabled = base.isThemeCompatibilityEnabled;
 
         uidError = base.uidError;
 
@@ -174,6 +176,7 @@ class PackageSettingBase extends GrantedPermissions {
             userState.put(base.userState.keyAt(i), base.userState.valueAt(i));
         }
         installStatus = base.installStatus;
+        isThemeCompatibilityEnabled = base.isThemeCompatibilityEnabled;
     }
 
     private PackageUserState modifyUserState(int userId) {

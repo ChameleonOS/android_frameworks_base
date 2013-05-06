@@ -1756,7 +1756,13 @@ public final class ActivityThread {
 			int displayId, Configuration overrideConfiguration,
 			CompatibilityInfo compInfo) {
         Resources resources = getTopLevelResources(resDir, displayId, overrideConfiguration, compInfo);
-        ((CosResources)resources).init(packageName);
+        boolean isThemeCompatibilityModeEnabled;
+        try {
+            isThemeCompatibilityModeEnabled = sPackageManager.isThemeCompatibilityModeEnabled(packageName);
+        } catch (RemoteException e) {
+            isThemeCompatibilityModeEnabled = false;
+        }
+        ((CosResources)resources).init(packageName, isThemeCompatibilityModeEnabled);
         return resources;
     }
 

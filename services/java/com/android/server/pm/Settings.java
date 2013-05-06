@@ -1298,6 +1298,7 @@ final class Settings {
                 serializer.attribute(null, ATTR_NAME, usr.name);
                 serializer.attribute(null, "userId",
                         Integer.toString(usr.userId));
+                serializer.attribute(null, "theme-compat", Boolean.toString(usr.isThemeCompatibilityEnabled));
                 usr.signatures.writeXml(serializer, "sigs", mPastSignatures);
                 serializer.startTag(null, "perms");
                 for (String name : usr.grantedPermissions) {
@@ -1440,6 +1441,7 @@ final class Settings {
         serializer.attribute(null, "it", Long.toHexString(pkg.firstInstallTime));
         serializer.attribute(null, "ut", Long.toHexString(pkg.lastUpdateTime));
         serializer.attribute(null, "version", String.valueOf(pkg.versionCode));
+        serializer.attribute(null, "theme-compat", Boolean.toString(pkg.isThemeCompatibilityEnabled));
         if (!pkg.resourcePathString.equals(pkg.codePathString)) {
             serializer.attribute(null, "resourcePath", pkg.resourcePathString);
         }
@@ -1506,6 +1508,7 @@ final class Settings {
         serializer.attribute(null, "it", Long.toHexString(pkg.firstInstallTime));
         serializer.attribute(null, "ut", Long.toHexString(pkg.lastUpdateTime));
         serializer.attribute(null, "version", String.valueOf(pkg.versionCode));
+        serializer.attribute(null, "theme-compat", Boolean.toString(pkg.isThemeCompatibilityEnabled));
         if (pkg.sharedUser == null) {
             serializer.attribute(null, "userId", Integer.toString(pkg.appId));
         } else {
@@ -1997,6 +2000,8 @@ final class Settings {
             String sharedIdStr = parser.getAttributeValue(null, "sharedUserId");
             ps.appId = sharedIdStr != null ? Integer.parseInt(sharedIdStr) : 0;
         }
+        String compatMode = parser.getAttributeValue(null, "theme-compat");
+        ps.isThemeCompatibilityEnabled = compatMode != null ? Boolean.valueOf(compatMode) : false;
         int outerDepth = parser.getDepth();
         int type;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
@@ -2202,6 +2207,8 @@ final class Settings {
                 }
             }
 
+            String compatMode = parser.getAttributeValue(null, "theme-compat");
+            packageSetting.isThemeCompatibilityEnabled = compatMode != null ? Boolean.valueOf(compatMode) : false;
             int outerDepth = parser.getDepth();
             int type;
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
