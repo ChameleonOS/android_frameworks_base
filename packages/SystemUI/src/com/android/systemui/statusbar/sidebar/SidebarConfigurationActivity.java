@@ -172,19 +172,19 @@ public class SidebarConfigurationActivity extends Activity {
             helper.close();
             List<ItemInfo> items = getSidebarItems();
             for (ItemInfo i : items) {
-                Log.i(TAG, i.toString());
-                ContentValues values = new ContentValues();
-                values.put(SidebarTable.COLUMN_ITEM_ID, i.id);
-                values.put(SidebarTable.COLUMN_ITEM_TYPE, i.itemType);
-                values.put(SidebarTable.COLUMN_CONTAINER, i.container);
-                values.put(SidebarTable.COLUMN_TITLE, i.title.toString());
-                if (i instanceof AppItemInfo) {
-                    ComponentName cn = new ComponentName(((AppItemInfo)i).packageName,
-                            ((AppItemInfo)i).className);
-                    values.put(SidebarTable.COLUMN_COMPONENT, cn.flattenToString());
+                if (i.container >= ItemInfo.CONTAINER_SIDEBAR) {
+                    ContentValues values = new ContentValues();
+                    values.put(SidebarTable.COLUMN_ITEM_ID, i.id);
+                    values.put(SidebarTable.COLUMN_ITEM_TYPE, i.itemType);
+                    values.put(SidebarTable.COLUMN_CONTAINER, i.container);
+                    values.put(SidebarTable.COLUMN_TITLE, i.title.toString());
+                    if (i instanceof AppItemInfo) {
+                        ComponentName cn = new ComponentName(((AppItemInfo)i).packageName,
+                                ((AppItemInfo)i).className);
+                        values.put(SidebarTable.COLUMN_COMPONENT, cn.flattenToString());
+                    }
+                    getContentResolver().insert(SidebarContentProvider.CONTENT_URI, values);
                 }
-                Uri itemUri = getContentResolver().insert(SidebarContentProvider.CONTENT_URI, values);
-                Log.d("itemURI", itemUri.toString());
             }
             sendBroadcast(new Intent(AppSidebar.ACTION_SIDEBAR_ITEMS_CHANGED));
             Toast.makeText(this, R.string.toast_items_saved, Toast.LENGTH_SHORT).show();
