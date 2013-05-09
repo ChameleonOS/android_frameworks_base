@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar;
 
+import static android.view.KeyEvent.ACTION_DOWN;
+import static android.view.KeyEvent.KEYCODE_BACK;
+
 import android.app.AlarmManager;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
@@ -499,7 +502,8 @@ public class AppSidebar extends FrameLayout {
 
     @Override
     public boolean dispatchKeyEventPreIme(KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN)
+        if (event.getKeyCode() == KEYCODE_BACK && event.getAction() == ACTION_DOWN &&
+                mState == SIDEBAR_STATE.OPENED)
             showAppContainer(false);
         return super.dispatchKeyEventPreIme(event);
     }
