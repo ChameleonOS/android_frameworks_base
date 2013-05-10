@@ -136,9 +136,7 @@ public class AppSidebar extends FrameLayout {
         mTriggerColor = resources.getColor(R.color.trigger_region_color);
         mPm = context.getPackageManager();
         mWm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        Rect r = new Rect();
-        getWindowVisibleDisplayFrame(r);
-        mBarHeight = r.bottom - r.top;
+        mBarHeight = getWindowHeight();
     }
 
     @Override
@@ -443,7 +441,14 @@ public class AppSidebar extends FrameLayout {
         });
     }
 
+    private int getWindowHeight() {
+        Rect r = new Rect();
+        getWindowVisibleDisplayFrame(r);
+        return r.bottom - r.top;
+    }
+
     private void layoutItems() {
+        int windowHeight = getWindowHeight();
         if (mScrollView != null)
             removeView(mScrollView);
 
@@ -462,8 +467,8 @@ public class AppSidebar extends FrameLayout {
         int desiredHeight = mContext.getResources().
                 getDimensionPixelSize(R.dimen.app_sidebar_item_size) +
                 padding * 2;
-        int numItems = (int)Math.floor(mBarHeight / desiredHeight);
-        ITEM_LAYOUT_PARAMS.height = mBarHeight / numItems;
+        int numItems = (int)Math.floor(windowHeight / desiredHeight);
+        ITEM_LAYOUT_PARAMS.height = windowHeight / numItems;
         ITEM_LAYOUT_PARAMS.width = desiredHeight;
 
         for (View icon : mContainerItems) {
