@@ -567,4 +567,8 @@ public class IWindowManagerImpl implements IWindowManager {
         // TODO Auto-generated method stub
         return false;
     }
+
+    public boolean hasMenuKeyEnabled() {
+        return true;
+    }
 }
