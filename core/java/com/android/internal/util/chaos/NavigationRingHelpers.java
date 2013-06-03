@@ -152,7 +152,7 @@ public class NavigationRingHelpers {
                 selector.addState(TargetDrawable.STATE_ACTIVE, iconActivated);
                 selector.addState(TargetDrawable.STATE_FOCUSED, iconActivated);
                 return new TargetDrawable(res, selector);
-            } catch (URISyntaxException e) {
+            } catch (Exception e) {
                 resourceId = com.android.internal.R.drawable.ic_navigation_ring_empty;
             }
         }
