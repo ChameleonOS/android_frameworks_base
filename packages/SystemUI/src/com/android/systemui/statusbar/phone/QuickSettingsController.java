@@ -16,8 +16,46 @@
 
 package com.android.systemui.statusbar.phone;
 
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.HashMap;
+=======
+import static com.android.internal.util.cm.QSConstants.TILES_DEFAULT;
+import static com.android.internal.util.cm.QSConstants.TILE_AIRPLANE;
+import static com.android.internal.util.cm.QSConstants.TILE_AUTOROTATE;
+import static com.android.internal.util.cm.QSConstants.TILE_BATTERY;
+import static com.android.internal.util.cm.QSConstants.TILE_BLUETOOTH;
+import static com.android.internal.util.cm.QSConstants.TILE_BRIGHTNESS;
+import static com.android.internal.util.cm.QSConstants.TILE_DELIMITER;
+import static com.android.internal.util.cm.QSConstants.TILE_EXPANDEDDESKTOP;
+import static com.android.internal.util.cm.QSConstants.TILE_GPS;
+import static com.android.internal.util.cm.QSConstants.TILE_LOCKSCREEN;
+import static com.android.internal.util.cm.QSConstants.TILE_LTE;
+import static com.android.internal.util.cm.QSConstants.TILE_MOBILEDATA;
+import static com.android.internal.util.cm.QSConstants.TILE_NETWORKMODE;
+import static com.android.internal.util.cm.QSConstants.TILE_NFC;
+import static com.android.internal.util.cm.QSConstants.TILE_PROFILE;
+import static com.android.internal.util.cm.QSConstants.TILE_QUIETHOURS;
+import static com.android.internal.util.cm.QSConstants.TILE_RINGER;
+import static com.android.internal.util.cm.QSConstants.TILE_SCREENTIMEOUT;
+import static com.android.internal.util.cm.QSConstants.TILE_SETTINGS;
+import static com.android.internal.util.cm.QSConstants.TILE_SLEEP;
+import static com.android.internal.util.cm.QSConstants.TILE_SYNC;
+import static com.android.internal.util.cm.QSConstants.TILE_TORCH;
+import static com.android.internal.util.cm.QSConstants.TILE_USER;
+import static com.android.internal.util.cm.QSConstants.TILE_VOLUME;
+import static com.android.internal.util.cm.QSConstants.TILE_WIFI;
+import static com.android.internal.util.cm.QSConstants.TILE_WIFIAP;
+import static com.android.internal.util.cm.QSConstants.TILE_WIMAX;
+import static com.android.internal.util.cm.QSUtils.deviceSupportsBluetooth;
+import static com.android.internal.util.cm.QSUtils.deviceSupportsDockBattery;
+import static com.android.internal.util.cm.QSUtils.deviceSupportsImeSwitcher;
+import static com.android.internal.util.cm.QSUtils.deviceSupportsLte;
+import static com.android.internal.util.cm.QSUtils.deviceSupportsMobileData;
+import static com.android.internal.util.cm.QSUtils.deviceSupportsUsbTether;
+import static com.android.internal.util.cm.QSUtils.expandedDesktopEnabled;
+import static com.android.internal.util.cm.QSUtils.systemProfilesEnabled;
+>>>>>>> d3361b7... QS/PW: Check for mobile data instead of telephony permissions (1/2)
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
@@ -173,12 +211,22 @@ public class QuickSettingsController {
 
         // Filter items not compatible with device
         boolean bluetoothSupported = deviceSupportsBluetooth();
+<<<<<<< HEAD
         boolean telephonySupported = deviceSupportsTelephony();
+=======
+        boolean mobileDataSupported = deviceSupportsMobileData(mContext);
+        boolean lteSupported = deviceSupportsLte(mContext);
+>>>>>>> d3361b7... QS/PW: Check for mobile data instead of telephony permissions (1/2)
 
         if (!bluetoothSupported) {
             TILES_DEFAULT.remove(TILE_BLUETOOTH);
         }
+<<<<<<< HEAD
         if (!telephonySupported) {
+=======
+
+        if (!mobileDataSupported) {
+>>>>>>> d3361b7... QS/PW: Check for mobile data instead of telephony permissions (1/2)
             TILES_DEFAULT.remove(TILE_WIFIAP);
             TILES_DEFAULT.remove(TILE_MOBILEDATA);
             TILES_DEFAULT.remove(TILE_NETWORKMODE);
@@ -218,6 +266,7 @@ public class QuickSettingsController {
             } else if (tile.equals(TILE_RINGER)) {
                 mQuickSettings.add(RINGER_TILE);
             } else if (tile.equals(TILE_SYNC)) {
+<<<<<<< HEAD
                 mQuickSettings.add(SYNC_TILE);
             } else if (tile.equals(TILE_WIFIAP)) {
                 if(telephonySupported) {
@@ -235,6 +284,19 @@ public class QuickSettingsController {
                 if(telephonySupported) {
                     mQuickSettings.add(MOBILE_NETWORK_TYPE_TILE);
                 }
+=======
+                qs = new SyncTile(mContext, this);
+            } else if (tile.equals(TILE_WIFIAP) && mobileDataSupported) {
+                qs = new WifiAPTile(mContext, this);
+            } else if (tile.equals(TILE_SCREENTIMEOUT)) {
+                qs = new ScreenTimeoutTile(mContext, this);
+            } else if (tile.equals(TILE_MOBILEDATA) && mobileDataSupported) {
+                qs = new MobileNetworkTile(mContext, this);
+            } else if (tile.equals(TILE_LOCKSCREEN)) {
+                qs = new ToggleLockscreenTile(mContext, this);
+            } else if (tile.equals(TILE_NETWORKMODE) && mobileDataSupported) {
+                qs = new MobileNetworkTypeTile(mContext, this);
+>>>>>>> d3361b7... QS/PW: Check for mobile data instead of telephony permissions (1/2)
             } else if (tile.equals(TILE_AUTOROTATE)) {
                 mQuickSettings.add(AUTO_ROTATION_TILE);
             } else if (tile.equals(TILE_AIRPLANE)) {
