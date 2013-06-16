@@ -243,4 +243,27 @@
     <dimen name="folder_width">290dp</dimen>
     <dimen name="folder_height">480dp</dimen>
     <dimen name="setup_sidebar_width">90dp</dimen>
+
+    <!-- SystemBar specific dimensions -->
+    <!-- ======================================== -->
+    <!-- The following resources were recently moved from sw600dp; there may
+         be situations where they don't sync up perfectly with
+         PhoneStatusBar/TabletStatusBar. -->
+    <!-- ======================================== -->
+
+    <!-- The width of the ticker, including the icon -->
+    <dimen name="notification_ticker_width">240dp</dimen>
+    <!-- Status bar panel bottom offset (height of status bar - overlap) -->
+    <dimen name="status_bar_panel_bottom_offset">36dp</dimen>
+    <!-- The width of the notification panel window -->
+    <dimen name="notification_panel_width">320dp</dimen>
+    <!-- The minimum height of the notification panel window -->
+    <dimen name="notification_panel_min_height">480dp</dimen>
+    <!-- Bottom margin (from display edge) for status bar panels -->
+    <dimen name="panel_float">56dp</dimen>
+
+    <dimen name="navigation_key_width_tablet">64dip</dimen>
+
+    <!-- Width of recents panel -->
+    <dimen name="status_bar_recents_width">320dp</dimen>
 </resources>

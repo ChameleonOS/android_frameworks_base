@@ -21,14 +21,18 @@ import java.io.PrintWriter;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
@@ -50,6 +54,8 @@ public class SystemUIService extends Service {
      * Hold a reference on the stuff we start.
      */
     SystemUI[] mServices;
+
+    private Context mContext;
 
     private Class chooseClass(Object o) {
         if (o instanceof Integer) {
@@ -98,6 +104,9 @@ public class SystemUIService extends Service {
             Slog.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
         }
+        mContext = this;
+        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
+        settingsObserver.observe();
     }
 
     @Override
@@ -130,6 +139,24 @@ public class SystemUIService extends Service {
                     ui.dump(fd, pw, args);
                 }
             }
+        }
+    }
+    class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.ENABLE_TABLET_MODE), false,
+                    this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            // Dirty way to kill off the SystemUI service so we can restart with the new UI
+            System.exit(1);
         }
     }
 }

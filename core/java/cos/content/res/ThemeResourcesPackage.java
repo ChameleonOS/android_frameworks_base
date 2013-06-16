@@ -17,6 +17,7 @@
 package cos.content.res;
 
 import android.content.res.Resources;
+import android.util.Log;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -24,6 +25,8 @@ import java.util.Map;
 
 public final class ThemeResourcesPackage extends ThemeResources
 {
+    private static final boolean DBG = ThemeResources.DEBUG_THEMES;
+    private static final String TAG = "ThemeResourcesPackage";
     private static final Map<String, WeakReference<ThemeResourcesPackage>> sPackageResources = new HashMap();
 
     protected ThemeResourcesPackage(ThemeResourcesPackage wrapped, Resources resources,
@@ -32,6 +35,8 @@ public final class ThemeResourcesPackage extends ThemeResources
     }
 
     public static ThemeResourcesPackage getThemeResources(Resources resources, String packageName) {
+        if (DBG)
+            Log.d(TAG, String.format("getThemeResources: packageName=%s", packageName));
         ThemeResourcesPackage themeResources = null;
         if (sPackageResources.containsKey(packageName))
             themeResources = (ThemeResourcesPackage)((WeakReference)sPackageResources.get(packageName)).get();
@@ -43,6 +48,21 @@ public final class ThemeResourcesPackage extends ThemeResources
                     themeResources = getTopLevelThemeResources(resources, packageName);
                     sPackageResources.put(packageName, new WeakReference(themeResources));
                 }
+            }
+        return themeResources;
+    }
+
+    public static ThemeResourcesPackage getThemeResources(Resources resources, String packageName, String originatingPackageName) {
+        if (DBG)
+            Log.d(TAG, String.format("getThemeResources: packageName=%s, originatingPackageName=%s", packageName, originatingPackageName));
+        ThemeResourcesPackage themeResources = null;
+        if (!packageName.equals(originatingPackageName) && sPackageResources.containsKey(packageName))
+            themeResources = (ThemeResourcesPackage)((WeakReference)sPackageResources.get(packageName)).get();
+        if (themeResources == null)
+            synchronized (sPackageResources) {
+                themeResources = getTopLevelThemeResources(resources, packageName);
+                if (packageName.equals(originatingPackageName))
+                    sPackageResources.put(packageName, new WeakReference(themeResources));
             }
         return themeResources;
     }

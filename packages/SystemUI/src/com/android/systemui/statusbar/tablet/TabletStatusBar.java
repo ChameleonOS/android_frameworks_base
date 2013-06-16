@@ -29,7 +29,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.IThemeManagerService;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -190,6 +192,8 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private int mShowSearchHoldoff = 0;
 
+    private Context mThemeContext;
+
     public Context getContext() { return mContext; }
 
     private Runnable mShowSearchPanel = new Runnable() {
@@ -235,6 +239,8 @@ public class TabletStatusBar extends BaseStatusBar implements
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.OPAQUE);
 
+        mStatusBarContainer.addView(sb);
+
         // We explicitly leave FLAG_HARDWARE_ACCELERATED out of the flags.  The status bar occupies
         // very little screen real-estate and is updated fairly frequently.  By using CPU rendering
         // for the status bar, we prevent the GPU from having to wake up just to do these small
@@ -243,7 +249,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         lp.gravity = getStatusBarGravity();
         lp.setTitle("SystemBar");
         lp.packageName = mContext.getPackageName();
-        mWindowManager.addView(sb, lp);
+        Slog.i(TAG, "mContext.getPackageName()=" + lp.packageName);
+        mWindowManager.addView(mStatusBarContainer, lp);
     }
 
     private boolean mRecreating = false;
@@ -374,6 +381,12 @@ public class TabletStatusBar extends BaseStatusBar implements
         scroller.setFillViewport(true);
     }
 
+    private void removePanelWindows() {
+        mWindowManager.removeView(mNotificationPanel);
+        mWindowManager.removeView(mInputMethodsPanel);
+        mWindowManager.removeView(mCompatModePanel);
+    }
+
     @Override
     protected int getExpandedViewMaxHeight() {
         return getNotificationPanelHeight();
@@ -404,6 +417,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     private void recreateStatusBar() {
         mRecreating = true;
         mStatusBarContainer.removeAllViews();
+        mStatusBarView = null;
 
         // extract notifications.
         int nNotifs = mNotificationData.size();
@@ -412,7 +426,11 @@ public class TabletStatusBar extends BaseStatusBar implements
         copyNotifications(notifications, mNotificationData);
         mNotificationData.clear();
 
-        mStatusBarContainer.addView(makeStatusBarView());
+        makeStatusBarView();
+        mStatusBarContainer.addView(mStatusBarView);
+        removePanelWindows();
+        addPanelWindows();
+        mStatusBarView.setBar(this);
 
         // recreate notifications.
         for (int i = 0; i < nNotifs; i++) {
@@ -647,6 +665,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         return sb;
@@ -709,18 +728,18 @@ public class TabletStatusBar extends BaseStatusBar implements
     public void showSearchPanel() {
         super.showSearchPanel();
         WindowManager.LayoutParams lp =
-            (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
+            (android.view.WindowManager.LayoutParams) mStatusBarContainer.getLayoutParams();
         lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        mWindowManager.updateViewLayout(mStatusBarView, lp);
+        mWindowManager.updateViewLayout(mStatusBarContainer, lp);
     }
 
     @Override
     public void hideSearchPanel() {
         super.hideSearchPanel();
         WindowManager.LayoutParams lp =
-            (android.view.WindowManager.LayoutParams) mStatusBarView.getLayoutParams();
+            (android.view.WindowManager.LayoutParams) mStatusBarContainer.getLayoutParams();
         lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        mWindowManager.updateViewLayout(mStatusBarView, lp);
+        mWindowManager.updateViewLayout(mStatusBarContainer, lp);
     }
 
     public int getStatusBarHeight() {
@@ -1482,6 +1501,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         for (int i=0; i<toShow.size(); i++) {
             View v = toShow.get(i);
             v.setPadding(mIconHPadding, 0, mIconHPadding, 0);
+            v.setVisibility(View.VISIBLE);
             if (v.getParent() == null) {
                 mIconLayout.addView(v, i, params);
             }
@@ -1560,6 +1580,14 @@ public class TabletStatusBar extends BaseStatusBar implements
                     }
                 }
                 animateCollapsePanels(flags);
+            }
+            else if (Intent.ACTION_BOOT_COMPLETED.equals(action)) {
+                // ugly hack to get systemui to reload resources since some drawables
+                // do not load on boot (like status_bar_background or notification_panel_bg)
+                IThemeManagerService ts = IThemeManagerService.Stub.asInterface(ServiceManager.getService("ThemeService"));
+                try {
+                    ts.updateSystemUI();
+                } catch (Exception e) {}
             }
         }
     };

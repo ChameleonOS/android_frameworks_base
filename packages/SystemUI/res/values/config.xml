@@ -46,7 +46,7 @@
 
     <!-- How many icons may be shown at once in the system bar. Includes any
          slots that may be reused for things like IME control. -->
-    <integer name="config_maxNotificationIcons">5</integer>
+    <integer name="config_maxNotificationIcons">2</integer>
 
     <!-- Show phone (voice) signal strength instead of data in mobile RSSI. -->
     <bool name="config_showPhoneRSSIForData">false</bool>

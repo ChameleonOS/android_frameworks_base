@@ -37,7 +37,7 @@ import cos.content.res.ThemeZipFile;
 /** {@hide} */
 public final class CosResources extends Resources {
 
-    public static final boolean DBG = false;
+    public static final boolean DBG = ThemeResources.DEBUG_THEMES;
     public static final String TAG = "CosResources";
 
     public static final int sCookieTypeFramework = 1;
@@ -124,8 +124,11 @@ public final class CosResources extends Resources {
             if(index >= 0) {
                 value = (CharSequence)mCharSequences.valueAt(index);
             } else {
-                value = mThemeResources.getThemeCharSequence(id);
-                mCharSequences.put(id, value);
+                if (id > 0) {
+                    String name = getResourceEntryName(id);
+                    value = mThemeResources.getThemeCharSequence(name);
+                    mCharSequences.put(id, value);
+                }
             }
         }
         return value;
@@ -138,8 +141,11 @@ public final class CosResources extends Resources {
             if(index >= 0) {
                 value = (Integer)mIntegers.valueAt(index);
             } else {
-                value = mThemeResources.getThemeInt(id);
-                mIntegers.put(id, value);
+                if (id > 0) {
+                    String name = getResourceEntryName(id);
+                    value = mThemeResources.getThemeInt(name);
+                    mIntegers.put(id, value);
+                }
             }
         }
         return value;

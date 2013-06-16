@@ -67,7 +67,7 @@ public class ThemeResources
     protected static Map<String, String> sMiuiToChaosPackageMappings;
     static {
         sMiuiToChaosPackageMappings = new HashMap();
-        sMiuiToChaosPackageMappings.put("framework-res", "framework-miui-res");
+        sMiuiToChaosPackageMappings.put("framework-res", "com.android.systemui");
         sMiuiToChaosPackageMappings.put("android", "com.android.systemui");
         sMiuiToChaosPackageMappings.put("com.android.contacts", "com.android.phone");
         sMiuiToChaosPackageMappings.put("com.android.mms", "framework-miui-res");
@@ -159,6 +159,65 @@ public class ThemeResources
         map.put("ic_notify_quicksettings_normal.png", "toggle_settings_n.png");
         map.put("ic_notify_open_pressed.png", "toggle_settings_p.png");
         map.put("ic_notify_open_normal.png", "toggle_settings_n.png");
+
+        // sysbar to statusbar image mappings
+        map.put("ic_sysbar_battery_0.png", "stat_sys_battery_0.png");
+        map.put("ic_sysbar_battery_15.png", "stat_sys_battery_15.png");
+        map.put("ic_sysbar_battery_28.png", "stat_sys_battery_28.png");
+        map.put("ic_sysbar_battery_43.png", "stat_sys_battery_43.png");
+        map.put("ic_sysbar_battery_57.png", "stat_sys_battery_57.png");
+        map.put("ic_sysbar_battery_71.png", "stat_sys_battery_71.png");
+        map.put("ic_sysbar_battery_85.png", "stat_sys_battery_85.png");
+        map.put("ic_sysbar_battery_100.png", "stat_sys_battery_100.png");
+        map.put("ic_sysbar_battery_charge_anim0.png", "stat_sys_battery_charge_anim0.png");
+        map.put("ic_sysbar_battery_charge_anim15.png", "stat_sys_battery_charge_anim15.png");
+        map.put("ic_sysbar_battery_charge_anim28.png", "stat_sys_battery_charge_anim28.png");
+        map.put("ic_sysbar_battery_charge_anim43.png", "stat_sys_battery_charge_anim43.png");
+        map.put("ic_sysbar_battery_charge_anim57.png", "stat_sys_battery_charge_anim57.png");
+        map.put("ic_sysbar_battery_charge_anim71.png", "stat_sys_battery_charge_anim71.png");
+        map.put("ic_sysbar_battery_charge_anim85.png", "stat_sys_battery_charge_anim85.png");
+        map.put("ic_sysbar_battery_charge_anim100.png", "stat_sys_battery_charge_anim100.png");
+        map.put("ic_sysbar_data_connected_1x.png", "stat_sys_data_connected_1x.png");
+        map.put("ic_sysbar_data_connected_3g.png", "stat_sys_data_connected_3g.png");
+        map.put("ic_sysbar_data_connected_4g.png", "stat_sys_data_connected_4g.png");
+        map.put("ic_sysbar_data_connected_e.png", "stat_sys_data_connected_e.png");
+        map.put("ic_sysbar_data_connected_g.png", "stat_sys_data_connected_g.png");
+        map.put("ic_sysbar_data_connected_h.png", "stat_sys_data_connected_h.png");
+        map.put("ic_sysbar_data_connected_roam.png", "stat_sys_data_connected_roam.png");
+        map.put("ic_sysbar_data_fully_connected_1x.png", "stat_sys_data_fully_connected_1x.png");
+        map.put("ic_sysbar_data_fully_connected_3g.png", "stat_sys_data_fully_connected_3g.png");
+        map.put("ic_sysbar_data_fully_connected_4g.png", "stat_sys_data_fully_connected_4g.png");
+        map.put("ic_sysbar_data_fully_connected_e.png", "stat_sys_data_fully_connected_e.png");
+        map.put("ic_sysbar_data_fully_connected_g.png", "stat_sys_data_fully_connected_g.png");
+        map.put("ic_sysbar_data_fully_connected_h.png", "stat_sys_data_fully_connected_h.png");
+        map.put("ic_sysbar_signal_0.png", "stat_sys_signal_0.png");
+        map.put("ic_sysbar_signal_1.png", "stat_sys_signal_1.png");
+        map.put("ic_sysbar_signal_2.png", "stat_sys_signal_2.png");
+        map.put("ic_sysbar_signal_3.png", "stat_sys_signal_3.png");
+        map.put("ic_sysbar_signal_4.png", "stat_sys_signal_4.png");
+        map.put("ic_sysbar_signal_0_fully.png", "stat_sys_signal_0_fully.png");
+        map.put("ic_sysbar_signal_1_fully.png", "stat_sys_signal_1_fully.png");
+        map.put("ic_sysbar_signal_2_fully.png", "stat_sys_signal_2_fully.png");
+        map.put("ic_sysbar_signal_3_fully.png", "stat_sys_signal_3_fully.png");
+        map.put("ic_sysbar_signal_4_fully.png", "stat_sys_signal_4_fully.png");
+        map.put("ic_sysbar_signal_flightmode.png", "stat_sys_signal_flightmode.png");
+        map.put("ic_sysbar_signal_in.png", "stat_sys_signal_in.png");
+        map.put("ic_sysbar_signal_inout.png", "stat_sys_signal_inout.png");
+        map.put("ic_sysbar_signal_null.png", "stat_sys_signal_null.png");
+        map.put("ic_sysbar_signal_out.png", "stat_sys_signal_inout.png");
+        map.put("ic_sysbar_wifi_in.png", "stat_sys_wifi_in.png");
+        map.put("ic_sysbar_wifi_inout.png", "stat_sys_wifi_inout.png");
+        map.put("ic_sysbar_wifi_on.png", "stat_sys_wifi_on.png");
+        map.put("ic_sysbar_wifi_out.png", "stat_sys_wifi_out.png");
+        map.put("ic_sysbar_wifi_signal_0.png", "stat_sys_wifi_signal_0.png");
+        map.put("ic_sysbar_wifi_signal_1.png", "stat_sys_wifi_signal_1.png");
+        map.put("ic_sysbar_wifi_signal_2.png", "stat_sys_wifi_signal_2.png");
+        map.put("ic_sysbar_wifi_signal_3.png", "stat_sys_wifi_signal_3.png");
+        map.put("ic_sysbar_wifi_signal_4.png", "stat_sys_wifi_signal_4.png");
+        map.put("ic_sysbar_wifi_signal_1_fully.png", "stat_sys_wifi_signal_1_fully.png");
+        map.put("ic_sysbar_wifi_signal_2_fully.png", "stat_sys_wifi_signal_2_fully.png");
+        map.put("ic_sysbar_wifi_signal_3_fully.png", "stat_sys_wifi_signal_3_fully.png");
+        map.put("ic_sysbar_wifi_signal_4_fully.png", "stat_sys_wifi_signal_4_fully.png");
         sMiuiToChaosResourceMappings.put("com.android.systemui", map);
         map = new HashMap();
         map.put("dial_num_0_wht.png", "dial_num_0_no_plus_wht.png");
@@ -192,7 +251,7 @@ public class ThemeResources
         if (sMiuiToChaosPackageMappings.containsKey(componentName)) {
             if (DBG)
                 Log.i(TAG, "Loading wrapper " + sMiuiToChaosPackageMappings.get(componentName) + " for " + componentName);
-            mWrapped = new ThemeResourcesPackage(null, resources, sMiuiToChaosPackageMappings.get(componentName), metaData);
+            mWrapped = ThemeResourcesPackage.getThemeResources(resources, sMiuiToChaosPackageMappings.get(componentName), componentName);
             supportWrapper = true;
         }
         mSupportWrapper = supportWrapper;
@@ -248,7 +307,7 @@ public class ThemeResources
 
     public boolean checkUpdate() {
         boolean result = mPackageZipFile.checkUpdate();
-        mHasWrapped = (mWrapped != null && (mSupportWrapper || !mPackageZipFile.exists()));
+        mHasWrapped = mWrapped != null;// && (mSupportWrapper || !mPackageZipFile.exists()));
 
         if(mHasWrapped)
             if(mWrapped.checkUpdate() || result)
@@ -274,6 +333,17 @@ public class ThemeResources
         CharSequence ret = mPackageZipFile.getThemeCharSequence(id);
         if(ret == null && mHasWrapped)
             ret = mWrapped.getThemeCharSequenceInner(id);
+        return ret;
+    }
+
+    public CharSequence getThemeCharSequence(String name) {
+        return getThemeCharSequenceInner(name);
+    }
+
+    protected CharSequence getThemeCharSequenceInner(String name) {
+        CharSequence ret = mPackageZipFile.getThemeCharSequence(name);
+        if(ret == null && mHasWrapped)
+            ret = mWrapped.getThemeCharSequenceInner(name);
         return ret;
     }
 
@@ -315,12 +385,16 @@ public class ThemeResources
 
     protected ThemeZipFile.ThemeFileInfo getThemeFileStreamInner(String relativeFilePath) {
         if (DBG)
-            Log.i(TAG, "getThemeFileStreamInnter(" + relativeFilePath + ")");
-        ThemeZipFile.ThemeFileInfo ret = mPackageZipFile.getInputStream(relativeFilePath);
-        if(ret == null && mHasWrapped) {
+            Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeFileStreamInner(" + relativeFilePath + ")");
+        ThemeZipFile.ThemeFileInfo ret = null;
+
+        if(mWrapped != null) {
             if (DBG)
                 Log.i(TAG, "Checking wrapper for " + relativeFilePath);
             ret = mWrapped.getThemeFileStreamInner(relativeFilePath);
+        }
+        if(ret == null) {
+            ret = mPackageZipFile.getInputStream(relativeFilePath);
         }
         return ret;
     }
@@ -330,9 +404,28 @@ public class ThemeResources
     }
 
     protected Integer getThemeIntInner(int id) {
+        if (DBG)
+            Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeIntInner(0x" + Integer.toHexString(id) + ")");
         Integer integer = mPackageZipFile.getThemeInt(id);
-        if(integer == null && mHasWrapped)
+        if(integer == null && mWrapped != null)
             integer = mWrapped.getThemeIntInner(id);
+        if (DBG)
+            Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeIntInner=" + integer);
+        return integer;
+    }
+
+    public Integer getThemeInt(String name) {
+        return getThemeIntInner(name);
+    }
+
+    protected Integer getThemeIntInner(String name) {
+        if (DBG)
+            Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeIntInner(" + name + ")");
+        Integer integer = mPackageZipFile.getThemeInt(name);
+        if(integer == null && mWrapped != null)
+            integer = mWrapped.getThemeIntInner(name);
+        if (DBG)
+            Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeIntInner=" + integer);
         return integer;
     }
 
@@ -341,7 +434,7 @@ public class ThemeResources
     }
 
     protected boolean hasValuesInner() {
-        return mPackageZipFile.hasValues() || mHasWrapped && mWrapped.hasValuesInner();
+        return mPackageZipFile.hasValues() || (mHasWrapped && mWrapped.hasValuesInner());
     }
 
     protected static final class MetaData {

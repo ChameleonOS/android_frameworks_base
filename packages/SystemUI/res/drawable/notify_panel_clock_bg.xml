@@ -19,4 +19,3 @@
         android:drawable="@drawable/notify_panel_clock_bg_pressed" />
     <item android:drawable="@drawable/notify_panel_clock_bg_normal" />
 </selector>
-

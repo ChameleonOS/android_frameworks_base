@@ -1436,6 +1436,14 @@ public final class Settings {
          */
         public static final int END_BUTTON_BEHAVIOR_DEFAULT = END_BUTTON_BEHAVIOR_SLEEP;
 
+
+        /**
+         * Used to override the normal system UI based on user preference
+         * @hide
+         */
+        public static final String ENABLE_TABLET_MODE = "enable_tablet_mode";
+
+
         /**
          * Is advanced settings mode turned on. 0 == no, 1 == yes
          * @hide

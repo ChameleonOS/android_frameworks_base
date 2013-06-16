@@ -60,8 +60,8 @@ public final class ThemeZipFile
     private static final int sDensity = DisplayMetrics.DENSITY_DEVICE;
     private static final int[] sDensities = DisplayUtils.getBestDensityOrder(sDensity);
     protected static final HashMap<String, ThemeZipFile> sThemeZipFiles = new HashMap<String, ThemeZipFile>();
-    private SparseArray<CharSequence> mCharSequences = new SparseArray();
-    private SparseArray<Integer> mIntegers = new SparseArray();
+    private HashMap<String, CharSequence> mCharSequences = new HashMap<String, CharSequence>();
+    private HashMap<String, Integer> mIntegers = new HashMap<String, Integer>();
     private long mLastModifyTime = -1L;
     private ThemeResources.MetaData mMetaData;
     public String mPackageName;
@@ -250,36 +250,27 @@ public final class ThemeZipFile
                             if (pkg == null)
                                 pkg = mPackageName;
 
-                            int resId = mResources.getIdentifier(attr, tag, pkg);
-                            // to allow overriding system values on a per-app basis we will check
-                            // if the resource name has a resource id in the android package and
-                            // if it does we'll use that id for indexing the resource value
-                            if (resId == 0) {
-                                resId = mResources.getIdentifier(attr, tag, CHAOS_FRAMEWORK_PACKAGE);
-                            }
-                            if (resId > 0) {
-                                if (tag.equals(TAG_BOOLEAN)) {
-                                    if (DBG)
-                                        Log.d(TAG, String.format("parsing boolean %s, %s, %s, %s", attr, tag, pkg, content));
-                                    int value = content.trim().equals(TRUE) ? 1 : 0;
-                                    mIntegers.put(resId, Integer.valueOf(value));
-                                } else if (tag.equals(TAG_COLOR) || tag.equals(TAG_INTEGER) || tag.equals(TAG_DRAWABLE)) {
-                                    if (DBG)
-                                        Log.d(TAG, String.format("parsing color/int/drawable %s, %s, %s, %s", attr, tag, pkg, content));
-                                    if (mMetaData.supportInt && mIntegers.indexOfKey(resId) < 0)
-                                        mIntegers.put(resId, Integer.valueOf(XmlUtils.convertValueToUnsignedInt(content.trim(), 0)));
-                                } else if (tag.equals(TAG_STRING)) {
-                                    if (DBG)
-                                        Log.d(TAG, String.format("parsing string %s, %s, %s, %s", attr, tag, pkg, content));
-                                    if (mMetaData.supportCharSequence && mCharSequences.indexOfKey(resId) < 0)
-                                        mCharSequences.put(resId, content);
-                                } else if (tag.equals(TAG_DIMEN)) {
-                                    if (DBG)
-                                        Log.d(TAG, String.format("parsing dimension %s, %s, %s, %s", attr, tag, pkg, content));
-                                    Integer integer = ThemeHelper.parseDimension(content.toString());
-                                    if (integer != null)
-                                        mIntegers.put(resId, integer);
-                                }
+                            if (tag.equals(TAG_BOOLEAN)) {
+                                if (DBG)
+                                    Log.d(TAG, String.format("parsing boolean %s, %s, %s, %s", attr, tag, pkg, content));
+                                int value = content.trim().equals(TRUE) ? 1 : 0;
+                                mIntegers.put(attr, Integer.valueOf(value));
+                            } else if (tag.equals(TAG_COLOR) || tag.equals(TAG_INTEGER) || tag.equals(TAG_DRAWABLE)) {
+                                if (DBG)
+                                    Log.d(TAG, String.format("parsing color/int/drawable %s, %s, %s, %s", attr, tag, pkg, content));
+                                if (mMetaData.supportInt && !mIntegers.containsKey(attr))
+                                    mIntegers.put(attr, Integer.valueOf(XmlUtils.convertValueToUnsignedInt(content.trim(), 0)));
+                            } else if (tag.equals(TAG_STRING)) {
+                                if (DBG)
+                                    Log.d(TAG, String.format("parsing string %s, %s, %s, %s", attr, tag, pkg, content));
+                                if (mMetaData.supportCharSequence && mCharSequences.containsKey(attr))
+                                    mCharSequences.put(attr, content);
+                            } else if (tag.equals(TAG_DIMEN)) {
+                                if (DBG)
+                                    Log.d(TAG, String.format("parsing dimension %s, %s, %s, %s", attr, tag, pkg, content));
+                                Integer integer = ThemeHelper.parseDimension(content.toString());
+                                if (integer != null)
+                                    mIntegers.put(attr, integer);
                             }
                         }
                     }
@@ -353,6 +344,14 @@ public final class ThemeZipFile
 
     public Integer getThemeInt(int id) {
         return (Integer)mIntegers.get(id);
+    }
+
+    public CharSequence getThemeCharSequence(String name) {
+        return (CharSequence)mCharSequences.get(name);
+    }
+
+    public Integer getThemeInt(String name) {
+        return (Integer)mIntegers.get(name);
     }
 
     public boolean hasValues() {

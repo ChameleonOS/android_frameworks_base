@@ -67,6 +67,7 @@ import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
 import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -74,6 +75,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -859,6 +861,9 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             Surface.closeTransaction();
         }
+        
+        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
+        settingsObserver.observe();
     }
 
     public InputMonitor getInputMonitor() {
@@ -11280,6 +11285,25 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
         if (displayContent != null) {
             displayContent.updateDisplayInfo();
+        }
+    }
+
+    class SettingsObserver extends ContentObserver {
+        SettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.ENABLE_TABLET_MODE),
+                    false,
+                    this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            displayReady();
         }
     }
 }

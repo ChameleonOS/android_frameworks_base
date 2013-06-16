@@ -34,4 +34,8 @@
 
     <!-- Enable the "flip settings" panel -->
     <bool name="config_hasFlipSettingsPanel">false</bool>
+
+    <!-- How many icons may be shown at once in the system bar. Includes any
+         slots that may be reused for things like IME control. -->
+    <integer name="config_maxNotificationIcons">5</integer>
 </resources>
