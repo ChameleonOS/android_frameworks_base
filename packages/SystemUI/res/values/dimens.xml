@@ -256,11 +256,11 @@
     <!-- Status bar panel bottom offset (height of status bar - overlap) -->
     <dimen name="status_bar_panel_bottom_offset">36dp</dimen>
     <!-- The width of the notification panel window -->
-    <dimen name="notification_panel_width">320dp</dimen>
+    <dimen name="notification_panel_width">400dp</dimen>
     <!-- The minimum height of the notification panel window -->
-    <dimen name="notification_panel_min_height">480dp</dimen>
+    <dimen name="notification_panel_min_height">320dp</dimen>
     <!-- Bottom margin (from display edge) for status bar panels -->
-    <dimen name="panel_float">56dp</dimen>
+    <dimen name="panel_float">@*android:dimen/system_bar_height</dimen>
 
     <dimen name="navigation_key_width_tablet">64dip</dimen>
 

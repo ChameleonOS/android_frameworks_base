@@ -127,7 +127,10 @@ public final class CosResources extends Resources {
                 if (id > 0) {
                     String name = getResourceEntryName(id);
                     value = mThemeResources.getThemeCharSequence(name);
-                    mCharSequences.put(id, value);
+                    if (DBG)
+                        Log.i(TAG, "getThemeCharSequence(" + id + "): " + name + ", " + value);
+                    if (value != null)
+                        mCharSequences.put(id, value);
                 }
             }
         }
@@ -144,7 +147,10 @@ public final class CosResources extends Resources {
                 if (id > 0) {
                     String name = getResourceEntryName(id);
                     value = mThemeResources.getThemeInt(name);
-                    mIntegers.put(id, value);
+                    if (DBG)
+                        Log.i(TAG, "getThemeInt(0x" + Integer.toHexString(id) + "): " + name + ", " + value);
+                    if (value != null)
+                        mIntegers.put(id, value);
                 }
             }
         }

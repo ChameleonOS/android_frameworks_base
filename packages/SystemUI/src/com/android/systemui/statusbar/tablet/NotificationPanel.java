@@ -60,6 +60,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     ViewGroup mContentFrame;
     Rect mContentArea = new Rect();
     View mSettingsView;
+    View mCompactToggles;
     ViewGroup mContentParent;
     TabletStatusBar mBar;
     View mClearButton;
@@ -104,6 +105,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         // the "X" that appears in place of the clock when the panel is showing notifications
         mClearButton = findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
+
+        mCompactToggles = findViewById(R.id.compact_toggles);
 
         mShowing = false;
     }
@@ -269,6 +272,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                 if (toShow != null) {
                     toShow.setVisibility(View.VISIBLE);
                     if (toShow == mSettingsView || mNotificationCount > 0) {
+                        mCompactToggles.setVisibility(View.GONE);
                         ObjectAnimator.ofFloat(toShow, "alpha", 0f, 1f)
                                 .setDuration(PANEL_FADE_DURATION)
                                 .start();
@@ -276,6 +280,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
                     if (toHide == mSettingsView) {
                         removeSettingsView();
+                        mCompactToggles.setVisibility(View.VISIBLE);
                     }
                 }
                 updateClearButton();
@@ -326,7 +331,8 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     // NB: it will be invisible until you show it
     void addSettingsView() {
         LayoutInflater infl = LayoutInflater.from(getContext());
-        mSettingsView = infl.inflate(R.layout.system_bar_settings_view, mContentFrame, false);
+        //mSettingsView = infl.inflate(R.layout.system_bar_settings_view, mContentFrame, false);
+        mSettingsView = infl.inflate(R.layout.system_bar_toggles_view, mContentFrame, false);
         mSettingsView.setVisibility(View.GONE);
         mContentFrame.addView(mSettingsView);
     }
@@ -391,6 +397,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         void startAnimation(boolean appearing) {
             if (DEBUG) Slog.d(TAG, "startAnimation(appearing=" + appearing + ")");
 
+            mCompactToggles.setVisibility(View.VISIBLE);
             createAnimation(appearing);
             mContentAnim.start();
 

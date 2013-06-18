@@ -24,7 +24,7 @@
     android:clickable="true"
     android:orientation="vertical"
     android:paddingLeft="26dp"
-    android:paddingTop="14dp"
+    android:paddingTop="6dp"
     android:paddingRight="26dp"
     >
 
@@ -34,8 +34,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
         android:shrinkColumns="2,4"
         android:stretchColumns="7"
         >
@@ -226,7 +226,7 @@
 
         <Space
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="40dp"
             android:layout_weight="1"
             />
 

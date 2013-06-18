@@ -110,6 +110,9 @@ public final class ThemeZipFile
                     if (result != null) {
                         if(sDensities[j] > 1)
                             result.mDensity = sDensities[j];
+                        if (DBG)
+                            Log.d(TAG, String.format("Loading %s%s%s", prefix,
+                                DisplayUtils.getDensitySuffix(sDensities[j]), suffix));
                         break;
                     }
                 }

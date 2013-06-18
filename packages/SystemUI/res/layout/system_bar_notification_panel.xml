@@ -27,7 +27,7 @@
     <!-- lift the panel up off the status bar while leaving a touchable are -->
     <Space
         android:id="@+id/system_bar_notification_panel_bottom_space"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/panel_float"
         android:layout_width="478dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
@@ -41,19 +41,17 @@
         android:orientation="vertical"
         android:layout_alignParentRight="true"
         android:layout_above="@id/system_bar_notification_panel_bottom_space"
-        android:paddingBottom="8dp"
         >
 
         <include layout="@layout/system_bar_notification_panel_title"
             android:layout_width="match_parent"
-            android:layout_height="130dp"
+            android:layout_height="80dp"
             android:layout_above="@id/content_frame"
             android:layout_alignParentRight="true"
             android:layout_weight="0"
             />
 
         <ScrollView
-
             android:id="@+id/notification_scroller"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
@@ -71,5 +69,13 @@
                 systemui:rowHeight="@dimen/notification_row_min_height"
                 />
         </ScrollView>
+        <com.android.systemui.statusbar.powerwidget.StatusBarToggles
+                android:id="@+id/compact_toggles"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:orientation="horizontal"
+                systemui:compactLayout="true"
+                />
     </LinearLayout>
 </com.android.systemui.statusbar.tablet.NotificationPanel>

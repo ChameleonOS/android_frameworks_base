@@ -192,7 +192,9 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private int mShowSearchHoldoff = 0;
 
-    private Context mThemeContext;
+    // new tablet ui stuff
+    private boolean mIsForcedTabletUI = false;
+    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
     public Context getContext() { return mContext; }
 
@@ -301,8 +303,14 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
+        int panelWidth = res.getDimensionPixelSize(R.dimen.notification_panel_width);
+        if (isPhone(mContext)) {
+            if (mOrientation == Configuration.ORIENTATION_PORTRAIT)
+                panelWidth = WindowManager.LayoutParams.MATCH_PARENT;
+        }
+
         WindowManager.LayoutParams lp = mNotificationPanelParams = new WindowManager.LayoutParams(
-                res.getDimensionPixelSize(R.dimen.notification_panel_width),
+                panelWidth,
                 getNotificationPanelHeight(),
                 WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
@@ -402,6 +410,12 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     @Override
     public void start() {
+        try {
+            mIsForcedTabletUI = Settings.System.getInt(
+                    mContext.getContentResolver(), Settings.System.ENABLE_TABLET_MODE) == 1;
+        } catch (Settings.SettingNotFoundException e) {
+            mIsForcedTabletUI = false;
+        }
         super.start(); // will add the main bar view
     }
 
@@ -443,9 +457,9 @@ public class TabletStatusBar extends BaseStatusBar implements
         mRecreating = false;
     }
 
-
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        mOrientation = newConfig.orientation;
         if ((newConfig.extraConfig.mThemeChangedFlags & (ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG)) != 0) {
             recreateStatusBar();
         }
@@ -1618,6 +1632,10 @@ public class TabletStatusBar extends BaseStatusBar implements
     protected boolean shouldDisableNavbarGestures() {
         return mNotificationPanel.getVisibility() == View.VISIBLE
                 || (mDisabled & StatusBarManager.DISABLE_HOME) != 0;
+    }
+
+    static boolean isPhone(Context context) {
+        return context.getResources().getConfiguration().smallestScreenWidthDp < 600;
     }
 }
 

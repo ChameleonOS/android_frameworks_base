@@ -136,7 +136,7 @@ public class InputMethodButton extends ImageView {
         if (mIcon == null) {
             return;
         }
-        if (!needsToShowIMEButton()) {
+        if (!needsToShowIMEButton() || TabletStatusBar.isPhone(getContext())) {
             setVisibility(View.GONE);
             return;
         } else {
