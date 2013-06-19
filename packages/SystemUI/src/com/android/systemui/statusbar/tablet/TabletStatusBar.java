@@ -476,7 +476,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         final Resources res = mContext.getResources();
 
         mNaturalBarHeight = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.navigation_bar_height);
+                com.android.internal.R.dimen.system_bar_height);
 
         int newIconSize = res.getDimensionPixelSize(
             com.android.internal.R.dimen.system_bar_icon_size);
@@ -1185,7 +1185,9 @@ public class TabletStatusBar extends BaseStatusBar implements
         if (DEBUG) {
             Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }
-        mMenuButton.setVisibility(showMenu ? View.VISIBLE : View.GONE);
+        int visibility = showMenu ? View.VISIBLE : View.GONE;
+        boolean visibilityChanged = mMenuButton.getVisibility() != visibility;
+        mMenuButton.setVisibility(visibility);
 
         // See above re: lights-out policy for legacy apps.
         if (showMenu) setLightsOn(true);
@@ -1200,6 +1202,7 @@ public class TabletStatusBar extends BaseStatusBar implements
             hideCompatibilityHelp();
             mCompatModePanel.closePanel();
         }
+        if (isPhone(mContext) && visibilityChanged) updateNotificationIcons();
     }
 
     private void showCompatibilityHelp() {
@@ -1488,6 +1491,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         int maxNotificationIconsCount = mMaxNotificationIcons;
         if (mInputMethodSwitchButton.getVisibility() != View.GONE) maxNotificationIconsCount --;
         if (mCompatModeButton.getVisibility()        != View.GONE) maxNotificationIconsCount --;
+        if (mMenuButton.getVisibility() != View.GONE && isPhone(mContext)) maxNotificationIconsCount --;
 
         final boolean provisioned = isDeviceProvisioned();
         // If the device hasn't been through Setup, we only show system notifications
