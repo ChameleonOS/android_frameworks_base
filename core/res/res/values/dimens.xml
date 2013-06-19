@@ -44,9 +44,9 @@
     <dimen name="status_bar_content_number_size">48sp</dimen>
     <!-- Height of the system bar (combined status & navigation); used by
          SystemUI internally, not respected by the window manager. -->
-    <dimen name="system_bar_height">@dimen/navigation_bar_height</dimen>
+    <dimen name="system_bar_height">40dp</dimen>
     <!-- Height of notification icons in the system bar -->
-    <dimen name="system_bar_icon_size">32dip</dimen>
+    <dimen name="system_bar_icon_size">24dip</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
 
