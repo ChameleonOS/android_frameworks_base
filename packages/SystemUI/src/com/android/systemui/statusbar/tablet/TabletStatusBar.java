@@ -682,6 +682,11 @@ public class TabletStatusBar extends BaseStatusBar implements
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mBroadcastReceiver, filter);
 
+        if (mRecreating) {
+            removeSidebarView();
+        }
+        addSidebarView();
+
         return sb;
     }
 
