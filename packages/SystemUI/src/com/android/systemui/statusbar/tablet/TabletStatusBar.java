@@ -44,6 +44,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
@@ -307,6 +308,13 @@ public class TabletStatusBar extends BaseStatusBar implements
         if (isPhone(mContext)) {
             if (mOrientation == Configuration.ORIENTATION_PORTRAIT)
                 panelWidth = WindowManager.LayoutParams.MATCH_PARENT;
+            else {
+                // let's match the width of what it would be in portrait when using MATCH_PARENT
+                DisplayMetrics dm = new DisplayMetrics();
+                mWindowManager.getDefaultDisplay().getMetrics(dm);
+                panelWidth = dm.heightPixels
+                        + res.getDimensionPixelSize(com.android.internal.R.dimen.system_bar_height);
+            }
         }
 
         WindowManager.LayoutParams lp = mNotificationPanelParams = new WindowManager.LayoutParams(
@@ -470,6 +478,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         mShowSearchHoldoff = mContext.getResources().getInteger(
                 R.integer.config_show_search_delay);
         updateSearchPanel();
+        mNotificationPanel.updateToggles();
     }
 
     protected void loadDimens() {
@@ -1586,6 +1595,11 @@ public class TabletStatusBar extends BaseStatusBar implements
         } catch (RemoteException ex) {
             // system process is dead if we're here.
         }
+        animateCollapsePanels();
+        visibilityChanged(false);
+    }
+
+    public void dismissPanels() {
         animateCollapsePanels();
         visibilityChanged(false);
     }
