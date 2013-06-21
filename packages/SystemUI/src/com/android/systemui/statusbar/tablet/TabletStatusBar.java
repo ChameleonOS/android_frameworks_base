@@ -478,7 +478,6 @@ public class TabletStatusBar extends BaseStatusBar implements
         mShowSearchHoldoff = mContext.getResources().getInteger(
                 R.integer.config_show_search_delay);
         updateSearchPanel();
-        mNotificationPanel.updateToggles();
     }
 
     protected void loadDimens() {
