@@ -20,6 +20,7 @@ import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
@@ -75,6 +76,7 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationData.Entry;
 import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.phone.TriggerView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.CompatModeButton;
@@ -88,6 +90,7 @@ import cos.content.res.ExtraConfiguration;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class TabletStatusBar extends BaseStatusBar implements
         InputMethodsPanel.OnHardKeyboardEnabledChangeListener {
@@ -118,6 +121,11 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10; // see NotificationManagerService
     private static final int HIDE_ICONS_BELOW_SCORE = Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
+
+    public static final String ACTION_NAVBAR_HIDE
+            = "com.android.internal.policy.statusbar.HIDE_NAVBAR";
+
+    private static final long AUTO_HIDE_DELAY = 3000;
 
     // The height of the bar, as definied by the build.  It may be taller if we're plugged
     // into hdmi.
@@ -196,6 +204,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     // new tablet ui stuff
     private boolean mIsForcedTabletUI = false;
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
+    private TriggerView mSystemBarTrigger;
 
     public Context getContext() { return mContext; }
 
@@ -649,6 +658,12 @@ public class TabletStatusBar extends BaseStatusBar implements
                 }
             });
 
+        mSystemBarTrigger = (TriggerView)View.inflate(context, R.layout.trigger_view, null);
+        mWindowManager.addView(mSystemBarTrigger, getSystemBarTriggerViewLayoutParams(true));
+
+        // listen for the trigger to show navigation bar
+        mSystemBarTrigger.setOnTriggerListener(mSystemBarTriggerListener);
+
         // tuning parameters
         final int LIGHTS_GOING_OUT_SYSBAR_DURATION = 750;
         final int LIGHTS_GOING_OUT_SHADOW_DURATION = 750;
@@ -688,6 +703,7 @@ public class TabletStatusBar extends BaseStatusBar implements
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        filter.addAction(ACTION_NAVBAR_HIDE);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         if (mRecreating) {
@@ -696,6 +712,24 @@ public class TabletStatusBar extends BaseStatusBar implements
         addSidebarView();
 
         return sb;
+    }
+
+    private WindowManager.LayoutParams getSystemBarTriggerViewLayoutParams(boolean isPortrait) {
+        WindowManager.LayoutParams lp;
+        lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                mContext.getResources().getDimensionPixelSize(R.dimen.config_trigger_view_height),
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
+                0
+                        | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.BOTTOM | Gravity.FILL_HORIZONTAL;
+        lp.setTitle("SystemBarTriggerView");
+
+        return lp;
     }
 
     @Override
@@ -1625,6 +1659,13 @@ public class TabletStatusBar extends BaseStatusBar implements
                     ts.updateSystemUI();
                 } catch (Exception e) {}
             }
+            else if (ACTION_NAVBAR_HIDE.equals(action)) {
+                try {
+                    if (mWindowManagerService.shouldHideNavbar())
+                        mWindowManagerService.hideNavbar();
+                } catch (RemoteException re) {
+                }
+            }
         }
     };
 
@@ -1658,6 +1699,46 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     static boolean isPhone(Context context) {
         return context.getResources().getConfiguration().smallestScreenWidthDp < 600;
+    }
+
+    private TriggerView.OnTriggerListener mSystemBarTriggerListener =
+            new TriggerView.OnTriggerListener() {
+                @Override
+                public void onTriggered(View v) {
+                    try {
+                        if (mWindowManagerService.shouldHideNavbar()) {
+                            mWindowManagerService.showNavbar();
+                            updateAutoHideTimer(ACTION_NAVBAR_HIDE);
+                            v.requestFocus();
+                        }
+                    } catch (RemoteException e) {
+                    }
+                }
+            };
+
+    public void updateAutoHideTimer(String action) {
+        AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(action);
+
+        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        try {
+            am.cancel(pi);
+        } catch (Exception e) {
+        }
+        Calendar time = Calendar.getInstance();
+        time.setTimeInMillis(System.currentTimeMillis() + AUTO_HIDE_DELAY);
+        am.set(AlarmManager.RTC, time.getTimeInMillis(), pi);
+    }
+
+    public void cancelAutoHideTimer(String action) {
+        AlarmManager am = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(action);
+
+        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        try {
+            am.cancel(pi);
+        } catch (Exception e) {
+        }
     }
 }
 
