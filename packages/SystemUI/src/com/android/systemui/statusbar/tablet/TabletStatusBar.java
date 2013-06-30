@@ -203,7 +203,6 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     // new tablet ui stuff
     private boolean mIsForcedTabletUI = false;
-    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
     private TriggerView mSystemBarTrigger;
 
     public Context getContext() { return mContext; }
@@ -314,8 +313,9 @@ public class TabletStatusBar extends BaseStatusBar implements
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
         int panelWidth = res.getDimensionPixelSize(R.dimen.notification_panel_width);
+        int orientation = res.getConfiguration().orientation;
         if (isPhone(mContext)) {
-            if (mOrientation == Configuration.ORIENTATION_PORTRAIT)
+            if (orientation == Configuration.ORIENTATION_PORTRAIT)
                 panelWidth = WindowManager.LayoutParams.MATCH_PARENT;
             else {
                 // let's match the width of what it would be in portrait when using MATCH_PARENT
@@ -476,7 +476,6 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        mOrientation = newConfig.orientation;
         if ((newConfig.extraConfig.mThemeChangedFlags & (ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG)) != 0) {
             recreateStatusBar();
         }
