@@ -18,7 +18,7 @@ package cos.util;
 
 public class DisplayUtils
 {
-    private static final int[] DENSITIES = {320, 240, 160, 120, 1, 0};
+    private static final int[] DENSITIES = {480, 320, 240, 160, 120, 1, 0};
 
     public static int[] getBestDensityOrder(int currentDensity) {
         /* TODO: figure out what they were trying to accomplish here
@@ -61,6 +61,9 @@ public class DisplayUtils
             break;
         case 320:
             name = "xhdpi";
+            break;
+        case 420:
+            name = "xxhdpi";
             break;
         case 1:
             name = "nodpi";
