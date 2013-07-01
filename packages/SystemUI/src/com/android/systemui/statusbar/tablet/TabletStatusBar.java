@@ -204,6 +204,7 @@ public class TabletStatusBar extends BaseStatusBar implements
     // new tablet ui stuff
     private boolean mIsForcedTabletUI = false;
     private TriggerView mSystemBarTrigger;
+    private boolean mHasHardwareNavKeys = false;
 
     public Context getContext() { return mContext; }
 
@@ -500,6 +501,8 @@ public class TabletStatusBar extends BaseStatusBar implements
             R.dimen.status_bar_icon_padding);
         int newNavIconWidth = res.getDimensionPixelSize(R.dimen.navigation_key_width);
         int newMenuNavIconWidth = res.getDimensionPixelSize(R.dimen.navigation_menu_key_width);
+        mHasHardwareNavKeys = !res.getBoolean(
+                    com.android.internal.R.bool.config_showNavigationBar);
 
         if (mNavigationArea != null && newNavIconWidth != mNavIconWidth) {
             mNavIconWidth = newNavIconWidth;
@@ -526,7 +529,8 @@ public class TabletStatusBar extends BaseStatusBar implements
             reloadAllNotificationIcons(); // reload the tray
         }
 
-        final int numIcons = res.getInteger(R.integer.config_maxNotificationIcons);
+        final int numIcons = res.getInteger(R.integer.config_maxNotificationIcons) +
+                (mHasHardwareNavKeys ? 4 : 0);
         if (numIcons != mMaxNotificationIcons) {
             mMaxNotificationIcons = numIcons;
             if (DEBUG) Slog.d(TAG, "max notification icons: " + mMaxNotificationIcons);
@@ -602,6 +606,8 @@ public class TabletStatusBar extends BaseStatusBar implements
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
+        if (mHasHardwareNavKeys)
+            mNavigationArea.setVisibility(View.GONE);
 
         LayoutTransition lt = new LayoutTransition();
         lt.setDuration(250);
@@ -942,8 +948,10 @@ public class TabletStatusBar extends BaseStatusBar implements
                     break;
                 case MSG_SHOW_CHROME:
                     if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");
-                    mBarContents.setVisibility(View.VISIBLE);
-                    mShadow.setVisibility(View.GONE);
+                    if (!mHasHardwareNavKeys) {
+                        mBarContents.setVisibility(View.VISIBLE);
+                        mShadow.setVisibility(View.GONE);
+                    }
                     mSystemUiVisibility &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
                     notifyUiVisibilityChanged();
                     break;
@@ -951,8 +959,10 @@ public class TabletStatusBar extends BaseStatusBar implements
                     if (DEBUG) Slog.d(TAG, "showing shadows (lights out)");
                     animateCollapsePanels();
                     visibilityChanged(false);
-                    mBarContents.setVisibility(View.GONE);
-                    mShadow.setVisibility(View.VISIBLE);
+                    if (!mHasHardwareNavKeys) {
+                        mBarContents.setVisibility(View.GONE);
+                        mShadow.setVisibility(View.VISIBLE);
+                    }
                     mSystemUiVisibility |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
                     notifyUiVisibilityChanged();
                     break;
