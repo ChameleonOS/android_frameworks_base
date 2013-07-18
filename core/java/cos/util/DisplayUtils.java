@@ -62,7 +62,7 @@ public class DisplayUtils
         case 320:
             name = "xhdpi";
             break;
-        case 420:
+        case 480:
             name = "xxhdpi";
             break;
         case 1:
