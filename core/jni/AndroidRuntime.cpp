@@ -47,8 +47,6 @@
 
 using namespace android;
 
-extern void register_BindTest();
-
 extern int register_android_os_Binder(JNIEnv* env);
 extern int register_android_os_Process(JNIEnv* env);
 extern int register_android_graphics_Bitmap(JNIEnv*);
@@ -69,11 +67,13 @@ extern int register_android_graphics_YuvImage(JNIEnv* env);
 extern int register_com_google_android_gles_jni_EGLImpl(JNIEnv* env);
 extern int register_com_google_android_gles_jni_GLImpl(JNIEnv* env);
 extern int register_android_opengl_jni_EGL14(JNIEnv* env);
+extern int register_android_opengl_jni_EGLExt(JNIEnv* env);
 extern int register_android_opengl_jni_GLES10(JNIEnv* env);
 extern int register_android_opengl_jni_GLES10Ext(JNIEnv* env);
 extern int register_android_opengl_jni_GLES11(JNIEnv* env);
 extern int register_android_opengl_jni_GLES11Ext(JNIEnv* env);
 extern int register_android_opengl_jni_GLES20(JNIEnv* env);
+extern int register_android_opengl_jni_GLES30(JNIEnv* env);
 
 extern int register_android_hardware_Camera(JNIEnv *env);
 extern int register_android_hardware_SensorManager(JNIEnv *env);
@@ -121,6 +121,7 @@ extern int register_android_view_GLES20DisplayList(JNIEnv* env);
 extern int register_android_view_GLES20Canvas(JNIEnv* env);
 extern int register_android_view_HardwareRenderer(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
+extern int register_android_view_SurfaceControl(JNIEnv* env);
 extern int register_android_view_SurfaceSession(JNIEnv* env);
 extern int register_android_view_TextureView(JNIEnv* env);
 extern int register_android_database_CursorWindow(JNIEnv* env);
@@ -164,6 +165,8 @@ extern int register_android_media_RemoteDisplay(JNIEnv *env);
 extern int register_android_view_InputChannel(JNIEnv* env);
 extern int register_android_view_InputDevice(JNIEnv* env);
 extern int register_android_view_InputEventReceiver(JNIEnv* env);
+extern int register_android_view_InputEventSender(JNIEnv* env);
+extern int register_android_view_InputQueue(JNIEnv* env);
 extern int register_android_view_KeyCharacterMap(JNIEnv *env);
 extern int register_android_view_KeyEvent(JNIEnv* env);
 extern int register_android_view_MotionEvent(JNIEnv* env);
@@ -176,6 +179,7 @@ extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env
 #ifdef QCOM_HARDWARE
 extern int register_com_android_internal_app_ActivityTrigger(JNIEnv *env);
 #endif
+extern int register_com_android_internal_net_NetworkStatsFactory(JNIEnv *env);
 
 static AndroidRuntime* gCurRuntime = NULL;
 
@@ -468,9 +472,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
       kEMDefault,
       kEMIntPortable,
       kEMIntFast,
-#if defined(WITH_JIT)
       kEMJitCompiler,
-#endif
     } executionMode = kEMDefault;
 
 
@@ -490,10 +492,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         executionMode = kEMIntPortable;
     } else if (strcmp(propBuf, "int:fast") == 0) {
         executionMode = kEMIntFast;
-#if defined(WITH_JIT)
     } else if (strcmp(propBuf, "int:jit") == 0) {
         executionMode = kEMJitCompiler;
-#endif
     }
 
     property_get("dalvik.vm.stack-trace-file", stackTraceFileBuf, "");
@@ -663,7 +663,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
       mOptions.add(opt);
     }
 
-#if defined(WITH_JIT)
     /* Force interpreter-only mode for selected opcodes. Eg "1-0a,3c,f1-ff" */
     char jitOpBuf[sizeof("-Xjitop:") + PROPERTY_VALUE_MAX];
     property_get("dalvik.vm.jit.op", propBuf, "");
@@ -683,7 +682,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         opt.optionString = jitMethodBuf;
         mOptions.add(opt);
     }
-#endif
 
     if (executionMode == kEMIntPortable) {
         opt.optionString = "-Xint:portable";
@@ -691,11 +689,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     } else if (executionMode == kEMIntFast) {
         opt.optionString = "-Xint:fast";
         mOptions.add(opt);
-#if defined(WITH_JIT)
     } else if (executionMode == kEMJitCompiler) {
         opt.optionString = "-Xint:jit";
         mOptions.add(opt);
-#endif
     }
 
     if (checkDexSum) {
@@ -1123,16 +1119,19 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_view_GLES20Canvas),
     REG_JNI(register_android_view_HardwareRenderer),
     REG_JNI(register_android_view_Surface),
+    REG_JNI(register_android_view_SurfaceControl),
     REG_JNI(register_android_view_SurfaceSession),
     REG_JNI(register_android_view_TextureView),
     REG_JNI(register_com_google_android_gles_jni_EGLImpl),
     REG_JNI(register_com_google_android_gles_jni_GLImpl),
     REG_JNI(register_android_opengl_jni_EGL14),
+    REG_JNI(register_android_opengl_jni_EGLExt),
     REG_JNI(register_android_opengl_jni_GLES10),
     REG_JNI(register_android_opengl_jni_GLES10Ext),
     REG_JNI(register_android_opengl_jni_GLES11),
     REG_JNI(register_android_opengl_jni_GLES11Ext),
     REG_JNI(register_android_opengl_jni_GLES20),
+    REG_JNI(register_android_opengl_jni_GLES30),
 
     REG_JNI(register_android_graphics_Bitmap),
     REG_JNI(register_android_graphics_BitmapFactory),
@@ -1205,6 +1204,8 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_app_NativeActivity),
     REG_JNI(register_android_view_InputChannel),
     REG_JNI(register_android_view_InputEventReceiver),
+    REG_JNI(register_android_view_InputEventSender),
+    REG_JNI(register_android_view_InputQueue),
     REG_JNI(register_android_view_KeyEvent),
     REG_JNI(register_android_view_MotionEvent),
     REG_JNI(register_android_view_PointerIcon),
@@ -1219,6 +1220,7 @@ static const RegJNIRec gRegJNI[] = {
 #ifdef QCOM_HARDWARE
     REG_JNI(register_com_android_internal_app_ActivityTrigger),
 #endif
+    REG_JNI(register_com_android_internal_net_NetworkStatsFactory),
 };
 
 /*

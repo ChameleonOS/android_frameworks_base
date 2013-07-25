@@ -266,4 +266,11 @@
 
     <!-- Width of recents panel -->
     <dimen name="status_bar_recents_width">320dp</dimen>
+
+    <!-- Quick Settings tile geometry: top interior margin, above icon -->
+    <dimen name="qs_tile_margin_above_icon">27dp</dimen>
+    <!-- Quick Settings tile geometry: gap between icon and text -->
+    <dimen name="qs_tile_margin_below_icon">17dp</dimen>
+    <!-- Quick Settings tile geometry: icon size -->
+    <dimen name="qs_tile_icon_size">32dp</dimen>
 </resources>

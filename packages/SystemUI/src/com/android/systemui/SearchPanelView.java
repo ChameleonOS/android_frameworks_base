@@ -35,6 +35,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.EventLog;
 import android.util.Slog;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
@@ -49,6 +50,8 @@ import com.android.internal.util.chaos.NavigationRingHelpers;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
 import com.android.internal.widget.multiwaveview.TargetDrawable;
+
+import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.chaos.ActionTarget;
 import com.android.systemui.recent.StatusBarTouchProxy;
@@ -65,6 +68,9 @@ public class SearchPanelView extends FrameLayout implements
     private static final int SEARCH_PANEL_HOLD_DURATION = 0;
     static final String TAG = "SearchPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
+    public static final boolean DEBUG_GESTURES = true;
+    private static final String ASSIST_ICON_METADATA_NAME =
+            "com.android.systemui.action_assist_icon";
     private final Context mContext;
     private BaseStatusBar mBar;
     private StatusBarTouchProxy mStatusBarTouchProxy;
@@ -89,8 +95,41 @@ public class SearchPanelView extends FrameLayout implements
         mContext = context;
         mWm = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
         mActionTarget = new ActionTarget(context);
-
         mObserver = new SettingsObserver(new Handler());
+    }
+
+    private void startAssistActivity() {
+        if (!mBar.isDeviceProvisioned()) return;
+
+        // Close Recent Apps if needed
+        mBar.animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_SEARCH_PANEL);
+        boolean isKeyguardShowing = false;
+        try {
+            isKeyguardShowing = mWm.isKeyguardLocked();
+        } catch (RemoteException e) {
+
+        }
+
+        if (isKeyguardShowing) {
+            // Have keyguard show the bouncer and launch the activity if the user succeeds.
+            try {
+                mWm.showAssistant();
+            } catch (RemoteException e) {
+                // too bad, so sad...
+            }
+            onAnimationStarted();
+        } else {
+            // Otherwise, keyguard isn't showing so launch it from here.
+            Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                    .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
+            if (intent == null) return;
+
+            try {
+                ActivityManagerNative.getDefault().dismissKeyguardOnNextActivity();
+            } catch (RemoteException e) {
+                // too bad, so sad...
+            }
+        }
     }
 
     class GlowPadTriggerListener implements GlowPadView.OnTriggerListener {
@@ -163,6 +202,19 @@ public class SearchPanelView extends FrameLayout implements
             targets.add(NavigationRingHelpers.getTargetDrawable(mContext, null));
         }
         mGlowPadView.setTargetResources(targets);
+    }
+
+    private void maybeSwapSearchIcon() {
+        Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                .getAssistIntent(mContext, false, UserHandle.USER_CURRENT);
+        if (intent != null) {
+            ComponentName component = intent.getComponent();
+            if (component == null || !mGlowPadView.replaceTargetDrawablesIfPresent(component,
+                    ASSIST_ICON_METADATA_NAME,
+                    com.android.internal.R.drawable.ic_action_assist_generic)) {
+                if (DEBUG) Slog.v(TAG, "Couldn't grab icon for component " + component);
+            }
+        }
     }
 
     private boolean pointInside(int x, int y, View v) {
@@ -305,6 +357,17 @@ public class SearchPanelView extends FrameLayout implements
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (DEBUG_GESTURES) {
+            if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
+                EventLog.writeEvent(EventLogTags.SYSUI_SEARCHPANEL_TOUCH,
+                        event.getActionMasked(), (int) event.getX(), (int) event.getY());
+            }
+        }
+        return super.onTouchEvent(event);
+    }
+
     private LayoutTransition createLayoutTransitioner() {
         LayoutTransition transitioner = new LayoutTransition();
         transitioner.setDuration(200);
@@ -353,5 +416,10 @@ public class SearchPanelView extends FrameLayout implements
             updateSettings();
             setDrawables();
         }
+    }
+
+    public boolean isAssistantAvailable() {
+        return ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                .getAssistIntent(mContext, false, UserHandle.USER_CURRENT) != null;
     }
 }

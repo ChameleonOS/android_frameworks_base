@@ -90,8 +90,8 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 switch (resId) {
                 case com.android.internal.R.drawable.ic_action_assist_generic:
                     Intent assistIntent =
-                    ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                    .getAssistIntent(mContext, UserHandle.USER_CURRENT);
+                            ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
+                            .getAssistIntent(mContext, true, UserHandle.USER_CURRENT);
                     if (assistIntent != null) {
                         mActivityLauncher.launchActivity(assistIntent, false, true, null, null);
                     } else {
@@ -274,8 +274,8 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
                 currentUserHandle);
         boolean searchActionAvailable =
                 ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(mContext, UserHandle.USER_CURRENT) != null;
-        mCameraDisabled = cameraDisabledByAdmin || disabledBySimState || !cameraPresent
+                .getAssistIntent(mContext, false, UserHandle.USER_CURRENT) != null;
+        mCameraDisabled = cameraDisabledByAdmin || disabledBySimState || !cameraTargetPresent
                 || !currentUserSetup;
         mSearchDisabled = disabledBySimState || !searchActionAvailable || !searchTargetPresent
                 || !currentUserSetup;

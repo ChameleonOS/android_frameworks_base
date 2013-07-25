@@ -167,6 +167,23 @@ public class StatusBarIconView extends AnimatedImageView {
         return true;
     }
 
+    public void updateDrawable() {
+        updateDrawable(true /* with clear */);
+    }
+
+    private boolean updateDrawable(boolean withClear) {
+        Drawable drawable = getIcon(mIcon);
+        if (drawable == null) {
+            Slog.w(TAG, "No icon for slot " + mSlot);
+            return false;
+        }
+        if (withClear) {
+            setImageDrawable(null);
+        }
+        setImageDrawable(drawable);
+        return true;
+    }
+
     private Drawable getIcon(StatusBarIcon icon) {
         return getIcon(getContext(), icon);
     }

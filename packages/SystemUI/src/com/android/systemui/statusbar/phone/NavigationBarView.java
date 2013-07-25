@@ -86,7 +86,9 @@ public class NavigationBarView extends LinearLayout {
     int mNavigationIconHints = 0;
 
     private Drawable mBackIcon, mBackLandIcon, mBackAltIcon, mBackAltLandIcon;
-    
+    private Drawable mRecentIcon;
+    private Drawable mRecentLandIcon;
+
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
     private BaseStatusBar mStatusBar;
@@ -207,6 +209,7 @@ public class NavigationBarView extends LinearLayout {
         mDelegateHelper = new DelegateViewHelper(this);
         updateResources();
 
+        getIcons(res);
         mNavBarReceiver = new NavBarReceiver();
         mContext.registerReceiver(mNavBarReceiver, new IntentFilter(NAVBAR_EDIT));
     }
@@ -247,6 +250,22 @@ public class NavigationBarView extends LinearLayout {
                 }
             }
         }
+    }
+
+    private void getIcons(Resources res) {
+        mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
+        mBackLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_land);
+        mBackAltIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
+        mBackAltLandIcon = res.getDrawable(R.drawable.ic_sysbar_back_ime);
+        mRecentIcon = res.getDrawable(R.drawable.ic_sysbar_recent);
+        mRecentLandIcon = res.getDrawable(R.drawable.ic_sysbar_recent_land);
+    }
+
+    @Override
+    public void setLayoutDirection(int layoutDirection) {
+        getIcons(mContext.getResources());
+
+        super.setLayoutDirection(layoutDirection);
     }
 
     public void notifyScreenOn(boolean screenOn) {
@@ -306,6 +325,7 @@ public class NavigationBarView extends LinearLayout {
                     ? (mVertical ? mBackAltLandIcon : mBackAltIcon)
                             : (mVertical ? mBackLandIcon : mBackIcon));
         }
+
         setDisabledFlags(mDisabledFlags, true);
     }
 
