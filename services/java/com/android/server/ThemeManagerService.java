@@ -368,7 +368,9 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         if (!dir.exists()) {
             Log.d(TAG, "Creating themes directory");
             dir.mkdir();
-            run(String.format("invoke-as -u root chmod 0775 %s", THEME_DIR));
+            dir.setReadable(true, false);
+            dir.setWritable(true, true);
+            dir.setExecutable(true, false);
 
             Message msg = Message.obtain();
             msg.what = ThemeWorkerHandler.MESSAGE_APPLY_DEFAULT;
@@ -389,7 +391,9 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             Log.d(TAG, "Creating icons directory");
             File dir = new File(CUSTOMIZED_ICONS_DIR);
             dir.mkdir();
-            run(String.format("invoke-as -u root chmod 0775 %s", CUSTOMIZED_ICONS_DIR));
+            dir.setReadable(true, false);
+            dir.setWritable(true, true);
+            dir.setExecutable(true, false);
         }
     }
 
@@ -405,7 +409,9 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             Log.d(TAG, "Creating fonts directory");
             File dir = new File(FONTS_DIR);
             dir.mkdir();
-            run(String.format("invoke-as -u root chmod 0775 %s", FONTS_DIR));
+            dir.setReadable(true, false);
+            dir.setWritable(true, true);
+            dir.setExecutable(true, false);
         }
     }
 
@@ -543,21 +549,12 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         }
     }
 
-    private void setBootanimation() {
-        try {
-            run(String.format("invoke-as -u root chown system.system %s", "/data/local"));
-            run(String.format("invoke-as -u root cp %s %s", THEME_DIR + "/boots/bootanimation.zip", "/data/local/bootanimation.zip"));
-            run(String.format("invoke-as -u root chmod 0644 %s", "/data/local/bootanimation.zip"));
-            run(String.format("invoke-as -u root chown root.root %s", "/data/local"));
-        } catch (Exception e) {}
-    }
-
     private void resetBootanimation() {
-        try {
-            run(String.format("invoke-as -u root chown system.system %s", "/data/local"));
-            run(String.format("invoke-as -u root rm %s", "/data/local/bootanimation.zip"));
-            run(String.format("invoke-as -u root chown root.root %s", "/data/local"));
-        } catch (Exception e) {}
+        File boot = new File(THEME_DIR + "boots");
+        if (boot.exists())
+            try {
+                delete(boot);
+            } catch (IOException e) {}
     }
 
     private void reboot() {
@@ -840,7 +837,6 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                                 }
             
                                 zip.close();
-                                setBootanimation();
                                 setThemeWallpaper();
                                 if (applyFont) {
                                     removeBadFonts();
@@ -888,7 +884,6 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         }
             
                         zip.close();
-                        setBootanimation();
                         setThemeWallpaper();
 
                         if (!isSystemCall) {
@@ -905,13 +900,10 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     }
                     break;
                 case MESSAGE_APPLY_CURRENT:
-                    setBootanimation();
-
                     notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
                     setThemeWallpaper();
                     break;
                 case MESSAGE_APPLY_CURRENT_REBOOT:
-                    setBootanimation();
                     setThemeWallpaper();
 
                     reboot();
@@ -1002,7 +994,6 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     boolean scaleBoot = msg.arg1 == 1;
                     try {
                         extractBootAnimationFromTheme(themeURI, "boots/", THEME_DIR, scaleBoot);
-                        setBootanimation();
                         notifyThemeApplied();
                     } catch (Exception e) {
                         Log.e(TAG, "applyThemeBootanimation failed " +themeURI, e);
