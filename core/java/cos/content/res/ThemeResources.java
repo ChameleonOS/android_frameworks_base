@@ -72,6 +72,7 @@ public class ThemeResources
         sMiuiToChaosPackageMappings.put("com.android.contacts", "com.android.phone");
         sMiuiToChaosPackageMappings.put("com.android.mms", "framework-miui-res");
         sMiuiToChaosPackageMappings.put("com.android.systemui", "framework-miui-res");
+        sMiuiToChaosPackageMappings.put("com.android.dialer", "com.android.contacts");
     }
 
     // To offer better support for MIUI themes we will create a map of resources
