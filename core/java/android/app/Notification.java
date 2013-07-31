@@ -483,8 +483,6 @@ public class Notification implements Parcelable
      */
     public static final int FLAG_FORCE_LED_SCREEN_OFF = 0x00000100;
 
-    private Bundle extras;
-
     /**
      * Structure to encapsulate an "action", including title and icon, that can be attached to a Notification.
      * @hide

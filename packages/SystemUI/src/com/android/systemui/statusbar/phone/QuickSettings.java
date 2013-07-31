@@ -98,6 +98,10 @@ class QuickSettings {
 
     private BluetoothController mBluetoothController;
 
+    private Dialog mBrightnessDialog;
+    private int mBrightnessDialogShortTimeout;
+    private int mBrightnessDialogLongTimeout;
+
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
 
     private LevelListDrawable mBatteryLevels;
@@ -137,6 +141,10 @@ class QuickSettings {
         mBatteryLevels = (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery);
         mChargingBatteryLevels =
                 (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery_charging);
+        mBrightnessDialogLongTimeout =
+                r.getInteger(R.integer.quick_settings_brightness_dialog_long_timeout);
+        mBrightnessDialogShortTimeout =
+                r.getInteger(R.integer.quick_settings_brightness_dialog_short_timeout);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
@@ -719,6 +727,23 @@ class QuickSettings {
         }
         ((QuickSettingsContainerView)mContainerView).updateResources();
         mContainerView.requestLayout();
+
+        // Reset the dialog
+        boolean isBrightnessDialogVisible = false;
+        if (mBrightnessDialog != null) {
+            removeAllBrightnessDialogCallbacks();
+
+            isBrightnessDialogVisible = mBrightnessDialog.isShowing();
+            mBrightnessDialog.dismiss();
+        }
+        mBrightnessDialog = null;
+        if (isBrightnessDialogVisible) {
+            showBrightnessDialog();
+        }
+    }
+
+    private void removeAllBrightnessDialogCallbacks() {
+        mHandler.removeCallbacks(mDismissBrightnessDialogRunnable);
     }
 
     private Runnable mDismissBrightnessDialogRunnable = new Runnable() {

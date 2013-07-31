@@ -228,6 +228,19 @@ public class WifiStateMachine extends StateMachine {
 
     /* The base for wifi message types */
     static final int BASE = Protocol.BASE_WIFI;
+    /* Load the driver */
+    static final int CMD_LOAD_DRIVER                      = BASE + 1;
+    /* Unload the driver */
+    static final int CMD_UNLOAD_DRIVER                    = BASE + 2;
+    /* Indicates driver load succeeded */
+    static final int CMD_LOAD_DRIVER_SUCCESS              = BASE + 3;
+    /* Indicates driver load failed */
+    static final int CMD_LOAD_DRIVER_FAILURE              = BASE + 4;
+    /* Indicates driver unload succeeded */
+    static final int CMD_UNLOAD_DRIVER_SUCCESS            = BASE + 5;
+    /* Indicates driver unload failed */
+    static final int CMD_UNLOAD_DRIVER_FAILURE            = BASE + 6;
+
     /* Start the supplicant */
     static final int CMD_START_SUPPLICANT                 = BASE + 11;
     /* Stop the supplicant */

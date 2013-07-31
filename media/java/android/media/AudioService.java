@@ -2435,7 +2435,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         if (mMusicActiveMs > UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX) {
                             setSafeMediaVolumeEnabled(true);
                             mMusicActiveMs = 0;
-                            displaySafeVolumeWarning();
                         }
                     }
                 }
@@ -4291,17 +4290,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 final Context context = mContext;
                 mVolumePanel = new VolumePanel(context, AudioService.this);
                 mVolumePanel.postRemoteVolumeChanged(streamType, flags);
-            }
-        });
-    }
-
-    private void displaySafeVolumeWarning() {
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                final Context context = mContext;
-                mVolumePanel = new VolumePanel(context, AudioService.this);
-                mVolumePanel.postDisplaySafeVolumeWarning();
             }
         });
     }
@@ -6771,7 +6759,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
                     ((device & mSafeMediaVolumeDevices) != 0) &&
                     (index > mSafeMediaVolumeIndex)) {
-                displaySafeVolumeWarning();
                 return false;
             }
             return true;

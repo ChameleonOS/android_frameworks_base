@@ -480,6 +480,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         if (mPagedToggles != null) {
             mPagedToggles.setupWidget();
         }
+    }
 
     public void refreshLayout(int layoutDirection) {
         // Force asset reloading

@@ -73,6 +73,9 @@ struct BatteryManagerConstants {
 static BatteryManagerConstants gConstants;
 
 struct PowerSupplyPaths {
+    String8 acOnlinePath;
+    String8 usbOnlinePath;
+    String8 wirelessOnlinePath;
     String8 batteryStatusPath;
     String8 batteryHealthPath;
     String8 batteryPresentPath;
@@ -192,7 +195,7 @@ static void setIntField(JNIEnv* env, jobject obj, const String8& path, jfieldID 
     env->SetIntField(obj, fieldID, value);
 }
 
-static void setIntFieldMax(JNIEnv* env, jobject obj, const char* path, jfieldID fieldID, int maxValue)
+static void setIntFieldMax(JNIEnv* env, jobject obj, const String8& path, jfieldID fieldID, int maxValue)
 {
     const int SIZE = 128;
     char buf[SIZE];
@@ -362,28 +365,28 @@ int register_android_server_BatteryService(JNIEnv* env)
                     gPaths.batteryVoltagePath = path;
                     // voltage_now is in microvolts, not millivolts
                     gVoltageDivisor = 1000;
+                }
+                else if (strcmp(buf, "Wireless") == 0) {
+                    path.appendFormat("%s/%s/online", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.wirelessOnlinePath = path;
+                }
+                else if (strcmp(buf, "Battery") == 0) {
+                    path.appendFormat("%s/%s/status", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.batteryStatusPath = path;
+                    path.appendFormat("%s/%s/health", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.batteryHealthPath = path;
+                    path.appendFormat("%s/%s/present", POWER_SUPPLY_PATH, name);
+                    if (access(path, R_OK) == 0)
+                        gPaths.batteryPresentPath = path;
                 } else {
                     path.clear();
                     path.appendFormat("%s/%s/batt_vol", POWER_SUPPLY_PATH, name);
                     if (access(path, R_OK) == 0)
                             gPaths.batteryVoltagePath = path;
                 }
-                else if (strcmp(buf, "Wireless") == 0) {
-                    snprintf(path, sizeof(path), "%s/%s/online", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.wirelessOnlinePath = strdup(path);
-                }
-                else if (strcmp(buf, "Battery") == 0) {
-                    snprintf(path, sizeof(path), "%s/%s/status", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.batteryStatusPath = strdup(path);
-                    snprintf(path, sizeof(path), "%s/%s/health", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.batteryHealthPath = strdup(path);
-                    snprintf(path, sizeof(path), "%s/%s/present", POWER_SUPPLY_PATH, name);
-                    if (access(path, R_OK) == 0)
-                        gPaths.batteryPresentPath = strdup(path);
-
                     /* For some weird, unknown reason Motorola phones provide
                     * capacity information only in 10% steps in the 'capacity'
                     * file. The 'charge_counter' file provides the 1% steps
@@ -394,39 +397,38 @@ int register_android_server_BatteryService(JNIEnv* env)
                     char valueChargeCounter[PROPERTY_VALUE_MAX];
                     if (property_get("ro.product.use_charge_counter", valueChargeCounter, NULL)
                         && (!strcmp(valueChargeCounter, "1"))) {
-                       snprintf(path, sizeof(path), "%s/%s/charge_counter", POWER_SUPPLY_PATH, name);
+                       path.appendFormat("%s/%s/charge_counter", POWER_SUPPLY_PATH, name);
                        if (access(path, R_OK) == 0)
-                           gPaths.batteryCapacityPath = strdup(path);
+                           gPaths.batteryCapacityPath = path;
                     } else {
-                        snprintf(path, sizeof(path), "%s/%s/capacity", POWER_SUPPLY_PATH, name);
+                        path.appendFormat("%s/%s/capacity", POWER_SUPPLY_PATH, name);
                         if (access(path, R_OK) == 0)
-                            gPaths.batteryCapacityPath = strdup(path);
+                            gPaths.batteryCapacityPath = path;
                     }
 
-                    snprintf(path, sizeof(path), "%s/%s/voltage_now", POWER_SUPPLY_PATH, name);
+                    path.appendFormat("%s/%s/voltage_now", POWER_SUPPLY_PATH, name);
                     if (access(path, R_OK) == 0) {
-                        gPaths.batteryVoltagePath = strdup(path);
+                        gPaths.batteryVoltagePath = path;
                         // voltage_now is in microvolts, not millivolts
                         gVoltageDivisor = 1000;
                     } else {
-                        snprintf(path, sizeof(path), "%s/%s/batt_vol", POWER_SUPPLY_PATH, name);
+                        path.appendFormat("%s/%s/batt_vol", POWER_SUPPLY_PATH, name);
                         if (access(path, R_OK) == 0)
-                            gPaths.batteryVoltagePath = strdup(path);
+                            gPaths.batteryVoltagePath = path;
                     }
 
-                    snprintf(path, sizeof(path), "%s/%s/temp", POWER_SUPPLY_PATH, name);
+                    path.appendFormat("%s/%s/temp", POWER_SUPPLY_PATH, name);
                     if (access(path, R_OK) == 0) {
-                        gPaths.batteryTemperaturePath = strdup(path);
+                        gPaths.batteryTemperaturePath = path;
                     } else {
-                        snprintf(path, sizeof(path), "%s/%s/batt_temp", POWER_SUPPLY_PATH, name);
+                        path.appendFormat("%s/%s/batt_temp", POWER_SUPPLY_PATH, name);
                         if (access(path, R_OK) == 0)
-                            gPaths.batteryTemperaturePath = strdup(path);
+                            gPaths.batteryTemperaturePath = path;
                     }
 
-                    snprintf(path, sizeof(path), "%s/%s/technology", POWER_SUPPLY_PATH, name);
+                    path.appendFormat("%s/%s/technology", POWER_SUPPLY_PATH, name);
                     if (access(path, R_OK) == 0)
                             gPaths.batteryTemperaturePath = path;
-                }
 
                 path.clear();
                 path.appendFormat("%s/%s/technology", POWER_SUPPLY_PATH, name);

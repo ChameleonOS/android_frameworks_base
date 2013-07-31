@@ -322,6 +322,16 @@ public class PhoneStatusBar extends BaseStatusBar {
     private ViewGroup mCling;
     private boolean mSuppressStatusBarDrags; // while a cling is up, briefly deaden the bar to give things time to settle
 
+    boolean mAnimating;
+    boolean mClosing; // only valid when mAnimating; indicates the initial acceleration
+    float mAnimY;
+    float mAnimVel;
+    float mAnimAccel;
+    long mAnimLastTimeNanos;
+    boolean mAnimatingReveal = false;
+    int mViewDelta;
+    float mFlingVelocity;
+    int mFlingY;
     int[] mAbsPos = new int[2];
     Runnable mPostCollapseCleanup = null;
 
@@ -1200,7 +1210,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         return lp;
     }
 
-    @Override
     public void refreshAllStatusBarIcons() {
         refreshAllIconsForLayout(mStatusIcons);
         refreshAllIconsForLayout(mNotificationIcons);

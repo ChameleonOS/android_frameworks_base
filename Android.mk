@@ -235,9 +235,6 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl \
-	voip/java/android/net/sip/ISipSession.aidl \
-	voip/java/android/net/sip/ISipSessionListener.aidl \
-	voip/java/android/net/sip/ISipService.aidl \
 	fmradio/java/com/stericsson/hardware/fm/IFmReceiver.aidl \
 	fmradio/java/com/stericsson/hardware/fm/IFmTransmitter.aidl \
 	fmradio/java/com/stericsson/hardware/fm/IOnStateChangedListener.aidl \

@@ -67,7 +67,6 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="8dp"
-                android:layout_marginStart="8dp"
                 />
         </com.android.systemui.statusbar.tablet.NotificationIconArea>
     </LinearLayout>

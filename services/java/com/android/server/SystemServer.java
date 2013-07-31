@@ -40,7 +40,6 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.server.search.SearchManagerService;
 import android.service.dreams.DreamService;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -551,15 +550,6 @@ class ServerThread extends Thread {
                         Context.NSD_SERVICE, serviceDiscovery);
             } catch (Throwable e) {
                 reportWtf("starting Service Discovery Service", e);
-            }
-
-            try {
-                Slog.i(TAG, "Throttle Service");
-                throttle = new ThrottleService(context);
-                ServiceManager.addService(
-                        Context.THROTTLE_SERVICE, throttle);
-            } catch (Throwable e) {
-                reportWtf("starting ThrottleService", e);
             }
 
             try {

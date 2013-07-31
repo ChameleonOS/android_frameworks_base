@@ -1659,7 +1659,8 @@ public class Resources {
     @CosHook(CosHook.CosHookType.NEW_METHOD)
     static void clearPreloadedCache()
     {
-        sPreloadedDrawables.clear();
+        sPreloadedDrawables[0].clear();
+        sPreloadedDrawables[1].clear();
         sPreloadedColorStateLists.clear();
         sPreloadedColorDrawables.clear();
     }

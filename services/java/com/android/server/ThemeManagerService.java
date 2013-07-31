@@ -79,12 +79,14 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mWorker.start();
         Log.i(TAG, "Spawned worker thread");
 
-        // create the themes directory if it does not exist
-        createThemeDir();
-        // create the customized icon directory if it does not exist
-        createIconsDir();
-        // create the fonts directory if it does not exist
-        createFontsDir();
+        File firstRun = new File(THEME_DIR + "firstrun");
+        if (firstRun.exists()) {
+            firstRun.delete();
+            Message msg = Message.obtain();
+            msg.what = ThemeWorkerHandler.MESSAGE_APPLY_DEFAULT;
+            msg.arg1 = 1;
+            mHandler.sendMessage(msg);
+        }
     }
 
     public void applyDefaultTheme() {
@@ -362,12 +364,11 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
     }
 
     private void createThemeDir() {
-        if (!themeDirExists()) {
+        File dir = new File(THEME_DIR);
+        if (!dir.exists()) {
             Log.d(TAG, "Creating themes directory");
-            File dir = new File(THEME_DIR);
-            if(dir.mkdir()) {
-                run(String.format("invoke-as -u root chmod 0775 %s", THEME_DIR));
-            }
+            dir.mkdir();
+            run(String.format("invoke-as -u root chmod 0775 %s", THEME_DIR));
 
             Message msg = Message.obtain();
             msg.what = ThemeWorkerHandler.MESSAGE_APPLY_DEFAULT;
@@ -387,9 +388,8 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         if (!iconsDirExists()) {
             Log.d(TAG, "Creating icons directory");
             File dir = new File(CUSTOMIZED_ICONS_DIR);
-            if(dir.mkdir()) {
-                run(String.format("invoke-as -u root chmod 0775 %s", CUSTOMIZED_ICONS_DIR));
-            }
+            dir.mkdir();
+            run(String.format("invoke-as -u root chmod 0775 %s", CUSTOMIZED_ICONS_DIR));
         }
     }
 
@@ -404,9 +404,8 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         if (!fontsDirExists()) {
             Log.d(TAG, "Creating fonts directory");
             File dir = new File(FONTS_DIR);
-            if(dir.mkdir()) {
-                run(String.format("invoke-as -u root chmod 0775 %s", FONTS_DIR));
-            }
+            dir.mkdir();
+            run(String.format("invoke-as -u root chmod 0775 %s", FONTS_DIR));
         }
     }
 

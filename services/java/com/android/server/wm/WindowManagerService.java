@@ -5454,24 +5454,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 // Constrain frame to the screen size.
                 frame.intersect(0, 0, dw, dh);
 
-            // The screenshot API does not apply the current screen rotation.
-            rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
-            // Allow for abnormal hardware orientation
-            rot = (rot + (android.os.SystemProperties.getInt("ro.sf.hwrotation",0) / 90 )) % 4;
-
-            int fw = frame.width();
-            int fh = frame.height();
-
-            // Constrain thumbnail to smaller of screen width or height. Assumes aspect
-            // of thumbnail is the same as the screen (in landscape) or square.
-            float targetWidthScale = width / (float) fw;
-            float targetHeightScale = height / (float) fh;
-            if (dw <= dh) {
-                scale = targetWidthScale;
-                // If aspect of thumbnail is the same as the screen (in landscape),
-                // select the slightly larger value so we fill the entire bitmap
-                if (targetHeightScale > scale && (int) (targetHeightScale * fw) == width) {
-                    scale = targetHeightScale;
                 if (frame.isEmpty() || maxLayer == 0) {
                     if (DEBUG_SCREENSHOT) Slog.i(TAG, "Screenshot of " + appToken
                             + ": returning null frame=" + frame.toShortString() + " maxLayer="
@@ -5481,6 +5463,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // The screenshot API does not apply the current screen rotation.
                 rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
+                // Allow for abnormal hardware orientation
+                rot = (rot + (android.os.SystemProperties.getInt("ro.sf.hwrotation",0) / 90 )) % 4;
                 int fw = frame.width();
                 int fh = frame.height();
 

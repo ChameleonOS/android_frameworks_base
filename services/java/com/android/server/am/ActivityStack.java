@@ -322,19 +322,8 @@ final class ActivityStack {
         }
     }
 
-    private static final ActivityTrigger mActivityTrigger;
-
-    private final PowerManagerService mPm;
-
-    static {
-        if (SystemProperties.QCOM_HARDWARE) {
-            mActivityTrigger = new ActivityTrigger();
-        } else {
-            mActivityTrigger = null;
-        }
-    }
-
-    final Handler mHandler = new Handler() {
+    final PowerManagerService mPm;
+    final Handler mHandler;
 
     final class ActivityStackHandler extends Handler {
         //public Handler() {
@@ -1518,10 +1507,6 @@ final class ActivityStack {
 
         if (DEBUG_SWITCH) Slog.v(TAG, "Resuming " + next);
 
-        if (mActivityTrigger != null) {
-            mActivityTrigger.activityResumeTrigger(next.intent);
-        }
-
         // If we are currently pausing an activity, then don't do anything
         // until that is done.
         if (mPausingActivity != null) {
@@ -2535,9 +2520,6 @@ final class ActivityStack {
             final int userId = aInfo != null ? UserHandle.getUserId(aInfo.applicationInfo.uid) : 0;
             Slog.i(TAG, "START u" + userId + " {" + intent.toShortString(true, true, true, false)
                     + "} from pid " + (callerApp != null ? callerApp.pid : callingPid));
-            if (mActivityTrigger != null) {
-                mActivityTrigger.activityStartTrigger(intent);
-            }
         }
 
         ActivityRecord sourceRecord = null;
