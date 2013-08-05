@@ -79,16 +79,9 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mWorker.start();
         Log.i(TAG, "Spawned worker thread");
 
-        // when the directories are first created an empty file named firstrun should exist
-        // if it does then we apply the default theme.
-        File firstRun = new File(THEME_DIR + "firstrun");
-        if (firstRun.exists()) {
-            firstRun.delete();
-            Message msg = Message.obtain();
-            msg.what = ThemeWorkerHandler.MESSAGE_APPLY_DEFAULT;
-            msg.arg1 = 1;
-            mHandler.sendMessage(msg);
-        }
+        String[] files = (new File(THEME_DIR)).list();
+        if (files.length == 0)
+            applyDefaultThemeImpl();
     }
 
     public void applyDefaultTheme() {
@@ -451,6 +444,9 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         }
     
         resetBootanimation();
+        // create an empty file so the default is not applied on next boot
+        file = new File(THEME_DIR + ".nodefault");
+        file.createNewFile();
     }
 
     private static boolean run(String cmd) {
@@ -746,6 +742,36 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             zos.closeEntry();
         }
         zos.close();
+    }
+
+    private void applyDefaultThemeImpl() {
+        try {
+            ZipInputStream zip = new ZipInputStream(new BufferedInputStream(new FileInputStream("/system/media/default.ctz")));
+            ZipEntry ze = null;
+            while ((ze = zip.getNextEntry()) != null) {
+                if (ze.isDirectory()) {
+                    // Assume directories are stored parents first then children
+                    File dir = new File("/data/system/theme/" + ze.getName());
+                    dir.mkdir();
+                    dir.setReadable(true, false);
+                    dir.setWritable(true, false);
+                    dir.setExecutable(true, false);
+                    zip.closeEntry();
+                    continue;
+                }
+
+                copyInputStream(zip,
+                        new BufferedOutputStream(
+                        new FileOutputStream("/data/system/theme/" + ze.getName())));
+                (new File("/data/system/theme/" + ze.getName())).setReadable(true, false);
+                zip.closeEntry();
+            }
+
+            zip.close();
+            setThemeWallpaper();
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to install default theme.");
+        }
     }
 
     private class ThemeWorkerHandler extends Handler {
