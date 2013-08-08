@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The ChameleonOS Project
+ * Copyright (C) 2013 The ChameleonOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,7 @@ import java.util.Map;
 import cos.util.ImageUtils;
 import cos.util.InputStreamLoader;
 
-public class ThemeResources
-{
+public class ThemeResources {
     public static final boolean DEBUG_THEMES = false;
     private static final boolean DBG = DEBUG_THEMES;
     private static final String TAG = "ThemeResources";
@@ -47,10 +46,9 @@ public class ThemeResources
     public static final String LOCKSCREEN_NAME = "lockscreen";
     public static final String LOCKSCREEN_WALLPAPER_NAME = "lock_wallpaper";
 
-    public static final String SYSTEM_THEME_PATH = "/system/media/theme/default/";
     public static final String THEME_PATH = "/data/system/theme/";
     public static final MetaData[] THEME_PATHS = {
-            new MetaData(THEME_PATH, true, true, true) };
+            new MetaData(THEME_PATH, true, true, true)};
 
     public static final String WALLPAPER_NAME = "wallpaper";
     public static final String sAppliedLockstyleConfigPath = THEME_PATH + File.separator + "config.config";
@@ -65,6 +63,7 @@ public class ThemeResources
     protected ThemeResources mWrapped;
 
     protected static Map<String, String> sMiuiToChaosPackageMappings;
+
     static {
         sMiuiToChaosPackageMappings = new HashMap();
         sMiuiToChaosPackageMappings.put("framework-res", "com.android.systemui");
@@ -80,6 +79,7 @@ public class ThemeResources
     // package name.  The Map returned as the value uses the ChaOS resource name
     // as the key and the value returned is the MIUI resource name.
     protected static Map<String, Map<String, String>> sMiuiToChaosResourceMappings;
+
     static {
         sMiuiToChaosResourceMappings = new HashMap();
         Map<String, String> map = new HashMap();
@@ -190,11 +190,13 @@ public class ThemeResources
         boolean supportWrapper = false;
         if (!"icons".equals(componentName))
             supportWrapper = true;
-        
+
         if (sMiuiToChaosPackageMappings.containsKey(componentName)) {
             if (DBG)
-                Log.i(TAG, "Loading wrapper " + sMiuiToChaosPackageMappings.get(componentName) + " for " + componentName);
-            mWrapped = ThemeResourcesPackage.getThemeResources(resources, sMiuiToChaosPackageMappings.get(componentName), componentName);
+                Log.i(TAG, "Loading wrapper " + sMiuiToChaosPackageMappings.get(componentName)
+                        + " for " + componentName);
+            mWrapped = ThemeResourcesPackage.getThemeResources(resources,
+                    sMiuiToChaosPackageMappings.get(componentName), componentName);
             supportWrapper = true;
         }
         mSupportWrapper = supportWrapper;
@@ -209,18 +211,19 @@ public class ThemeResources
     public static final Drawable getLockWallpaperCache(Context context) {
         Drawable drawable = null;
         File file = sSystem.getLockscreenWallpaper();
-        if(file != null && file.exists())
-            if(sLockWallpaperModifiedTime == file.lastModified()) {
+        if (file != null && file.exists())
+            if (sLockWallpaperModifiedTime == file.lastModified()) {
                 drawable = sLockWallpaperCache;
             } else {
                 sLockWallpaperModifiedTime = file.lastModified();
                 sLockWallpaperCache = null;
                 try {
                     DisplayMetrics displaymetrics = Resources.getSystem().getDisplayMetrics();
-                    Bitmap bitmap = ImageUtils.getBitmap(new InputStreamLoader(file.getAbsolutePath()), displaymetrics.widthPixels, displaymetrics.heightPixels);
+                    Bitmap bitmap = ImageUtils.getBitmap(new InputStreamLoader(file.getAbsolutePath()),
+                            displaymetrics.widthPixels, displaymetrics.heightPixels);
                     sLockWallpaperCache = new BitmapDrawable(context.getResources(), bitmap);
-                } catch(Exception exception) {
-                } catch(OutOfMemoryError outofmemoryerror) {
+                } catch (Exception exception) {
+                } catch (OutOfMemoryError outofmemoryerror) {
                 }
                 drawable = sLockWallpaperCache;
             }
@@ -240,8 +243,8 @@ public class ThemeResources
 
     public static ThemeResources getTopLevelThemeResources(Resources resources, String componentName) {
         ThemeResources themeResources = null;
-        for(int i = 0; i < THEME_PATHS.length; i++) {
-            themeResources = new ThemeResources(themeResources, 
+        for (int i = 0; i < THEME_PATHS.length; i++) {
+            themeResources = new ThemeResources(themeResources,
                     resources, componentName, THEME_PATHS[i]);
         }
 
@@ -250,10 +253,10 @@ public class ThemeResources
 
     public boolean checkUpdate() {
         boolean result = mPackageZipFile.checkUpdate();
-        mHasWrapped = mWrapped != null;// && (mSupportWrapper || !mPackageZipFile.exists()));
+        mHasWrapped = mWrapped != null;
 
-        if(mHasWrapped)
-            if(mWrapped.checkUpdate() || result)
+        if (mHasWrapped)
+            if (mWrapped.checkUpdate() || result)
                 result = true;
             else
                 result = false;
@@ -268,24 +271,13 @@ public class ThemeResources
         return ret;
     }
 
-    public CharSequence getThemeCharSequence(int id) {
-        return getThemeCharSequenceInner(id);
-    }
-
-    protected CharSequence getThemeCharSequenceInner(int id) {
-        CharSequence ret = mPackageZipFile.getThemeCharSequence(id);
-        if(ret == null && mHasWrapped)
-            ret = mWrapped.getThemeCharSequenceInner(id);
-        return ret;
-    }
-
     public CharSequence getThemeCharSequence(String name) {
         return getThemeCharSequenceInner(name);
     }
 
     protected CharSequence getThemeCharSequenceInner(String name) {
         CharSequence ret = mPackageZipFile.getThemeCharSequence(name);
-        if(ret == null && mHasWrapped)
+        if (ret == null && mHasWrapped)
             ret = mWrapped.getThemeCharSequenceInner(name);
         return ret;
     }
@@ -299,11 +291,12 @@ public class ThemeResources
 
         if (info == null) {
             int index = relativeFilePath.indexOf("dpi/");
-            if(index > 0) {
+            if (index > 0) {
                 String fileName = relativeFilePath.substring(index + 4);
                 String prefix = relativeFilePath.substring(0, index + 4);
                 if (DBG)
-                    Log.i(TAG, "Checking for mapping of " + prefix + fileName + " for " + mPackageZipFile.mPackageName);
+                    Log.i(TAG, "Checking for mapping of " + prefix + fileName + " for "
+                            + mPackageZipFile.mPackageName);
                 Map<String, String> mapping = sMiuiToChaosResourceMappings.get(mPackageZipFile.mPackageName);
                 if (mapping != null && mapping.containsKey(fileName)) {
                     if (DBG)
@@ -315,7 +308,7 @@ public class ThemeResources
 
         if (info == null && !(this instanceof ThemeResourcesSystem)) {
             int index = relativeFilePath.indexOf("framework-res/");
-            if(index >= 0) {
+            if (index >= 0) {
                 String fileName = relativeFilePath.substring(index + 14);
                 if (DBG)
                     Log.i(TAG, "Checking for overridden framework-res drawable " + fileName);
@@ -330,20 +323,21 @@ public class ThemeResources
         if (DBG)
             Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeFileStreamInner(" + relativeFilePath + ")");
         ThemeZipFile.ThemeFileInfo ret = null;
-        if ( !((this instanceof ThemeResourcesSystem) && relativeFilePath.contains("stat_sys_battery")) )
+        if (!((this instanceof ThemeResourcesSystem) && relativeFilePath.contains("stat_sys_battery")))
             ret = mPackageZipFile.getInputStream(relativeFilePath);
 
-        if(ret == null && mWrapped != null) {
+        if (ret == null && mWrapped != null) {
             if (DBG)
                 Log.i(TAG, "Checking wrapper for " + relativeFilePath);
             ret = mWrapped.getThemeFileStreamInner(relativeFilePath);
             if (ret == null) {
                 int index = relativeFilePath.indexOf("dpi/");
-                if(index > 0) {
+                if (index > 0) {
                     String fileName = relativeFilePath.substring(index + 4);
                     String prefix = relativeFilePath.substring(0, index + 4);
                     if (DBG)
-                        Log.i(TAG, "Checking for mapping of " + prefix + fileName + " for " + mPackageZipFile.mPackageName);
+                        Log.i(TAG, "Checking for mapping of " + prefix + fileName + " for "
+                                + mPackageZipFile.mPackageName);
                     Map<String, String> mapping = sMiuiToChaosResourceMappings.get(mPackageZipFile.mPackageName);
                     if (mapping != null && mapping.containsKey(fileName)) {
                         if (DBG)
@@ -354,21 +348,6 @@ public class ThemeResources
             }
         }
         return ret;
-    }
-
-    public Integer getThemeInt(int id) {
-        return getThemeIntInner(id);
-    }
-
-    protected Integer getThemeIntInner(int id) {
-        if (DBG)
-            Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeIntInner(0x" + Integer.toHexString(id) + ")");
-        Integer integer = mPackageZipFile.getThemeInt(id);
-        if(integer == null && mWrapped != null)
-            integer = mWrapped.getThemeIntInner(id);
-        if (DBG)
-            Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeIntInner=" + integer);
-        return integer;
     }
 
     public Integer getThemeInt(String name) {
@@ -383,9 +362,9 @@ public class ThemeResources
         if (DBG)
             Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeIntInner(" + name + ")");
         Integer integer = mPackageZipFile.getThemeInt(name);
-        if(integer == null && mWrapped != null && checkWrapped)
+        if (integer == null && mWrapped != null && checkWrapped)
             integer = mWrapped.getThemeIntInner(name, false);
-        if(integer == null && !(this instanceof ThemeResourcesSystem))
+        if (integer == null && !(this instanceof ThemeResourcesSystem))
             integer = sSystem.getThemeInt(name, false);
         if (DBG)
             Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeIntInner=" + integer);

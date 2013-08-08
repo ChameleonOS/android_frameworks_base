@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The ChameleonOS Project
+ * Copyright (C) 2013 The ChameleonOS Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,16 @@ import android.app.IActivityManager;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.RemoteException;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ExtraConfiguration
-    implements java.lang.Comparable<Object>
-{
+        implements java.lang.Comparable<Object> {
     public static final String CONTACTS_PKG_NAME = "com.android.contacts";
+
+    public static final String DIALER_PKG_NAME = "com.android.dialer";
 
     public static final String LAUNCHER_PKG_NAME = "org.chameleonos.chaoslauncher";
 
@@ -64,16 +66,16 @@ public class ExtraConfiguration
 
     public static final long SYSTEM_INTRESTE_CHANGE_FLAG = THEME_FLAG_THIRD_APP |
             THEME_FLAG_FONT_FALLBACK | THEME_FLAG_LAUNCHER | THEME_FLAG_STATUSBAR |
-            THEME_FLAG_LOCKSTYLE | THEME_FLAG_CONTACT | THEME_FLAG_MMS | 
+            THEME_FLAG_LOCKSTYLE | THEME_FLAG_CONTACT | THEME_FLAG_MMS |
             THEME_FLAG_FONT | THEME_FLAG_ICON | THEME_FLAG_FRAMEWORK; //0x10047899;
 
-    private static final long THEME_LAUNCHER_FLAGS = THEME_FLAG_LAUNCHER | 
+    private static final long THEME_LAUNCHER_FLAGS = THEME_FLAG_LAUNCHER |
             THEME_FLAG_FONT | THEME_FLAG_ICON | THEME_FLAG_FRAMEWORK;
 
-    private static final long THEME_CONTACTS_FLAGS = THEME_FLAG_CONTACT | 
+    private static final long THEME_CONTACTS_FLAGS = THEME_FLAG_CONTACT |
             THEME_FLAG_FONT | THEME_FLAG_FRAMEWORK;
 
-    private static final long THEME_MMS_FLAGS = THEME_FLAG_MMS | 
+    private static final long THEME_MMS_FLAGS = THEME_FLAG_MMS |
             THEME_FLAG_FONT | THEME_FLAG_FRAMEWORK;
 
     private static final long THEME_SETTINGS_FLAGS = THEME_FLAG_FONT |
@@ -86,96 +88,66 @@ public class ExtraConfiguration
     public int mThemeChanged;
     public long mThemeChangedFlags;
 
-    public static void addNeedRestartActivity(long flags)
-    {
+    public static void addNeedRestartActivity(long flags) {
         if (needRestartLauncher(flags))
             needRestartActivitySet.add(LAUNCHER_PKG_NAME);
         if (needRestartSettings(flags))
             needRestartActivitySet.add(SETTINGS_PKG_NAME);
         if (needRestartMms(flags))
             needRestartActivitySet.add(MMS_PKG_NAME);
-        if (needRestartContacts(flags))
+        if (needRestartContacts(flags)) {
             needRestartActivitySet.add(CONTACTS_PKG_NAME);
-    }
-
-    public static int getScaleMode()
-    {
-        int i = 1;
-        try
-        {
-            Configuration config = ActivityManagerNative.getDefault().getConfiguration();
-            if (config != null)
-            {
-                int j = config.uiMode;
-                i = j & 0xF;
-                if ((i != 12) && (i != 13) && (i != 14) && (i != 15))
-                    i = 1;
-            }
-            return i;
-        }
-        catch (RemoteException localRemoteException)
-        {
-            return 1;
+            needRestartActivitySet.add(DIALER_PKG_NAME);
         }
     }
 
-    public static boolean needNewResources(int paramInt)
-    {
-        return ((0x80000000 & paramInt) != 0);
+    public static boolean needNewResources(int configChanges) {
+        return ((0x80000000 & configChanges) != 0);
     }
 
-    public static boolean needRestart3rdApp(long paramLong)
-    {
-        return ((0x10000011 & paramLong) != 0L);
+    public static boolean needRestart3rdApp(long themeChangeFlags) {
+        return ((0x10000011 & themeChangeFlags) != 0L);
     }
 
-    public static boolean needRestartActivity(String paramString, long paramLong)
-    {
-        boolean bool = false;
-        if (paramString != null) {
-            if (paramString.startsWith(LAUNCHER_PKG_NAME))
-                bool = needRestartLauncher(paramLong);
-            else if (paramString.startsWith(SETTINGS_PKG_NAME))
-                bool = needRestartSettings(paramLong);
-            else if (paramString.startsWith(MMS_PKG_NAME))
-                bool = needRestartMms(paramLong);
-            else if (paramString.startsWith(CONTACTS_PKG_NAME))
-                bool = needRestartContacts(paramLong);
+    public static boolean needRestartActivity(String packageName, long paramLong) {
+        if (packageName != null) {
+            if (packageName.startsWith(LAUNCHER_PKG_NAME))
+                return needRestartLauncher(paramLong);
+            else if (packageName.startsWith(SETTINGS_PKG_NAME))
+                return needRestartSettings(paramLong);
+            else if (packageName.startsWith(MMS_PKG_NAME))
+                return needRestartMms(paramLong);
+            else if (packageName.startsWith(CONTACTS_PKG_NAME) || packageName.startsWith((DIALER_PKG_NAME)))
+                return needRestartContacts(paramLong);
             else
-                bool = needRestart3rdApp(paramLong);
+                return needRestart3rdApp(paramLong);
         }
 
-        return bool;
+        return false;
     }
 
-    public static boolean needRestartContacts(long flags)
-    {
+    public static boolean needRestartContacts(long flags) {
         return ((THEME_CONTACTS_FLAGS & flags) != 0L);
     }
 
-    public static boolean needRestartLauncher(long flags)
-    {
+    public static boolean needRestartLauncher(long flags) {
         return ((THEME_LAUNCHER_FLAGS & flags) != 0L);
     }
 
-    public static boolean needRestartMms(long flags)
-    {
+    public static boolean needRestartMms(long flags) {
         return ((THEME_MMS_FLAGS & flags) != 0L);
     }
 
-    public static boolean needRestartSettings(long flags)
-    {
+    public static boolean needRestartSettings(long flags) {
         return ((THEME_SETTINGS_FLAGS & flags) != 0L);
     }
 
-    public static boolean needRestartStatusBar(long flags)
-    {
+    public static boolean needRestartStatusBar(long flags) {
         return ((THEME_STATUSBAR_FLAGS & flags) != 0L);
     }
 
-    public static boolean removeNeedRestartActivity(String paramString)
-    {
-        return needRestartActivitySet.remove(paramString);
+    public static boolean removeNeedRestartActivity(String pkgName) {
+        return needRestartActivitySet.remove(pkgName);
     }
 
     public int compareTo(Object that) {
@@ -186,73 +158,62 @@ public class ExtraConfiguration
         }
     }
 
-    public int compareTo(ExtraConfiguration that)
-    {
+    public int compareTo(ExtraConfiguration that) {
         return this.mThemeChanged - that.mThemeChanged;
     }
 
-    public int diff(ExtraConfiguration config)
-    {
-        if (this.mThemeChanged < config.mThemeChanged)
+    public int diff(ExtraConfiguration config) {
+        if (mThemeChanged < config.mThemeChanged)
             return 0x80000000;
 
         return 0;
     }
 
-    public int hashCode()
-    {
-        return this.mThemeChanged + (int)this.mThemeChangedFlags;
+    public int hashCode() {
+        return this.mThemeChanged + (int) mThemeChangedFlags;
     }
 
-    public void readFromParcel(Parcel parcel)
-    {
-        this.mThemeChanged = parcel.readInt();
-        this.mThemeChangedFlags = parcel.readLong();
+    public void readFromParcel(Parcel parcel) {
+        mThemeChanged = parcel.readInt();
+        mThemeChangedFlags = parcel.readLong();
     }
 
-    public void setTo(ExtraConfiguration newConfig)
-    {
-        this.mThemeChanged = newConfig.mThemeChanged;
-        this.mThemeChangedFlags = newConfig.mThemeChangedFlags;
+    public void setTo(ExtraConfiguration newConfig) {
+        mThemeChanged = newConfig.mThemeChanged;
+        mThemeChangedFlags = newConfig.mThemeChangedFlags;
     }
 
-    public void setToDefaults()
-    {
-        this.mThemeChanged = 0;
-        this.mThemeChangedFlags = 0L;
+    public void setToDefaults() {
+        mThemeChanged = 0;
+        mThemeChangedFlags = 0L;
     }
 
-    public String toString()
-    {
-        StringBuilder localStringBuilder = new StringBuilder();
-        localStringBuilder.append(" themeChanged=");
-        localStringBuilder.append(this.mThemeChanged);
-        localStringBuilder.append(" themeChangedFlags=");
-        localStringBuilder.append(this.mThemeChangedFlags);
-        return localStringBuilder.toString();
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(" themeChanged=");
+        sb.append(mThemeChanged);
+        sb.append(" themeChangedFlags=");
+        sb.append(mThemeChangedFlags);
+        return sb.toString();
     }
 
-    public int updateFrom(ExtraConfiguration paramExtraConfiguration)
-    {
+    public int updateFrom(ExtraConfiguration delta) {
         int i = 0;
-        if (this.mThemeChanged < paramExtraConfiguration.mThemeChanged)
-        {
+        if (mThemeChanged < delta.mThemeChanged) {
             i = 0x0 | 0x80000000;
-            this.mThemeChanged = paramExtraConfiguration.mThemeChanged;
-            this.mThemeChangedFlags = paramExtraConfiguration.mThemeChangedFlags;
+            mThemeChanged = delta.mThemeChanged;
+            mThemeChangedFlags = delta.mThemeChangedFlags;
         }
         return i;
     }
 
-    public void updateTheme(long flags)
-    {
-        this.mThemeChanged = (1 + this.mThemeChanged);
-        this.mThemeChangedFlags = flags;
+    public void updateTheme(long flags) {
+        mThemeChanged = (1 + mThemeChanged);
+        mThemeChangedFlags = flags;
     }
 
-    public void writeToParcel(Parcel paramParcel, int paramInt)
-    {
-        paramParcel.writeInt(this.mThemeChanged);
-        paramParcel.writeLong(this.mThemeChangedFlags);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mThemeChanged);
+        dest.writeLong(mThemeChangedFlags);
     }
 }

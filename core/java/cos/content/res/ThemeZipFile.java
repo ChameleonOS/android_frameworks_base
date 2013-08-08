@@ -22,6 +22,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.SparseArray;
 import com.android.internal.util.XmlUtils;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+
 import cos.util.DisplayUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -40,21 +42,22 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import static cos.content.res.ThemeResources.CHAOS_FRAMEWORK_PACKAGE;
 
 
-public final class ThemeZipFile
-{
+public final class ThemeZipFile {
+    private static final boolean DBG = ThemeResources.DEBUG_THEMES;
+    private static final String TAG = "ThemeZipFile";
+
     private static final String ALTERNATIVE_THEME_VALUE_FILE = "theme_values%s.xml";
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
-    static boolean DBG = ThemeResources.DEBUG_THEMES;
-    static String TAG = "ThemeZipFile";
+    private static final String MIUI_TAG_ROOT = "MIUI_Theme_Values";
+    private static final String COS_TAG_ROOT = "ChaOS_Theme_Values";
     private static final String TAG_BOOLEAN = "bool";
     private static final String TAG_COLOR = "color";
     private static final String TAG_DIMEN = "dimen";
     private static final String TAG_DRAWABLE = "drawable";
     private static final String TAG_INTEGER = "integer";
-    private static final String MIUI_TAG_ROOT = "MIUI_Theme_Values";
-    private static final String COS_TAG_ROOT = "ChaOS_Theme_Values";
     private static final String TAG_STRING = "string";
+
     public static final String THEME_VALUE_FILE = "theme_values.xml";
     private static final String TRUE = "true";
     private static final int sDensity = DisplayMetrics.DENSITY_DEVICE;
@@ -64,12 +67,15 @@ public final class ThemeZipFile
     private HashMap<String, Integer> mIntegers = new HashMap<String, Integer>();
     private long mLastModifyTime = -1L;
     private ThemeResources.MetaData mMetaData;
-    public String mPackageName;
+    String mPackageName;
     private String mPath;
     private Resources mResources;
     private ZipFile mZipFile;
 
-    public ThemeZipFile(String zipFilePath, ThemeResources.MetaData metaData, String packageName, Resources resources) {
+    public ThemeZipFile(String zipFilePath,
+                        ThemeResources.MetaData metaData,
+                        String packageName,
+                        Resources resources) {
         if (DBG)
             Log.d(TAG, "create ThemeZipFile for " + zipFilePath);
         mResources = resources;
@@ -79,15 +85,13 @@ public final class ThemeZipFile
     }
 
     private void clean() {
-        if(DBG)
+        if (DBG)
             Log.d(TAG, "clean for " + mPath);
-        if(mZipFile != null)
-        {
-            try
-            {
+        if (mZipFile != null) {
+            try {
                 mZipFile.close();
+            } catch (Exception exception) {
             }
-            catch(Exception exception) { }
             mZipFile = null;
         }
         mIntegers.clear();
@@ -98,21 +102,19 @@ public final class ThemeZipFile
         ThemeFileInfo result = getZipInputStream(relativeFilePath);
         if (result == null) {
             int index = relativeFilePath.indexOf("dpi/");
-            if(index > 0)
-            {
+            if (index > 0) {
                 String suffix = relativeFilePath.substring(index + 3);
-                for(; relativeFilePath.charAt(index) != '-'; index--);
+                for (; relativeFilePath.charAt(index) != '-'; index--) ;
                 String prefix = relativeFilePath.substring(0, index);
-                for(int j = 0; j < sDensities.length; j++)
-                {
-                    result = getZipInputStream(String.format("%s%s%s", prefix, 
+                for (int j = 0; j < sDensities.length; j++) {
+                    result = getZipInputStream(String.format("%s%s%s", prefix,
                             DisplayUtils.getDensitySuffix(sDensities[j]), suffix));
                     if (result != null) {
-                        if(sDensities[j] > 1)
+                        if (sDensities[j] > 1)
                             result.mDensity = sDensities[j];
                         if (DBG)
                             Log.d(TAG, String.format("Loading %s%s%s", prefix,
-                                DisplayUtils.getDensitySuffix(sDensities[j]), suffix));
+                                    DisplayUtils.getDensitySuffix(sDensities[j]), suffix));
                         break;
                     }
                 }
@@ -132,23 +134,29 @@ public final class ThemeZipFile
         return componentName;
     }
 
-    protected static ThemeZipFile getThemeZipFile(ThemeResources.MetaData metadata, String componentName, Resources resources) {
+    public String getPackageName() {
+        return mPackageName;
+    }
+
+    protected static ThemeZipFile getThemeZipFile(ThemeResources.MetaData metadata,
+                                                  String componentName,
+                                                  Resources resources) {
         ThemeZipFile zipFile = null;
         String path = metadata.themePath + componentName;
         WeakReference ref = new WeakReference<ThemeZipFile>(sThemeZipFiles.get(path));
-        if(ref != null)
-            zipFile = (ThemeZipFile)ref.get();
+        if (ref != null)
+            zipFile = (ThemeZipFile) ref.get();
         else
             zipFile = null;
-        if(zipFile == null) {
-            synchronized(sThemeZipFiles) {
+        if (zipFile == null) {
+            synchronized (sThemeZipFiles) {
                 ref = new WeakReference<ThemeZipFile>(sThemeZipFiles.get(path));
-                if(ref != null)
-                    zipFile = (ThemeZipFile)ref.get();
-                if(zipFile == null) {
+                if (ref != null)
+                    zipFile = (ThemeZipFile) ref.get();
+                if (zipFile == null) {
                     zipFile = new ThemeZipFile(path, metadata, getPackageName(componentName), resources);
                     ref = new WeakReference<ThemeZipFile>(zipFile);
-                    sThemeZipFiles.put(path, (ThemeZipFile)ref.get());
+                    sThemeZipFiles.put(path, (ThemeZipFile) ref.get());
                 }
             }
         }
@@ -166,11 +174,11 @@ public final class ThemeZipFile
         try {
             if (relativeFilePath.endsWith("#*.png")) {
                 String fuzzyIconName = relativeFilePath.substring(0, relativeFilePath.length() - "#*.png".length());
-                Enumeration localEnumeration = this.mZipFile.entries();
+                Enumeration entries = this.mZipFile.entries();
                 do {
-                    if (!localEnumeration.hasMoreElements())
+                    if (!entries.hasMoreElements())
                         break;
-                    entry = (ZipEntry)localEnumeration.nextElement();
+                    entry = (ZipEntry) entries.nextElement();
                 } while ((entry.isDirectory()) || (!entry.getName().startsWith(fuzzyIconName)));
             }
 
@@ -182,7 +190,7 @@ public final class ThemeZipFile
                 if (DBG) Log.d(TAG, String.format("getZipInputStream: %s", relativeFilePath));
                 themeFileInfo = new ThemeFileInfo(input, entry.getSize());
             }
-        } catch (Exception localException) {
+        } catch (Exception e) {
         }
 
         return themeFileInfo;
@@ -195,13 +203,13 @@ public final class ThemeZipFile
     private void loadThemeValues() {
         if (!isValid())
             return;
-        if(DBG)
+        if (DBG)
             Log.d(TAG, "loadThemeValues for " + mPath);
         for (int i = 0; i < sDensities.length; i++) {
             String filename = String.format(ALTERNATIVE_THEME_VALUE_FILE,
-                        DisplayUtils.getDensitySuffix(sDensities[i]));
+                    DisplayUtils.getDensitySuffix(sDensities[i]));
             ThemeFileInfo info = getZipInputStream(filename);
-            if(info != null) {
+            if (info != null) {
                 try {
                     if (DBG) Log.d(TAG, String.format("loadThemeValues: parsing %s for %s", filename, mPath));
                     XmlPullParser xmlpullparser = XmlPullParserFactory.newInstance().newPullParser();
@@ -211,7 +219,7 @@ public final class ThemeZipFile
                     mergeThemeValues(xmlpullparser);
                     bufferedinputstream.close();
                     break;
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -224,7 +232,7 @@ public final class ThemeZipFile
             eventType = xpp.next();
             while (eventType != XmlPullParser.START_TAG && eventType != XmlPullParser.END_DOCUMENT)
                 eventType = xpp.next();
-    		
+
             if (eventType != XmlPullParser.START_TAG)
                 throw new XmlPullParserException("No start tag found!");
         } catch (Exception e) {
@@ -253,24 +261,29 @@ public final class ThemeZipFile
                             if (pkg == null)
                                 pkg = mPackageName;
 
-                            if (tag.equals(TAG_BOOLEAN)) {
+                            if (TAG_BOOLEAN.equals(tag)) {
                                 if (DBG)
-                                    Log.d(TAG, String.format("parsing boolean %s, %s, %s, %s", attr, tag, pkg, content));
+                                    Log.d(TAG, String.format("parsing boolean %s, %s, %s, %s",
+                                            attr, tag, pkg, content));
                                 int value = content.trim().equals(TRUE) ? 1 : 0;
                                 mIntegers.put(attr, Integer.valueOf(value));
-                            } else if (tag.equals(TAG_COLOR) || tag.equals(TAG_INTEGER) || tag.equals(TAG_DRAWABLE)) {
+                            } else if (TAG_COLOR.equals(tag) || TAG_INTEGER.equals(tag) || TAG_DRAWABLE.equals(tag)) {
                                 if (DBG)
-                                    Log.d(TAG, String.format("parsing color/int/drawable %s, %s, %s, %s", attr, tag, pkg, content));
+                                    Log.d(TAG, String.format("parsing color/int/drawable %s, %s, %s, %s",
+                                            attr, tag, pkg, content));
                                 if (mMetaData.supportInt && !mIntegers.containsKey(attr))
-                                    mIntegers.put(attr, Integer.valueOf(XmlUtils.convertValueToUnsignedInt(content.trim(), 0)));
-                            } else if (tag.equals(TAG_STRING)) {
+                                    mIntegers.put(attr, Integer.valueOf(
+                                            XmlUtils.convertValueToUnsignedInt(content.trim(), 0)));
+                            } else if (TAG_STRING.equals(tag)) {
                                 if (DBG)
-                                    Log.d(TAG, String.format("parsing string %s, %s, %s, %s", attr, tag, pkg, content));
+                                    Log.d(TAG, String.format("parsing string %s, %s, %s, %s",
+                                            attr, tag, pkg, content));
                                 if (mMetaData.supportCharSequence && mCharSequences.containsKey(attr))
                                     mCharSequences.put(attr, content);
-                            } else if (tag.equals(TAG_DIMEN)) {
+                            } else if (TAG_DIMEN.equals(tag)) {
                                 if (DBG)
-                                    Log.d(TAG, String.format("parsing dimension %s, %s, %s, %s", attr, tag, pkg, content));
+                                    Log.d(TAG, String.format("parsing dimension %s, %s, %s, %s",
+                                            attr, tag, pkg, content));
                                 Integer integer = ThemeHelper.parseDimension(content.toString());
                                 if (integer != null)
                                     mIntegers.put(attr, integer);
@@ -290,14 +303,14 @@ public final class ThemeZipFile
     }
 
     private void openZipFile() {
-        if(DBG)
+        if (DBG)
             Log.d(TAG, "openZipFile for " + this.mPath);
         File file = new File(mPath);
         mLastModifyTime = file.lastModified();
-        if(mLastModifyTime != 0L) {
+        if (mLastModifyTime != 0L) {
             try {
                 mZipFile = new ZipFile(file);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 if (DBG) {
                     Log.e(TAG, "Unable to openzipfile " + this.mPath);
                     e.printStackTrace();
@@ -311,12 +324,12 @@ public final class ThemeZipFile
     }
 
     public boolean checkUpdate() {
-        if(DBG)
+        if (DBG)
             Log.d(TAG, "checkUpdate for " + this.mPath);
         long lastModified = (new File(mPath)).lastModified();
-    
-        if(mZipFile == null || mLastModifyTime != lastModified) {
-            synchronized(this) {
+
+        if (mZipFile == null || mLastModifyTime != lastModified) {
+            synchronized (this) {
                 clean();
                 openZipFile();
                 loadThemeValues();
@@ -336,32 +349,24 @@ public final class ThemeZipFile
 
     public ThemeFileInfo getInputStream(String relativeFilePath) {
         InputStream is = null;
-        if(mMetaData.supportFile)
+        if (mMetaData.supportFile)
             return getInputStreamInner(relativeFilePath);
         return null;
     }
 
-    public CharSequence getThemeCharSequence(int id) {
-        return (CharSequence)mCharSequences.get(id);
-    }
-
-    public Integer getThemeInt(int id) {
-        return (Integer)mIntegers.get(id);
-    }
-
     public CharSequence getThemeCharSequence(String name) {
-        return (CharSequence)mCharSequences.get(name);
+        return (CharSequence) mCharSequences.get(name);
     }
 
     public Integer getThemeInt(String name) {
-        return (Integer)mIntegers.get(name);
+        return (Integer) mIntegers.get(name);
     }
 
     public boolean hasValues() {
         return mIntegers.size() > 0 || mCharSequences.size() > 0;
     }
 
-    public class ThemeFileInfo {
+    public static class ThemeFileInfo {
         public int mDensity;
         public InputStream mInput;
         public long mSize;

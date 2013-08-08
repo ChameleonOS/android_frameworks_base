@@ -18,19 +18,20 @@ package cos.content.res;
 
 import android.content.res.Resources;
 import android.util.Log;
+
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class ThemeResourcesPackage extends ThemeResources
-{
+public final class ThemeResourcesPackage extends ThemeResources {
     private static final boolean DBG = ThemeResources.DEBUG_THEMES;
     private static final String TAG = "ThemeResourcesPackage";
-    private static final Map<String, WeakReference<ThemeResourcesPackage>> sPackageResources = new HashMap();
+    private static final Map<String, WeakReference<ThemeResourcesPackage>>
+            sPackageResources = new HashMap();
 
     protected ThemeResourcesPackage(ThemeResourcesPackage wrapped, Resources resources,
-            String packageName, ThemeResources.MetaData metaData) {
+                                    String packageName, ThemeResources.MetaData metaData) {
         super(wrapped, resources, packageName, metaData);
     }
 
@@ -39,11 +40,11 @@ public final class ThemeResourcesPackage extends ThemeResources
             Log.d(TAG, String.format("getThemeResources: packageName=%s", packageName));
         ThemeResourcesPackage themeResources = null;
         if (sPackageResources.containsKey(packageName))
-            themeResources = (ThemeResourcesPackage)((WeakReference)sPackageResources.get(packageName)).get();
+            themeResources = (ThemeResourcesPackage) ((WeakReference) sPackageResources.get(packageName)).get();
         if (themeResources == null)
             synchronized (sPackageResources) {
                 if (sPackageResources.containsKey(packageName))
-                    themeResources = (ThemeResourcesPackage)((WeakReference)sPackageResources.get(packageName)).get();
+                    themeResources = (ThemeResourcesPackage) ((WeakReference) sPackageResources.get(packageName)).get();
                 if (themeResources == null) {
                     themeResources = getTopLevelThemeResources(resources, packageName);
                     sPackageResources.put(packageName, new WeakReference(themeResources));
@@ -52,12 +53,14 @@ public final class ThemeResourcesPackage extends ThemeResources
         return themeResources;
     }
 
-    public static ThemeResourcesPackage getThemeResources(Resources resources, String packageName, String originatingPackageName) {
+    public static ThemeResourcesPackage getThemeResources(Resources resources,
+            String packageName, String originatingPackageName) {
         if (DBG)
-            Log.d(TAG, String.format("getThemeResources: packageName=%s, originatingPackageName=%s", packageName, originatingPackageName));
+            Log.d(TAG, String.format("getThemeResources: packageName=%s, originatingPackageName=%s",
+                    packageName, originatingPackageName));
         ThemeResourcesPackage themeResources = null;
         if (!packageName.equals(originatingPackageName) && sPackageResources.containsKey(packageName))
-            themeResources = (ThemeResourcesPackage)((WeakReference)sPackageResources.get(packageName)).get();
+            themeResources = (ThemeResourcesPackage) ((WeakReference) sPackageResources.get(packageName)).get();
         if (themeResources == null)
             synchronized (sPackageResources) {
                 themeResources = getTopLevelThemeResources(resources, packageName);
@@ -69,24 +72,16 @@ public final class ThemeResourcesPackage extends ThemeResources
 
     public static ThemeResourcesPackage getTopLevelThemeResources(Resources resources, String packageName) {
         ThemeResourcesPackage themeResources = null;
-        for(int i = 0; i < THEME_PATHS.length; i++) {
+        for (int i = 0; i < THEME_PATHS.length; i++) {
             themeResources = new ThemeResourcesPackage(themeResources, resources, packageName, THEME_PATHS[i]);
         }
 
         return themeResources;
     }
 
-    public CharSequence getThemeCharSequence(int id) {
-        CharSequence ret = super.getThemeCharSequence(id);
-        if (ret == null)
-            ret = getSystem().getThemeCharSequence(id);
-        return ret;
-    }
-
     public ThemeZipFile.ThemeFileInfo getThemeFileStream(int cookieType, String fileName) {
         ThemeZipFile.ThemeFileInfo info;
-        if (1 == cookieType)
-        {
+        if (1 == cookieType) {
             info = getThemeFileStream("framework-res/" + fileName);
             if (info == null)
                 info = getSystem().getThemeFileStream(cookieType, fileName);
@@ -95,13 +90,6 @@ public final class ThemeResourcesPackage extends ThemeResources
         } else
             info = getThemeFileStream(fileName);
         return info;
-    }
-
-    public Integer getThemeInt(int id) {
-        Integer ret = super.getThemeInt(id);
-        if (ret == null)
-            ret = getSystem().getThemeInt(id);
-        return ret;
     }
 
     public boolean hasValues() {
