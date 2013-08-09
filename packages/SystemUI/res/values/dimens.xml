@@ -273,4 +273,7 @@
     <dimen name="qs_tile_margin_below_icon">17dp</dimen>
     <!-- Quick Settings tile geometry: icon size -->
     <dimen name="qs_tile_icon_size">32dp</dimen>
+
+    <!-- Battery bar height -->
+    <dimen name="battery_bar_height">2dp</dimen>
 </resources>
