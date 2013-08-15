@@ -20,7 +20,7 @@ package android.content.res;
 interface IThemeManagerService
 {
     void applyDefaultTheme();
-    void applyTheme(String themeURI, boolean applyFont, boolean scaleBoot);
+    void applyTheme(String themeURI, in List<String> excludedItems, boolean applyFont, boolean scaleBoot, boolean removeExistingTheme);
     void removeTheme(boolean removeFonts);
     void removeThemeAndApply(boolean removeFonts);
     void applyInstalledTheme();

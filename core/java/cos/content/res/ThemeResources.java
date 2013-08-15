@@ -42,15 +42,23 @@ public class ThemeResources {
     public static final String CHAOS_FRAMEWORK_PACKAGE = "android";
     public static final String MIUI_FRAMEWORK_NAME = "framework-miui-res";
     public static final String MIUI_FRAMEWORK_PACKAGE = "miui";
+    public static final String BOOTANI_NAME = "boots";
+    public static final String FONTS_NAME = "fonts";
     public static final String ICONS_NAME = "icons";
+    public static final String RINGTONES_NAME = "ringtones";
+    public static final String WALLPAPER_NAME = "wallpaper";
     public static final String LOCKSCREEN_NAME = "lockscreen";
     public static final String LOCKSCREEN_WALLPAPER_NAME = "lock_wallpaper";
+    public static final String MMS_PACKAGE = "com.android.mms";
+    public static final String LAUNCHER_PACKAGE = "org.chameleonos.chaoslauncher";
+    public static final String CONTACTS_PACKAGE = "com.android.contacts";
+    public static final String SYSTEMUI_PACKAGE = "com.android.systemui";
+    public static final String DIALER_PACKAGE = "com.android.dialer";
 
     public static final String THEME_PATH = "/data/system/theme/";
     public static final MetaData[] THEME_PATHS = {
             new MetaData(THEME_PATH, true, true, true)};
 
-    public static final String WALLPAPER_NAME = "wallpaper";
     public static final String sAppliedLockstyleConfigPath = THEME_PATH + File.separator + "config.config";
     private static Drawable sLockWallpaperCache;
     private static long sLockWallpaperModifiedTime;

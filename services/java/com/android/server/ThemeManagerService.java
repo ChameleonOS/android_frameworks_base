@@ -46,7 +46,9 @@ import cos.util.TTFUtils;
 import java.io.*;
 import java.lang.Process;
 import java.lang.RuntimeException;
+import java.lang.String;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -96,14 +98,18 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
     /**
      * Apply the theme specified by the URI string provided
      */
-    public void applyTheme(String themeURI, boolean applyFont, boolean scaleBoot) {
+    public void applyTheme(String themeURI, List<String> excludedItems,
+                           boolean applyFont, boolean scaleBoot, boolean removeExistingTheme) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_THEME_SERVICE, null);
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_APPLY;
         msg.arg1 = applyFont ? 1 : 0;
-        msg.arg2 = scaleBoot ? 1 : 0;
-        msg.obj = themeURI;
+        msg.arg2 = scaleBoot ? 1 : 0 | ((removeExistingTheme ? 1 : 0) << 1);
+        ApplyThemeData data = new ApplyThemeData();
+        data.mThemeURI = themeURI;
+        data.mExcludedItemsList = excludedItems;
+        msg.obj = data;
         mHandler.sendMessage(msg);
     }
 
@@ -774,6 +780,14 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         }
     }
 
+    private boolean shouldExclude(String entryName, List<String> excludedList) {
+        int index = entryName.indexOf('/');
+        if (index >= 0)
+            entryName = entryName.substring(0, index);
+
+        return excludedList.contains(entryName);
+    }
+
     private class ThemeWorkerHandler extends Handler {
         private static final int MESSAGE_APPLY = 0;
         private static final int MESSAGE_APPLY_CURRENT = 1;
@@ -812,14 +826,18 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             switch(msg.what) {
                 case MESSAGE_APPLY:
                     try {
-                        themeURI = (String)msg.obj;
+                        ApplyThemeData data = (ApplyThemeData)msg.obj;
+                        themeURI = data.mThemeURI;
+                        final List<String> excludedItems = data.mExcludedItemsList;
                         boolean applyFont = msg.arg1 == 1;
-                        boolean scaleBoot = msg.arg2 == 1;
+                        boolean scaleBoot = (msg.arg2 & 1) == 1;
+                        boolean removeExistingTheme = (msg.arg2 & 2) == 2;
                         if (msg.what == MESSAGE_APPLY && !TextUtils.isEmpty(themeURI)) {
                             Log.i(TAG, "applying theme " + themeURI);
                             try{
                                 // clear out the old theme first
-                                removeCurrentTheme();
+                                if (removeExistingTheme)
+                                    removeCurrentTheme();
 
                                 if (applyFont && fontsDirExists()) {
                                     // remove the contents of FONTS_DIR
@@ -833,33 +851,35 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                                 ZipInputStream zip = new ZipInputStream(new BufferedInputStream(getFileInputStream(themeURI)));
                                 ZipEntry ze = null;
                                 while ((ze = zip.getNextEntry()) != null) {
-                                    if (ze.getName().contains("fonts/")) {
-                                        if (ze.isDirectory()) {
-                                        } else if (applyFont) {
-                                            copyInputStream(zip,
-                                                    new BufferedOutputStream(new FileOutputStream("/data/" + ze.getName())));
-                                            (new File("/data/" + ze.getName())).setReadable(true, false);
+                                    if (!shouldExclude(ze.getName(), excludedItems)) {
+                                        if (ze.getName().contains("fonts/")) {
+                                            if (ze.isDirectory()) {
+                                            } else if (applyFont) {
+                                                copyInputStream(zip,
+                                                        new BufferedOutputStream(new FileOutputStream("/data/" + ze.getName())));
+                                                (new File("/data/" + ze.getName())).setReadable(true, false);
+                                            }
+                                        } else {
+                                            if (ze.isDirectory()) {
+                                                // Assume directories are stored parents first then children
+                                                Log.d(TAG, "Creating directory /data/system/theme/" + ze.getName());
+                                                File dir = new File("/data/system/theme/" + ze.getName());
+                                                dir.mkdir();
+                                                dir.setReadable(true, false);
+                                                dir.setWritable(true, false);
+                                                dir.setExecutable(true, false);
+                                                zip.closeEntry();
+                                                continue;
+                                            }
+
+                                            if (scaleBoot && ze.getName().contains("bootanimation.zip"))
+                                                scaleBootAnimation(zip, "/data/system/theme/" + ze.getName());
+                                            else
+                                                copyInputStream(zip,
+                                                        new BufferedOutputStream(
+                                                                new FileOutputStream("/data/system/theme/" + ze.getName())));
+                                            (new File("/data/system/theme/" + ze.getName())).setReadable(true, false);
                                         }
-                                    } else {
-                                        if (ze.isDirectory()) {
-                                            // Assume directories are stored parents first then children
-                                            Log.d(TAG, "Creating directory /data/system/theme/" + ze.getName());
-                                            File dir = new File("/data/system/theme/" + ze.getName());
-                                            dir.mkdir();
-                                            dir.setReadable(true, false);
-                                            dir.setWritable(true, false);
-                                            dir.setExecutable(true, false);
-                                            zip.closeEntry();
-                                            continue;
-                                        }
-                                        
-                                        if (scaleBoot && ze.getName().contains("bootanimation.zip"))
-                                            scaleBootAnimation(zip, "/data/system/theme/" + ze.getName());
-                                        else
-                                            copyInputStream(zip,
-                                                    new BufferedOutputStream(
-                                                    new FileOutputStream("/data/system/theme/" + ze.getName())));
-                                        (new File("/data/system/theme/" + ze.getName())).setReadable(true, false);
                                     }
                                     zip.closeEntry();
                                 }
@@ -1169,5 +1189,10 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     break;
            }
         }
+    }
+
+    private class ApplyThemeData {
+        String mThemeURI;
+        List<String> mExcludedItemsList;
     }
 }
