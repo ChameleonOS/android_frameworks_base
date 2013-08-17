@@ -276,4 +276,7 @@
 
     <!-- Battery bar height -->
     <dimen name="battery_bar_height">2dp</dimen>
+
+    <!-- Network stats text size -->
+    <dimen name="network_stats_text_size">10dp</dimen>
 </resources>
