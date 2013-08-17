@@ -347,8 +347,12 @@ public class FmTransmitterService extends IFmTransmitter.Stub {
                 }
 
                 // power down hardware
-                if (_fm_transmitter_reset() > FmTransmitter.STATE_IDLE) {
-                    notifyOnForcedReset(FmTransmitter.RESET_RADIO_FORBIDDEN);
+                try {
+                    if (_fm_transmitter_reset() > FmTransmitter.STATE_IDLE) {
+                        notifyOnForcedReset(FmTransmitter.RESET_RADIO_FORBIDDEN);
+                    }
+                } catch (UnsatisfiedLinkError e) {
+                    // do nothing
                 }
             }
         }
