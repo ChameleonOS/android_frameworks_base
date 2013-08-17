@@ -518,7 +518,10 @@ public class StatusBarToggles extends LinearLayout {
 
     private void updateButtonLayoutWidth() {
         // use our context to set a valid button width
-        BUTTON_LAYOUT_PARAMS.width = this.getWidth() / LAYOUT_SCROLL_BUTTON_THRESHOLD;
+        int width = getWidth();
+        if (width == 0)
+            width = mContext.getResources().getDisplayMetrics().widthPixels;
+        BUTTON_LAYOUT_PARAMS.width = width / LAYOUT_SCROLL_BUTTON_THRESHOLD;
     }
 
     public void updateVisibility() {
