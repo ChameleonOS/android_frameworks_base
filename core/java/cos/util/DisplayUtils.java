@@ -16,9 +16,19 @@
 
 package cos.util;
 
+import android.util.DisplayMetrics;
+
 public class DisplayUtils
 {
-    private static final int[] DENSITIES = {480, 320, 240, 160, 120, 1, 0};
+    private static final int[] DENSITIES = {
+        DisplayMetrics.DENSITY_XXXHIGH,
+        DisplayMetrics.DENSITY_XXHIGH,
+        DisplayMetrics.DENSITY_XHIGH,
+        DisplayMetrics.DENSITY_HIGH,
+        DisplayMetrics.DENSITY_MEDIUM,
+        DisplayMetrics.DENSITY_LOW,
+        1,
+        0};
 
     public static int[] getBestDensityOrder(int currentDensity) {
         /* TODO: figure out what they were trying to accomplish here
@@ -50,20 +60,23 @@ public class DisplayUtils
         int j;
         String name;
         switch (density) {
-        case 120:
+        case DisplayMetrics.DENSITY_LOW:
             name = "ldpi";
             break;
-        case 160:
+        case DisplayMetrics.DENSITY_MEDIUM:
             name = "mdpi";
             break;
-        case 240:
+        case DisplayMetrics.DENSITY_HIGH:
             name = "hdpi";
             break;
-        case 320:
+        case DisplayMetrics.DENSITY_XHIGH:
             name = "xhdpi";
             break;
-        case 480:
+        case DisplayMetrics.DENSITY_XXHIGH:
             name = "xxhdpi";
+            break;
+        case DisplayMetrics.DENSITY_XXXHIGH:
+            name = "xxxhdpi";
             break;
         case 1:
             name = "nodpi";
