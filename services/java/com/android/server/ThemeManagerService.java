@@ -246,6 +246,15 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mHandler.sendMessage(msg);
     }
 
+    public void applyThemeDialer(String themeURI) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_THEME_SERVICE, null);
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_APPLY_DIALER;
+        msg.obj = themeURI;
+        mHandler.sendMessage(msg);
+    }
+
     public void updateSystemUI() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_THEME_SERVICE, null);
@@ -339,6 +348,14 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 android.Manifest.permission.ACCESS_THEME_SERVICE, null);
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_RESET_CONTACTS;
+        mHandler.sendMessage(msg);
+    }
+
+    public void resetThemeDialer() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_THEME_SERVICE, null);
+        Message msg = Message.obtain();
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_DIALER;
         mHandler.sendMessage(msg);
     }
 
@@ -515,8 +532,10 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 killProcess(ExtraConfiguration.MMS_PKG_NAME);
             // restart contacts if needed
             if ((configChange & (ExtraConfiguration.THEME_FLAG_CONTACT |
-                    ExtraConfiguration.THEME_FLAG_FRAMEWORK)) != 0)
+                    ExtraConfiguration.THEME_FLAG_FRAMEWORK)) != 0) {
                 killProcess(ExtraConfiguration.CONTACTS_PKG_NAME);
+                killProcess(ExtraConfiguration.DIALER_PKG_NAME);
+            }
             notifyThemeApplied();
         } catch (Exception e) {
             notifyThemeNotApplied();
@@ -806,6 +825,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_APPLY_FONT_REBOOT = 14;
         private static final int MESSAGE_APPLY_CONTACTS = 15;
         private static final int MESSAGE_APPLY_DEFAULT = 16;
+        private static final int MESSAGE_APPLY_DIALER = 17;
         private static final int MESSAGE_RESET_ICONS = 20;
         private static final int MESSAGE_RESET_WALLPAPER = 21;
         private static final int MESSAGE_RESET_SYSTEMUI = 22;
@@ -817,6 +837,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_RESET_FONT = 28;
         private static final int MESSAGE_RESET_FONT_REBOOT = 29;
         private static final int MESSAGE_RESET_CONTACTS = 30;
+        private static final int MESSAGE_RESET_DIALER = 31;
         private static final int MESSAGE_UPDATE_SYSTEMUI = 40;
 
         @Override
@@ -1089,10 +1110,20 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     try {
                         themeURI = (String)msg.obj;
                         extractFileFromTheme(themeURI, "com.android.contacts", THEME_DIR);
-                        extractFileFromTheme(themeURI, "com.android.phone", THEME_DIR);
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_CONTACT);
                     } catch (Exception e) {
                         Log.e(TAG, "applyThemeContacts failed " +themeURI, e);
+                        notifyThemeNotApplied();
+                    }
+                    break;
+                case MESSAGE_APPLY_DIALER:
+                    try {
+                        themeURI = (String)msg.obj;
+                        extractFileFromTheme(themeURI, "com.android.dialer", THEME_DIR);
+                        extractFileFromTheme(themeURI, "com.android.phone", THEME_DIR);
+                        notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_CONTACT);
+                    } catch (Exception e) {
+                        Log.e(TAG, "applyThemeDialer failed " +themeURI, e);
                         notifyThemeNotApplied();
                     }
                     break;
@@ -1181,9 +1212,17 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         File contacts = new File(THEME_DIR + "/com.android.contacts");
                         if (contacts.exists())
                             delete(contacts);
-                        contacts = new File(THEME_DIR + "/com.android.phone");
-                        if (contacts.exists())
-                            delete(contacts);
+                        notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_CONTACT);
+                    } catch (Exception e) {}
+                    break;
+                case MESSAGE_RESET_DIALER:
+                    try {
+                        File dialer = new File(THEME_DIR + "/com.android.dialer");
+                        if (dialer.exists())
+                            delete(dialer);
+                        dialer = new File(THEME_DIR + "/com.android.phone");
+                        if (dialer.exists())
+                            delete(dialer);
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_CONTACT);
                     } catch (Exception e) {}
                     break;

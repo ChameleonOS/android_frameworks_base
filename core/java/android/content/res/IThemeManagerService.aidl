@@ -36,6 +36,7 @@ interface IThemeManagerService
     void applyThemeFont(String themeURI);
     void applyThemeFontReboot(String themeURI);
     void applyThemeContacts(String themeURI);
+    void applyThemeDialer(String themeURI);
     void updateSystemUI();
 
     void resetThemeIcons();
@@ -49,5 +50,6 @@ interface IThemeManagerService
     void resetThemeFont();
     void resetThemeFontReboot();
     void resetThemeContacts();
+    void resetThemeDialer();
 }
 
