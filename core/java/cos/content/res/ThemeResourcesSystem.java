@@ -29,8 +29,6 @@ public final class ThemeResourcesSystem extends ThemeResources {
     private static final boolean DBG = ThemeResources.DEBUG_THEMES;
     private static final String TAG = "ThemeResourcesSystem";
     private static ThemeResources sIcons;
-    private static ThemeResources sLockscreen;
-
     private static ThemeResources sSystemUI;
     protected String mThemePath;
 
@@ -44,37 +42,20 @@ public final class ThemeResourcesSystem extends ThemeResources {
     }
 
     private ThemeZipFile.ThemeFileInfo getThemeFileStreamSystem(String relativeFilePath, String name) {
-        ThemeZipFile.ThemeFileInfo themefileinfo = null;
-
-        themefileinfo = getThemeFileStreamInner(relativeFilePath);
-        return themefileinfo;
+        return getThemeFileStreamInner(relativeFilePath);
     }
 
     public static ThemeResourcesSystem getTopLevelThemeResources(Resources resources) {
-        sIcons = ThemeResources.getTopLevelThemeResources(resources, "icons");
-        sLockscreen = ThemeResources.getTopLevelThemeResources(resources, "lockscreen");
-        ThemeResourcesSystem themeresourcessystem = null;
-        for (int i = 0; i < THEME_PATHS.length; i++) {
-            themeresourcessystem = new ThemeResourcesSystem(themeresourcessystem, resources, THEME_PATHS[i]);
-        }
-
-        return themeresourcessystem;
+        if (sIcons == null)
+            sIcons = ThemeResources.getTopLevelThemeResources(resources, "icons");
+        return new ThemeResourcesSystem(null, resources, THEME_PATH_DATA);
     }
 
     public boolean checkUpdate() {
         sIcons.checkUpdate();
-        sLockscreen.checkUpdate();
         if (sSystemUI != null)
             sSystemUI.checkUpdate();
         return super.checkUpdate();
-    }
-
-    public boolean containsAwesomeLockscreenEntry(String entry) {
-        return sLockscreen.containsEntry("advance/" + entry);
-    }
-
-    public ThemeZipFile.ThemeFileInfo getAwesomeLockscreenFileStream(String name) {
-        return sLockscreen.getThemeFileStream("advance/" + name);
     }
 
     public Bitmap getIcon(Resources resources, String name) {
@@ -98,7 +79,6 @@ public final class ThemeResourcesSystem extends ThemeResources {
                 if (themefileinfo != null)
                     themefileinfo.mInput.close();
             } catch (IOException ioe) {
-                ioe.printStackTrace();
             }
         }
 
@@ -107,10 +87,6 @@ public final class ThemeResourcesSystem extends ThemeResources {
 
     public ThemeZipFile.ThemeFileInfo getIconStream(String relativeFilePath) {
         return sIcons.getThemeFileStream(relativeFilePath);
-    }
-
-    public ThemeZipFile.ThemeFileInfo getLockscreenStream(String relativeFilePath) {
-        return sLockscreen.getThemeFileStream(relativeFilePath);
     }
 
     public File getLockscreenWallpaper() {
@@ -122,14 +98,9 @@ public final class ThemeResourcesSystem extends ThemeResources {
 
     public ThemeZipFile.ThemeFileInfo getThemeFileStream(int cookieType, String relativeFilePath) {
         String name = relativeFilePath.substring(1 + relativeFilePath.lastIndexOf('/'));
-        ThemeZipFile.ThemeFileInfo themefileinfo;
         if (DBG) Log.d(TAG, String.format("getThemeFileStream(%d, %s)", cookieType, relativeFilePath));
-        themefileinfo = getThemeFileStreamSystem(relativeFilePath, name);
-        return themefileinfo;
-    }
 
-    public boolean hasAwesomeLockscreen() {
-        return sLockscreen.containsEntry("advance/manifest.xml");
+        return getThemeFileStreamSystem(relativeFilePath, name);
     }
 
     public boolean hasIcon(String name) {
@@ -137,7 +108,7 @@ public final class ThemeResourcesSystem extends ThemeResources {
     }
 
     public boolean hasValues() {
-        return (super.hasValues() || sLockscreen.hasValues());
+        return super.hasValues();
     }
 
     public void resetIcons() {

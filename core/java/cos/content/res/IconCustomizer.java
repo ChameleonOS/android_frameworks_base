@@ -87,34 +87,10 @@ public class IconCustomizer {
         sIconMapping.put("com.android.dialer.DialtactsActivity.png", "com.android.phone.png");
     }
 
-    private static int RGBToColor(int[] rgb) {
-        return ((rgb[0] << sColorShift) + rgb[1] << sColorShift) + rgb[2];
-    }
-
     public static void clearCache() {
         synchronized (sExcludeAll) {
             sCache.clear();
         }
-    }
-
-    public static void clearCustomizedIcons(String packageName) {
-        if (DBG)
-            Log.d(TAG, "Clearing customized icons");
-        if (TextUtils.isEmpty(packageName)) {
-            CommandLineUtils.rm(sPathPrefix + "*", "root");
-            sCache.clear();
-        } else {
-            CommandLineUtils.rm(sPathPrefix + packageName + "*", "root");
-            sCache.clear();
-        }
-    }
-
-    private static int[] colorToRGB(int color) {
-        int[] rgb = new int[3];
-        rgb[0] = ((0xFF0000 & color) >> 16);
-        rgb[1] = ((0xFF00 & color) >> sColorShift);
-        rgb[2] = (color & 0xFF);
-        return rgb;
     }
 
     private static Bitmap composeIcon(Bitmap base) {
@@ -193,56 +169,54 @@ public class IconCustomizer {
         int alphaWidth = alphaCutter.getWidth();
         int alphaHeight = alphaCutter.getHeight();
         if ((alphaWidth >= baseWidth) && (alphaHeight >= baseHeight)) {
-            int[] arrayOfInt = new int[alphaWidth * alphaHeight];
-            alphaCutter.getPixels(arrayOfInt, 0, baseWidth, (alphaWidth - baseWidth) / 2,
+            int[] alphaPixels = new int[alphaWidth * alphaHeight];
+            alphaCutter.getPixels(alphaPixels, 0, baseWidth, (alphaWidth - baseWidth) / 2,
                     (alphaHeight - baseHeight) / 2, baseWidth, baseHeight);
-            for (int k = -1 + baseWidth * baseHeight; k >= 0; k--)
-                basePixels[k] &= sRGBMask + ((basePixels[k] >>> sAlphaShift) *
-                        (arrayOfInt[k] >>> sAlphaShift) / 255 << sAlphaShift);
+            for (int i = baseWidth * baseHeight - 1; i >= 0; i--)
+                basePixels[i] &= sRGBMask + ((basePixels[i] >>> sAlphaShift) *
+                        (alphaPixels[i] >>> sAlphaShift) / 255 << sAlphaShift);
         }
     }
 
-    private static Bitmap drawableToBitmap(Drawable drawable) {
+    private static Bitmap drawableToBitmap(Drawable icon) {
         Canvas canvas = sCanvas;
-        int i = sIconWidth;
-        int j = sIconHeight;
-        int k = i;
-        int l = j;
-        int i1;
-        int j1;
-        if (drawable instanceof PaintDrawable) {
-            PaintDrawable paintdrawable = (PaintDrawable) drawable;
-            paintdrawable.setIntrinsicWidth(i);
-            paintdrawable.setIntrinsicHeight(j);
-        } else if (drawable instanceof BitmapDrawable) {
-            BitmapDrawable bitmapdrawable = (BitmapDrawable) drawable;
-            if (bitmapdrawable.getBitmap().getDensity() == 0)
-                bitmapdrawable.setTargetDensity(sSystemResource.getDisplayMetrics());
+        int targetWidth = sIconWidth;
+        int targetHeight = sIconHeight;
+        if (icon instanceof PaintDrawable) {
+            PaintDrawable painter = (PaintDrawable) icon;
+            painter.setIntrinsicWidth(targetWidth);
+            painter.setIntrinsicHeight(targetHeight);
+        } else if (icon instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) icon;
+            if (bitmapDrawable.getBitmap().getDensity() == 0)
+                bitmapDrawable.setTargetDensity(sSystemResource.getDisplayMetrics());
         }
-        i1 = drawable.getIntrinsicWidth();
-        j1 = drawable.getIntrinsicHeight();
-        Bitmap bitmap;
-        int k1;
-        int l1;
-        if (i1 > 0 && i1 > 0)
-            if (k < i1 || l < j1) {
-                float f = (float) i1 / (float) j1;
-                if (i1 > j1)
-                    l = (int) ((float) k / f);
-                else if (j1 > i1)
-                    k = (int) (f * (float) l);
-            } else if (i1 < k && j1 < l) {
-                k = i1;
-                l = j1;
+
+        int width = targetWidth;
+        int height = targetHeight;
+        int sourceWidth = icon.getIntrinsicWidth();
+        int sourceHeight = icon.getIntrinsicHeight();
+        if (sourceWidth > 0 && sourceWidth > 0) {
+            if (width < sourceWidth || height < sourceHeight) {
+                float ratio = (float) sourceWidth / (float) sourceHeight;
+                if (sourceWidth > sourceHeight)
+                    height = (int) ((float) width / ratio);
+                else if (sourceHeight > sourceWidth)
+                    width = (int) (ratio * (float) height);
+            } else if (sourceWidth < width && sourceHeight < height) {
+                width = sourceWidth;
+                height = sourceHeight;
             }
-        bitmap = Bitmap.createBitmap(i, j, android.graphics.Bitmap.Config.ARGB_8888);
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(targetWidth, targetHeight, android.graphics.Bitmap.Config.ARGB_8888);
         canvas.setBitmap(bitmap);
-        k1 = (i - k) / 2;
-        l1 = (j - l) / 2;
-        sOldBounds.set(drawable.getBounds());
-        drawable.setBounds(k1, l1, k1 + k, l1 + l);
-        drawable.draw(canvas);
-        drawable.setBounds(sOldBounds);
+        int left = (targetWidth - width) / 2;
+        int top = (targetHeight - height) / 2;
+        sOldBounds.set(icon.getBounds());
+        icon.setBounds(left, top, left + width, top + height);
+        icon.draw(canvas);
+        icon.setBounds(sOldBounds);
         return bitmap;
     }
 
@@ -312,37 +286,6 @@ public class IconCustomizer {
         return fileName;
     }
 
-    private static float getHue(int color) {
-        int[] rgb = colorToRGB(color);
-        int min = Math.min(rgb[0], Math.min(rgb[1], rgb[2]));
-        int max = Math.max(rgb[0], Math.max(rgb[1], rgb[2]));
-        int delta = max - min;
-        float f;
-        if (delta == 0)
-            f = 0.0f;
-        else {
-            int m;
-            for (m = 0; m < 2 && min != rgb[m]; m++) ;
-            f = (float) (120 * ((m + 1) % 3) + (60.0f * (float) (rgb[((m + 2) % 3)] - min)) /
-                    (float) delta + (60.0f * (float) (max - rgb[((m + 1) % 3)])) / (float) delta);
-        }
-
-        return f;
-    }
-
-    private static float getSaturation(int color) {
-        int[] rgb = colorToRGB(color);
-        int min = Math.min(rgb[0], Math.min(rgb[1], rgb[2]));
-        int max = Math.max(rgb[0], Math.max(rgb[1], rgb[2]));
-        float f;
-        if ((max == 0) || (max == min))
-            f = color;
-        else
-            f = (float) (max - min) / (float) max;
-
-        return f;
-    }
-
     private static Bitmap getThemeIcon(String fileName) {
         Bitmap icon = null;
         for (int i = 0; i < sDensities.length; i++) {
@@ -360,11 +303,6 @@ public class IconCustomizer {
             }
         }
         return icon;
-    }
-
-    private static float getValue(int color) {
-        int[] rgb = colorToRGB(color);
-        return (float) Math.max(rgb[0], Math.max(rgb[1], rgb[2])) / 255.0f;
     }
 
     public static boolean isExclude(String packageName) {
@@ -456,12 +394,10 @@ public class IconCustomizer {
     }
 
     private static BitmapDrawable scaleDrawable(Bitmap icon) {
-        BitmapDrawable bd = null;
-        if (icon != null) {
-            Bitmap bitmap = scaleBitmap(icon);
-            bd = new BitmapDrawable(sSystemResource, bitmap);
-        }
-        return bd;
+        if (icon != null)
+            return new BitmapDrawable(sSystemResource, scaleBitmap(icon));
+
+        return null;
     }
 
     private static int scalePixel(int px) {
@@ -472,57 +408,6 @@ public class IconCustomizer {
             density = 360;
         }
         return px * density / 240;
-    }
-
-    private static int setHue(int color, float hue) {
-        int[] rgb = colorToRGB(color);
-        int min = Math.min(rgb[0], Math.min(rgb[1], rgb[2]));
-        int max = Math.max(rgb[0], Math.max(rgb[1], rgb[2]));
-        int range = max - min;
-        if (range != 0) {
-            while (hue < 0F) {
-                hue += 360.0F;
-            }
-            while (hue > 360.0F) {
-                hue -= 360.0F;
-            }
-            int m = (int) Math.floor(hue / 120.0F);
-            float f = hue - m * 120;
-            int n = (m + 2) % 3;
-            rgb[n] = min;
-            rgb[((n + 2) % 3)] = (int) (min + range * Math.min(f, 60.0F) / 60.0F);
-            rgb[((n + 1) % 3)] = (int) (max - range * Math.max(0F, f - 60.0F) / 60.0F);
-            color = RGBToColor(rgb);
-        }
-        return color;
-    }
-
-    private static int setSaturation(int color, float saturation) {
-        int[] rgb = colorToRGB(color);
-        int min = Math.min(rgb[0], Math.min(rgb[1], rgb[2]));
-        int max = Math.max(rgb[0], Math.max(rgb[1], rgb[2]));
-        if ((max != 0) && (max != min)) {
-            float currentSaturation = (float) (max - min) / (float) max;
-            rgb[0] = (int) (max - saturation * max - rgb[0] / currentSaturation);
-            rgb[1] = (int) (max - saturation * max - rgb[1] / currentSaturation);
-            rgb[2] = (int) (max - saturation * max - rgb[2] / currentSaturation);
-            color = RGBToColor(rgb);
-        }
-
-        return color;
-    }
-
-    private static int setValue(int color, float value) {
-        int[] rgb = colorToRGB(color);
-        int max = Math.max(rgb[0], Math.max(rgb[1], rgb[2]));
-        if (max != 0) {
-            float currentValue = (float) max / 255.0F;
-            rgb[0] = (int) (value * rgb[0] / currentValue);
-            rgb[1] = (int) (value * rgb[1] / currentValue);
-            rgb[2] = (int) (value * rgb[2] / currentValue);
-            color = RGBToColor(rgb);
-        }
-        return color;
     }
 
     public static abstract interface CustomizedIconsListener {

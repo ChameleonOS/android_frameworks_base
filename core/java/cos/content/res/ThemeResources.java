@@ -56,8 +56,8 @@ public class ThemeResources {
     public static final String DIALER_PACKAGE = "com.android.dialer";
 
     public static final String THEME_PATH = "/data/system/theme/";
-    public static final MetaData[] THEME_PATHS = {
-            new MetaData(THEME_PATH, true, true, true)};
+    public static final MetaData THEME_PATH_DATA =
+            new MetaData(THEME_PATH, true, true, true);
 
     public static final String sAppliedLockstyleConfigPath = THEME_PATH + File.separator + "config.config";
     private static Drawable sLockWallpaperCache;
@@ -72,6 +72,12 @@ public class ThemeResources {
 
     protected static Map<String, String> sMiuiToChaosPackageMappings;
 
+    // To offer better support for MIUI themes we will create a map of resources
+    // that can be mapped back to a ChaOS resource.  The key for the map is the
+    // package name.  The Map returned as the value uses the ChaOS resource name
+    // as the key and the value returned is the MIUI resource name.
+    protected static Map<String, Map<String, String>> sMiuiToChaosResourceMappings;
+
     static {
         sMiuiToChaosPackageMappings = new HashMap();
         sMiuiToChaosPackageMappings.put("framework-res", "com.android.systemui");
@@ -80,15 +86,7 @@ public class ThemeResources {
         sMiuiToChaosPackageMappings.put("com.android.mms", "framework-miui-res");
         sMiuiToChaosPackageMappings.put("com.android.systemui", "framework-miui-res");
         sMiuiToChaosPackageMappings.put("com.android.dialer", "com.android.contacts");
-    }
 
-    // To offer better support for MIUI themes we will create a map of resources
-    // that can be mapped back to a ChaOS resource.  The key for the map is the
-    // package name.  The Map returned as the value uses the ChaOS resource name
-    // as the key and the value returned is the MIUI resource name.
-    protected static Map<String, Map<String, String>> sMiuiToChaosResourceMappings;
-
-    static {
         sMiuiToChaosResourceMappings = new HashMap();
         Map<String, String> map = new HashMap();
         map.put("status_bar_close_off.9.png", "status_bar_close_on.9.png");
@@ -168,17 +166,19 @@ public class ThemeResources {
         map.put("ic_notify_quicksettings_normal.png", "toggle_settings_n.png");
         map.put("ic_notify_open_pressed.png", "toggle_settings_p.png");
         map.put("ic_notify_open_normal.png", "toggle_settings_n.png");
-
         sMiuiToChaosResourceMappings.put("com.android.systemui", map);
+
         map = new HashMap();
         map.put("dial_num_0_wht.png", "dial_num_0_no_plus_wht.png");
         map.put("dial_num_1_wht.png", "dial_num_1_no_vm_wht.png");
         sMiuiToChaosResourceMappings.put("com.android.contacts", map);
+
         map = new HashMap();
         map.put("ic_menu_call.png", "call_btn_n.png");
         map.put("ic_dialog_attach.png", "insert_attachment_button_n.png");
         map.put("ic_menu_search_holo_dark.png", "ic_btn_search.png");
         sMiuiToChaosResourceMappings.put("com.android.mms", map);
+
         map = new HashMap();
         map.put("notification_bg_normal.9.png", "notification_item_bg_n.9.png");
         map.put("notification_bg_low_normal.9.png", "notification_item_bg_n.9.png");
@@ -211,34 +211,6 @@ public class ThemeResources {
         checkUpdate();
     }
 
-    public static final void clearLockWallpaperCache() {
-        sLockWallpaperModifiedTime = 0L;
-        sLockWallpaperCache = null;
-    }
-
-    public static final Drawable getLockWallpaperCache(Context context) {
-        Drawable drawable = null;
-        File file = sSystem.getLockscreenWallpaper();
-        if (file != null && file.exists())
-            if (sLockWallpaperModifiedTime == file.lastModified()) {
-                drawable = sLockWallpaperCache;
-            } else {
-                sLockWallpaperModifiedTime = file.lastModified();
-                sLockWallpaperCache = null;
-                try {
-                    DisplayMetrics displaymetrics = Resources.getSystem().getDisplayMetrics();
-                    Bitmap bitmap = ImageUtils.getBitmap(new InputStreamLoader(file.getAbsolutePath()),
-                            displaymetrics.widthPixels, displaymetrics.heightPixels);
-                    sLockWallpaperCache = new BitmapDrawable(context.getResources(), bitmap);
-                } catch (Exception exception) {
-                } catch (OutOfMemoryError outofmemoryerror) {
-                }
-                drawable = sLockWallpaperCache;
-            }
-        return drawable;
-    }
-
-
     public static ThemeResources getSystem(Resources resources) {
         if (sSystem == null)
             sSystem = ThemeResourcesSystem.getTopLevelThemeResources(resources);
@@ -250,33 +222,19 @@ public class ThemeResources {
     }
 
     public static ThemeResources getTopLevelThemeResources(Resources resources, String componentName) {
-        ThemeResources themeResources = null;
-        for (int i = 0; i < THEME_PATHS.length; i++) {
-            themeResources = new ThemeResources(themeResources,
-                    resources, componentName, THEME_PATHS[i]);
-        }
-
-        return themeResources;
+        return new ThemeResources(null,
+                resources, componentName, THEME_PATH_DATA);
     }
 
     public boolean checkUpdate() {
-        boolean result = mPackageZipFile.checkUpdate();
-        mHasWrapped = mWrapped != null;
-
-        if (mHasWrapped)
-            if (mWrapped.checkUpdate() || result)
-                result = true;
-            else
-                result = false;
         mHasValue = hasValuesInner();
-        return result;
+        return mPackageZipFile.checkUpdate() ||
+                (mWrapped != null && mWrapped.checkUpdate());
     }
 
     public boolean containsEntry(String name) {
-        boolean ret = mPackageZipFile.containsEntry(name);
-        if ((!ret) && (!mPackageZipFile.exists()) && (mWrapped != null))
-            ret = mWrapped.containsEntry(name);
-        return ret;
+        return mPackageZipFile.containsEntry(name) ||
+                (mWrapped != null && mWrapped.containsEntry(name));
     }
 
     public CharSequence getThemeCharSequence(String name) {
@@ -330,15 +288,15 @@ public class ThemeResources {
     protected ThemeZipFile.ThemeFileInfo getThemeFileStreamInner(String relativeFilePath) {
         if (DBG)
             Log.i(TAG + ":" + mPackageZipFile.mPackageName, "getThemeFileStreamInner(" + relativeFilePath + ")");
-        ThemeZipFile.ThemeFileInfo ret = null;
+        ThemeZipFile.ThemeFileInfo info = null;
         if (!((this instanceof ThemeResourcesSystem) && relativeFilePath.contains("stat_sys_battery")))
-            ret = mPackageZipFile.getInputStream(relativeFilePath);
+            info = mPackageZipFile.getInputStream(relativeFilePath);
 
-        if (ret == null && mWrapped != null) {
+        if (info == null && mWrapped != null) {
             if (DBG)
                 Log.i(TAG, "Checking wrapper for " + relativeFilePath);
-            ret = mWrapped.getThemeFileStreamInner(relativeFilePath);
-            if (ret == null) {
+            info = mWrapped.getThemeFileStreamInner(relativeFilePath);
+            if (info == null) {
                 int index = relativeFilePath.indexOf("dpi/");
                 if (index > 0) {
                     String fileName = relativeFilePath.substring(index + 4);
@@ -350,12 +308,12 @@ public class ThemeResources {
                     if (mapping != null && mapping.containsKey(fileName)) {
                         if (DBG)
                             Log.i(TAG, "Mapping " + fileName + " to " + mapping.get(fileName));
-                        ret = getThemeFileStreamInner(prefix + mapping.get(fileName));
+                        info = getThemeFileStreamInner(prefix + mapping.get(fileName));
                     }
                 }
             }
         }
-        return ret;
+        return info;
     }
 
     public Integer getThemeInt(String name) {

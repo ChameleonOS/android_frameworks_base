@@ -71,12 +71,7 @@ public final class ThemeResourcesPackage extends ThemeResources {
     }
 
     public static ThemeResourcesPackage getTopLevelThemeResources(Resources resources, String packageName) {
-        ThemeResourcesPackage themeResources = null;
-        for (int i = 0; i < THEME_PATHS.length; i++) {
-            themeResources = new ThemeResourcesPackage(themeResources, resources, packageName, THEME_PATHS[i]);
-        }
-
-        return themeResources;
+        return new ThemeResourcesPackage(null, resources, packageName, THEME_PATH_DATA);
     }
 
     public ThemeZipFile.ThemeFileInfo getThemeFileStream(int cookieType, String fileName) {

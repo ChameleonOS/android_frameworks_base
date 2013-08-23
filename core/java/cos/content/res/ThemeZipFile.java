@@ -165,7 +165,6 @@ public final class ThemeZipFile {
     }
 
     private ThemeFileInfo getZipInputStream(String relativeFilePath) {
-        ThemeFileInfo themeFileInfo = null;
         if (!isValid()) {
             return null;
         }
@@ -188,12 +187,12 @@ public final class ThemeZipFile {
             InputStream input = mZipFile.getInputStream(entry);
             if (input != null) {
                 if (DBG) Log.d(TAG, String.format("getZipInputStream: %s", relativeFilePath));
-                themeFileInfo = new ThemeFileInfo(input, entry.getSize());
+                return new ThemeFileInfo(input, entry.getSize());
             }
         } catch (Exception e) {
         }
 
-        return themeFileInfo;
+        return null;
     }
 
     private boolean isValid() {
