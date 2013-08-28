@@ -776,7 +776,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             while ((ze = zip.getNextEntry()) != null) {
                 if (ze.isDirectory()) {
                     // Assume directories are stored parents first then children
-                    File dir = new File("/data/system/theme/" + ze.getName());
+                    File dir = new File(THEME_DIR + ze.getName());
                     dir.mkdir();
                     dir.setReadable(true, false);
                     dir.setWritable(true, false);
@@ -787,8 +787,8 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
 
                 copyInputStream(zip,
                         new BufferedOutputStream(
-                        new FileOutputStream("/data/system/theme/" + ze.getName())));
-                (new File("/data/system/theme/" + ze.getName())).setReadable(true, false);
+                        new FileOutputStream(THEME_DIR + ze.getName())));
+                (new File(THEME_DIR + ze.getName())).setReadable(true, false);
                 zip.closeEntry();
             }
 
@@ -884,7 +884,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                                             if (ze.isDirectory()) {
                                                 // Assume directories are stored parents first then children
                                                 Log.d(TAG, "Creating directory /data/system/theme/" + ze.getName());
-                                                File dir = new File("/data/system/theme/" + ze.getName());
+                                                File dir = new File(THEME_DIR + ze.getName());
                                                 dir.mkdir();
                                                 dir.setReadable(true, false);
                                                 dir.setWritable(true, false);
@@ -894,12 +894,20 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                                             }
 
                                             if (scaleBoot && ze.getName().contains("bootanimation.zip"))
-                                                scaleBootAnimation(zip, "/data/system/theme/" + ze.getName());
-                                            else
+                                                scaleBootAnimation(zip, THEME_DIR + ze.getName());
+                                            else {
+                                                File outDir = new File((new File(THEME_DIR + ze.getName())).getParent());
+                                                if (!outDir.exists()) {
+                                                    outDir.mkdirs();
+                                                    outDir.setReadable(true, false);
+                                                    outDir.setWritable(true, false);
+                                                    outDir.setExecutable(true, false);
+                                                }
                                                 copyInputStream(zip,
                                                         new BufferedOutputStream(
-                                                                new FileOutputStream("/data/system/theme/" + ze.getName())));
-                                            (new File("/data/system/theme/" + ze.getName())).setReadable(true, false);
+                                                                new FileOutputStream(THEME_DIR + ze.getName())));
+                                            }
+                                            (new File(THEME_DIR + ze.getName())).setReadable(true, false);
                                         }
                                     }
                                     zip.closeEntry();
@@ -936,7 +944,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         while ((ze = zip.getNextEntry()) != null) {
                             if (ze.isDirectory()) {
                                 // Assume directories are stored parents first then children
-                                File dir = new File("/data/system/theme/" + ze.getName());
+                                File dir = new File(THEME_DIR + ze.getName());
                                 dir.mkdir();
                                 dir.setReadable(true, false);
                                 dir.setWritable(true, false);
@@ -947,8 +955,8 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                                         
                             copyInputStream(zip,
                                     new BufferedOutputStream(
-                                    new FileOutputStream("/data/system/theme/" + ze.getName())));
-                            (new File("/data/system/theme/" + ze.getName())).setReadable(true, false);
+                                    new FileOutputStream(THEME_DIR + ze.getName())));
+                            (new File(THEME_DIR + ze.getName())).setReadable(true, false);
                             zip.closeEntry();
                         }
             
