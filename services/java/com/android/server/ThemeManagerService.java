@@ -407,11 +407,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
     private void createIconsDir() {
         if (!iconsDirExists()) {
             Log.d(TAG, "Creating icons directory");
-            File dir = new File(CUSTOMIZED_ICONS_DIR);
-            dir.mkdir();
-            dir.setReadable(true, false);
-            dir.setWritable(true, true);
-            dir.setExecutable(true, false);
+            createDir(CUSTOMIZED_ICONS_DIR);
         }
     }
 
@@ -425,8 +421,14 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
     private void createFontsDir() {
         if (!fontsDirExists()) {
             Log.d(TAG, "Creating fonts directory");
-            File dir = new File(FONTS_DIR);
-            dir.mkdir();
+            createDir(FONTS_DIR);
+        }
+    }
+
+    private void createDir(String path) {
+        File dir = new File(path);
+        if (!dir.exists()) {
+            dir.mkdirs();
             dir.setReadable(true, false);
             dir.setWritable(true, true);
             dir.setExecutable(true, false);
@@ -1056,9 +1058,10 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                     themeURI = (String)msg.obj;
                     try {
                         String fileName = themeURI.substring(themeURI.lastIndexOf('/') + 1);
+                        createDir(THEME_DIR + File.separator + "ringtones");
                         copyInputStream(getFileInputStream(themeURI),
                                 new BufferedOutputStream(
-                                new FileOutputStream(THEME_DIR + fileName)));
+                                new FileOutputStream(THEME_DIR + File.separator + "ringtones" + fileName)));
                         (new File(THEME_DIR + fileName)).setReadable(true, false);
                         notifyThemeApplied();
                     } catch (Exception e) {
