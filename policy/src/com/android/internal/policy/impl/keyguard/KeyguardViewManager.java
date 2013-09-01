@@ -321,7 +321,6 @@ public class KeyguardViewManager {
             int flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
                     | WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN
-                    | WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
 
             if (!mNeedsInput) {
