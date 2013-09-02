@@ -30,7 +30,7 @@ interface IThemeManagerService
     void applyThemeSystemUI(String themeURI);
     void applyThemeFramework(String themeURI);
     void applyThemeRingtone(String themeURI);
-    void applyThemeLockscreen(String themeURI);
+    void applyThemeLockscreenWallpaper(String themeURI);
     void applyThemeBootanimation(String themeURI, boolean scale);
     void applyThemeMms(String themeURI);
     void applyThemeFont(String themeURI);
@@ -44,7 +44,7 @@ interface IThemeManagerService
     void resetThemeSystemUI();
     void resetThemeFramework();
     void resetThemeRingtone();
-    void resetThemeLockscreen();
+    void resetThemeLockscreenWallpaper();
     void resetThemeBootanimation();
     void resetThemeMms();
     void resetThemeFont();

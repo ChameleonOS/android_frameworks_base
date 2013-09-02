@@ -46,9 +46,9 @@ public class ThemeResources {
     public static final String FONTS_NAME = "fonts";
     public static final String ICONS_NAME = "icons";
     public static final String RINGTONES_NAME = "ringtones";
-    public static final String WALLPAPER_NAME = "wallpaper";
+    public static final String WALLPAPER_NAME = "wallpaper/default_wallpaper.jpg";
     public static final String LOCKSCREEN_NAME = "lockscreen";
-    public static final String LOCKSCREEN_WALLPAPER_NAME = "lock_wallpaper";
+    public static final String LOCKSCREEN_WALLPAPER_NAME = "wallpaper/default_lock_wallpaper.jpg";
     public static final String MMS_PACKAGE = "com.android.mms";
     public static final String LAUNCHER_PACKAGE = "org.chameleonos.chaoslauncher";
     public static final String CONTACTS_PACKAGE = "com.android.contacts";

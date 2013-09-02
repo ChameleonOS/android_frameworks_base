@@ -192,11 +192,11 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mHandler.sendMessage(msg);
     }
 
-    public void applyThemeLockscreen(String themeURI) {
+    public void applyThemeLockscreenWallpaper(String themeURI) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_THEME_SERVICE, null);
         Message msg = Message.obtain();
-        msg.what = ThemeWorkerHandler.MESSAGE_APPLY_LOCKSCREEN;
+        msg.what = ThemeWorkerHandler.MESSAGE_APPLY_LOCKSCREEN_WALLPAPER;
         msg.obj = themeURI;
         mHandler.sendMessage(msg);
     }
@@ -303,11 +303,11 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         mHandler.sendMessage(msg);
     }
 
-    public void resetThemeLockscreen() {
+    public void resetThemeLockscreenWallpaper() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_THEME_SERVICE, null);
         Message msg = Message.obtain();
-        msg.what = ThemeWorkerHandler.MESSAGE_RESET_LOCKSCREEN;
+        msg.what = ThemeWorkerHandler.MESSAGE_RESET_LOCKSCREEN_WALLPAPER;
         mHandler.sendMessage(msg);
     }
 
@@ -574,6 +574,20 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         }
     }
 
+    private void resetLockscreenWallpaper() {
+        try {
+            File f = new File(THEME_DIR + "/wallpaper/default_lock_wallpaper.jpg");
+            if (!f.exists())
+                f = new File(THEME_DIR + "/wallpaper/default_lock_wallpaper.png");
+            if (f.exists())
+                delete(f);
+
+            WallpaperManager wm = WallpaperManager.getInstance(mContext);
+            wm.clear();
+        } catch(IOException e) {
+        }
+    }
+
     private void resetBootanimation() {
         File boot = new File(THEME_DIR + "boots");
         if (boot.exists())
@@ -610,6 +624,13 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         ZipEntry ze = null;
         while ((ze = zip.getNextEntry()) != null) {
             if (ze.getName().equals(file)) {
+                File outDir = new File((new File(THEME_DIR + ze.getName())).getParent());
+                if (!outDir.exists()) {
+                    outDir.mkdirs();
+                    outDir.setReadable(true, false);
+                    outDir.setWritable(true, false);
+                    outDir.setExecutable(true, false);
+                }
                 copyInputStream(zip,
                         new BufferedOutputStream(new FileOutputStream(dstPath + ze.getName())));
                 (new File(dstPath + ze.getName())).setReadable(true, false);
@@ -803,7 +824,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
 
     private boolean shouldExclude(String entryName, List<String> excludedList) {
         int index = entryName.indexOf('/');
-        if (index >= 0)
+        if (index >= 0 && !entryName.contains("wallpaper"))
             entryName = entryName.substring(0, index);
 
         return excludedList.contains(entryName);
@@ -819,7 +840,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_APPLY_WALLPAPER = 6;
         private static final int MESSAGE_APPLY_SYSTEMUI = 7;
         private static final int MESSAGE_APPLY_FRAMEWORK = 8;
-        private static final int MESSAGE_APPLY_LOCKSCREEN = 9;
+        private static final int MESSAGE_APPLY_LOCKSCREEN_WALLPAPER = 9;
         private static final int MESSAGE_APPLY_RINGTONE = 10;
         private static final int MESSAGE_APPLY_BOOTANIMATION = 11;
         private static final int MESSAGE_APPLY_MMS = 12;
@@ -832,7 +853,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         private static final int MESSAGE_RESET_WALLPAPER = 21;
         private static final int MESSAGE_RESET_SYSTEMUI = 22;
         private static final int MESSAGE_RESET_FRAMEWORK = 23;
-        private static final int MESSAGE_RESET_LOCKSCREEN = 24;
+        private static final int MESSAGE_RESET_LOCKSCREEN_WALLPAPER = 24;
         private static final int MESSAGE_RESET_RINGTONE = 25;
         private static final int MESSAGE_RESET_BOOTANIMATION = 26;
         private static final int MESSAGE_RESET_MMS = 27;
@@ -1023,7 +1044,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 case MESSAGE_APPLY_WALLPAPER:
                     themeURI = (String)msg.obj;
                     try {
-                        extractDirectoryFromTheme(themeURI, "wallpaper/", THEME_DIR);
+                        extractDirectoryFromTheme(themeURI, "wallpaper/default_wallpaper.jpg", THEME_DIR);
                         setThemeWallpaper();
                         notifyThemeApplied();
                     } catch (Exception e) {
@@ -1051,8 +1072,15 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         notifyThemeNotApplied();
                     }
                     break;
-                case MESSAGE_APPLY_LOCKSCREEN:
+                case MESSAGE_APPLY_LOCKSCREEN_WALLPAPER:
                     themeURI = (String)msg.obj;
+                    try {
+                        extractFileFromTheme(themeURI, "wallpaper/default_lock_wallpaper.jpg", THEME_DIR);
+                        notifyThemeApplied();
+                    } catch (Exception e) {
+                        Log.e(TAG, "applyThemeLockscreenWallpaper failed " +themeURI, e);
+                        notifyThemeNotApplied();
+                    }
                     break;
                 case MESSAGE_APPLY_RINGTONE:
                     themeURI = (String)msg.obj;
@@ -1178,7 +1206,8 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         notifyThemeUpdate(ExtraConfiguration.SYSTEM_INTRESTE_CHANGE_FLAG);
                     } catch (Exception e) {}
                     break;
-                case MESSAGE_RESET_LOCKSCREEN:
+                case MESSAGE_RESET_LOCKSCREEN_WALLPAPER:
+                    resetLockscreenWallpaper();
                     break;
                 case MESSAGE_RESET_RINGTONE:
                     break;
