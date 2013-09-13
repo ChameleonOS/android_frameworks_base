@@ -196,6 +196,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int KEY_MASK_ASSIST = 0x08;
     private static final int KEY_MASK_APP_SWITCH = 0x10;
 
+    // These need to match the documentation/constant in
+    // packages/apps/Settings/res/values/arrays.xml
+    static final int UI_UNDEFINED = 0;
+    static final int UI_PHABLET = 1;
+    static final int UI_PHONE = 2;
+    static final int UI_TABLET = 3;
+
     /**
      * These are the system UI flags that, when changing, can cause the layout
      * of the screen to change.
@@ -1305,24 +1312,56 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // SystemUI (status bar) layout policy
         int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
-        if (shortSizeDp < 600) {
-            // 0-599dp: "phone" UI with a separate status & navigation bar
-            mHasSystemNavBar = false;
-            mNavigationBarCanMove = true;
-        } else if (shortSizeDp < 720) {
-            // 600+dp: "phone" UI with modifications for larger screens
-            mHasSystemNavBar = false;
-            mNavigationBarCanMove = false;
-        } else {
-            mHasSystemNavBar = true;
-            mNavigationBarCanMove = false;
-        }
+        int selectedUIMode = Settings.System.getInt(mContext.getContentResolver(),
+                                Settings.System.UI_DISPLAY_STATE, 0);
 
-        boolean enableTabletMode = Settings.System.getInt(mContext.getContentResolver(),
-                                Settings.System.ENABLE_TABLET_MODE, 0) == 1;
-        if (enableTabletMode) {
-            mHasSystemNavBar = true;
-            mNavigationBarCanMove = false;
+        boolean phabletMode = false;
+
+        switch (selectedUIMode) {
+            case UI_UNDEFINED: {
+                //ListPreference uiDisplay = (ListPreference) findPreference(KEY_UI_DISPLAY);
+                if (shortSizeDp < 600) {
+                    // 0-599dp: "phone" UI with a separate status and navigation bar
+                    mHasSystemNavBar = false;
+                    mNavigationBarCanMove = true;
+                    //uiDisplay.setValue(String.valueOf(2));
+
+                } else if (shortSizeDp < 720) {
+                    //600-719dp: "phablet" UI with modifications for larger screens
+                    mHasSystemNavBar = false;
+                    mNavigationBarCanMove = false;
+                    phabletMode = true;
+                    //uiDisplay.setValue(String.valueOf(1));
+                } else {
+                    //720+dp: "tablet" UI with combined status and navigation bar
+                    mHasSystemNavBar = true;
+                    mNavigationBarCanMove = false;
+                    //uiDisplay.setValue(String.valueOf(3));
+                }
+                //uiDisplay.setSummary(uiDisplay.getEntry());
+                break;
+            }
+
+            case UI_PHABLET: {
+                //600-719dp: "phablet" UI with modifications for larger screens
+                mHasSystemNavBar = false;
+                mNavigationBarCanMove = false;
+                break;
+            }
+
+            case UI_PHONE: {
+                // 0-599dp: "phone" UI with a separate status and navigation bar
+                mHasSystemNavBar = false;
+                mNavigationBarCanMove = true;
+                break;
+            }
+
+            case UI_TABLET: {
+                //720+dp: "tablet" UI with combined status and navigation bar
+                mHasSystemNavBar = true;
+                mNavigationBarCanMove = false;
+                break;
+            }
         }
 
         // Height of the navigation bar when presented horizontally at bottom
@@ -1359,6 +1398,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         } else {
             mHasNavigationBar = false;
+        }
+        if (phabletMode) {
+           mHasNavigationBar = true;
         }
 
         if (mHasSystemNavBar) {

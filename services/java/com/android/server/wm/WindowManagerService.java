@@ -10663,7 +10663,7 @@ public class WindowManagerService extends IWindowManager.Stub
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.ENABLE_TABLET_MODE),
+                    Settings.System.getUriFor(Settings.System.UI_DISPLAY_STATE),
                     false,
                     this);
         }

@@ -201,6 +201,7 @@ public class TabletStatusBar extends BaseStatusBar implements
 
     // new tablet ui stuff
     private boolean mIsForcedTabletUI = false;
+    private boolean mIsForcedPhabletUI = false;
     private TriggerView mSystemBarTrigger;
     private boolean mHasHardwareNavKeys = false;
 
@@ -428,9 +429,12 @@ public class TabletStatusBar extends BaseStatusBar implements
     public void start() {
         try {
             mIsForcedTabletUI = Settings.System.getInt(
-                    mContext.getContentResolver(), Settings.System.ENABLE_TABLET_MODE) == 1;
+                    mContext.getContentResolver(), Settings.System.UI_DISPLAY_STATE) == 3;
+            mIsForcedPhabletUI = Settings.System.getInt(
+                    mContext.getContentResolver(), Settings.System.UI_DISPLAY_STATE) == 2;
         } catch (Settings.SettingNotFoundException e) {
             mIsForcedTabletUI = false;
+            mIsForcedPhabletUI = false;
         }
         super.start(); // will add the main bar view
     }
@@ -610,8 +614,11 @@ public class TabletStatusBar extends BaseStatusBar implements
         mMenuButton = mNavigationArea.findViewById(R.id.menu);
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
-        if (mHasHardwareNavKeys)
+        
+        if (mHasHardwareNavKeys && !mIsForcedPhabletUI)
             mNavigationArea.setVisibility(View.GONE);
+        else
+            mNavigationArea.setVisibility(View.VISIBLE);
 
         LayoutTransition lt = new LayoutTransition();
         lt.setDuration(250);
@@ -954,7 +961,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                     break;
                 case MSG_SHOW_CHROME:
                     if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");
-                    if (!mHasHardwareNavKeys) {
+                    if (!mHasHardwareNavKeys || mIsForcedPhabletUI) {
                         mBarContents.setVisibility(View.VISIBLE);
                         mShadow.setVisibility(View.GONE);
                     }
@@ -965,7 +972,7 @@ public class TabletStatusBar extends BaseStatusBar implements
                     if (DEBUG) Slog.d(TAG, "showing shadows (lights out)");
                     animateCollapsePanels();
                     visibilityChanged(false);
-                    if (!mHasHardwareNavKeys) {
+                    if (!mHasHardwareNavKeys || mIsForcedPhabletUI) {
                         mBarContents.setVisibility(View.GONE);
                         mShadow.setVisibility(View.VISIBLE);
                     }

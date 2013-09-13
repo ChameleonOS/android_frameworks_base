@@ -150,7 +150,7 @@ public class SystemUIService extends Service {
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.ENABLE_TABLET_MODE), false,
+                    Settings.System.getUriFor(Settings.System.UI_DISPLAY_STATE), false,
                     this);
         }
 

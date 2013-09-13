@@ -1482,7 +1482,7 @@ public final class Settings {
          * Used to override the normal system UI based on user preference
          * @hide
          */
-        public static final String ENABLE_TABLET_MODE = "enable_tablet_mode";
+        public static final String UI_DISPLAY_STATE = "ui_display_state";
 
 
         /**
