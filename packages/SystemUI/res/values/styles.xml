@@ -272,4 +272,10 @@
         <item name="android:textSize">@dimen/network_stats_text_size</item>
         <item name="android:textColor">@android:color/primary_text_dark</item>
     </style>
+
+    <style name="Theme.DummyActivity" parent="android:style/Theme.Translucent" >
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
 </resources>

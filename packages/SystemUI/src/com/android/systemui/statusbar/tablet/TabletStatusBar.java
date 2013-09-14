@@ -31,7 +31,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.IThemeManagerService;
 import android.content.res.Resources;
@@ -62,7 +61,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.ImageView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -719,6 +717,8 @@ public class TabletStatusBar extends BaseStatusBar implements
 
         if (mRecreating) {
             removeSidebarView();
+        } else {
+            addActiveDisplayView();
         }
         addSidebarView();
 
