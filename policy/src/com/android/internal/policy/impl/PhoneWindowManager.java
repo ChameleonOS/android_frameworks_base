@@ -332,6 +332,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDeviceHardwareKeys;
     boolean mHasMenuKeyEnabled;
 
+    int mCurrentUser = 0;
+
     // The last window we were told about in focusChanged.
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
@@ -5421,8 +5423,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         ActivityInfo ai = null;
         ResolveInfo info = mContext.getPackageManager().resolveActivityAsUser(
                 intent,
-                PackageManager.MATCH_DEFAULT_ONLY,
-                UserHandle.USER_CURRENT);
+                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA,
+                mCurrentUser);
         if (info != null) {
             ai = info.activityInfo;
         }
@@ -5670,6 +5672,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         setLastInputMethodWindowLw(null, null);
+        mCurrentUser = newUserId;
     }
 
     @Override
