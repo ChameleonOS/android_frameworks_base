@@ -139,6 +139,7 @@ public class ActiveDisplayView extends FrameLayout {
     private LinearLayout.LayoutParams mOverflowLayoutParams;
     private KeyguardManager mKeyguardManager;
     private KeyguardLock mKeyguardLock;
+    private boolean mRegistered = false;
 
     // user customizable settings
     private boolean mDisplayNotifications = false;
@@ -280,10 +281,11 @@ public class ActiveDisplayView extends FrameLayout {
         void unobserve() {
             ActiveDisplayView.this.mContext.getContentResolver()
                     .unregisterContentObserver(this);
-            if (mDisplayNotifications) {
+            if (mDisplayNotifications && mRegistered) {
                 unregisterSensorListener();
                 unregisterNotificationListener();
                 unregisterBroadcastReceiver();
+                mRegistered = false;
             }
         }
 
@@ -326,10 +328,12 @@ public class ActiveDisplayView extends FrameLayout {
                 registerNotificationListener();
                 registerSensorListener();
                 registerBroadcastReceiver();
-            } else {
+                mRegistered = true;
+            } else if (mRegistered) {
                 unregisterNotificationListener();
                 unregisterSensorListener();
                 unregisterBroadcastReceiver();
+                mRegistered = false;
             }
         }
     }
