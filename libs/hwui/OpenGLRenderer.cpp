@@ -268,23 +268,19 @@ status_t OpenGLRenderer::clear(float left, float top, float right, float bottom,
     mCaches.enableScissor();
     mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
     glClear(GL_COLOR_BUFFER_BIT);
-    if(opaque)
-    {
+    if (opaque && !mCountOverdraw) {
         mCaches.resetScissor();
         return DrawGlInfo::kStatusDone;
     }
-    else
-    {
-        return DrawGlInfo::kStatusDrew;
-    }
+    return DrawGlInfo::kStatusDrew;  
 #else
     if (!opaque || mCountOverdraw) {
         mCaches.enableScissor();
         mCaches.setScissor(left, mSnapshot->height - bottom, right - left, bottom - top);
         glClear(GL_COLOR_BUFFER_BIT);
+
         return DrawGlInfo::kStatusDrew;
     }
-
     mCaches.resetScissor();
     return DrawGlInfo::kStatusDone;
 #endif
