@@ -129,6 +129,7 @@ public class ActiveDisplayView extends FrameLayout {
     private SensorManager mSensorManager;
     private Sensor mLightSensor;
     private Sensor mProximitySensor;
+    private boolean mProximityRegistered = false;
     private boolean mProximityIsFar = true;
     private boolean mIsInBrightLight = false;
     private LinearLayout mOverflowNotifications;
@@ -654,12 +655,14 @@ public class ActiveDisplayView extends FrameLayout {
 
     private void onScreenTurnedOn() {
         cancelRedisplayTimer();
+        unregisterSensorListener();
     }
 
     private void onScreenTurnedOff() {
         hideNotificationView();
         cancelTimeoutTimer();
         if (mRedisplayTimeout > 0) updateRedisplayTimer();
+        registerSensorListener();
     }
 
     private void turnScreenOff() {
@@ -752,13 +755,15 @@ public class ActiveDisplayView extends FrameLayout {
     }
 
     private void registerSensorListener() {
-        if (mProximitySensor != null)
+        if (mProximitySensor != null && !mProximityRegistered)
             mSensorManager.registerListener(mSensorListener, mProximitySensor, SensorManager.SENSOR_DELAY_UI);
+            mProximityRegistered = true;
     }
 
     private void unregisterSensorListener() {
-        if (mProximitySensor != null)
+        if (mProximitySensor != null && mProximityRegistered)
             mSensorManager.unregisterListener(mSensorListener, mProximitySensor);
+            mProximityRegistered = false;
     }
 
     private void registerCallbacks() {
