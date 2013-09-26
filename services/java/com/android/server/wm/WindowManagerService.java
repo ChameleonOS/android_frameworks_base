@@ -6806,6 +6806,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     displayContent.mInitialDisplayWidth = displayInfo.logicalWidth;
                     displayContent.mInitialDisplayHeight = displayInfo.logicalHeight;
+                    if (displayInfo.rotation == Surface.ROTATION_90
+                            || displayInfo.rotation == Surface.ROTATION_270) {
+                        int tmp = displayContent.mInitialDisplayWidth;
+                        displayContent.mInitialDisplayWidth = displayContent.mInitialDisplayHeight;
+                        displayContent.mInitialDisplayHeight = tmp;
+                    }
                     displayContent.mInitialDisplayDensity = displayInfo.logicalDensityDpi;
                     displayContent.mBaseDisplayWidth = displayContent.mInitialDisplayWidth;
                     displayContent.mBaseDisplayHeight = displayContent.mInitialDisplayHeight;
