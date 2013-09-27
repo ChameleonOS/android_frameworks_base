@@ -1,4 +1,7 @@
 /*
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Not a Contribution.
+ *
  * Copyright (C) 2008 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -284,6 +287,10 @@ public class AudioRecord
             mChannelCount = 2;
             mChannelMask = channelConfig;
             break;
+        case AudioFormat.CHANNEL_IN_5POINT1:
+            mChannelCount = 6;
+            mChannelMask = AudioFormat.CHANNEL_IN_5POINT1;
+            break;
         default:
             throw new IllegalArgumentException("Unsupported channel configuration.");
         }
@@ -471,6 +478,9 @@ public class AudioRecord
         case AudioFormat.CHANNEL_CONFIGURATION_STEREO:
         case (AudioFormat.CHANNEL_IN_FRONT | AudioFormat.CHANNEL_IN_BACK):
             channelCount = 2;
+            break;
+        case AudioFormat.CHANNEL_IN_5POINT1:
+            channelCount = 6;
             break;
         case AudioFormat.CHANNEL_INVALID:
         default:
