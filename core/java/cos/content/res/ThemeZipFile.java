@@ -212,7 +212,6 @@ public final class ThemeZipFile {
                 try {
                     if (DBG) Log.d(TAG, String.format("loadThemeValues: parsing %s for %s", filename, mPath));
                     XmlPullParser xmlpullparser = XmlPullParserFactory.newInstance().newPullParser();
-                    xmlpullparser = XmlPullParserFactory.newInstance().newPullParser();
                     BufferedInputStream bufferedinputstream = new BufferedInputStream(info.mInput, 8192);
                     xmlpullparser.setInput(bufferedinputstream, null);
                     mergeThemeValues(xmlpullparser);

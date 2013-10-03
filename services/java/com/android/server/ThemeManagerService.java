@@ -452,13 +452,8 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 delete(f);
         }
         
-        // remove the contents of CUSTOMIZED_ICONS_DIR
-        file = new File(CUSTOMIZED_ICONS_DIR);
-        if (file.exists()) {
-            for (File f : file.listFiles())
-                delete(f);
-        }
-    
+        removeCustomizedIcons();
+
         // remove the contents of FONTS_DIR
         if (mRemoveFonts) {
             file = new File(FONTS_DIR);
@@ -472,6 +467,15 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         // create an empty file so the default is not applied on next boot
         file = new File(THEME_DIR + ".nodefault");
         file.createNewFile();
+    }
+
+    private void removeCustomizedIcons() throws IOException {
+        // remove the contents of CUSTOMIZED_ICONS_DIR
+        File file = new File(CUSTOMIZED_ICONS_DIR);
+        if (file.exists()) {
+            for (File f : file.listFiles())
+                delete(f);
+        }
     }
 
     private static boolean run(String cmd) {
@@ -880,8 +884,11 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                             Log.i(TAG, "applying theme " + themeURI);
                             try{
                                 // clear out the old theme first
-                                if (removeExistingTheme)
+                                if (removeExistingTheme) {
                                     removeCurrentTheme();
+                                } else {
+                                    removeCustomizedIcons();
+                                }
 
                                 if (applyFont && fontsDirExists()) {
                                     // remove the contents of FONTS_DIR
@@ -1028,12 +1035,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         themeURI = (String)msg.obj;
                         extractFileFromTheme(themeURI, "icons", THEME_DIR);
                         if (iconsDirExists()) {
-                            // remove the contents of CUSTOMIZED_ICONS_DIR
-                            File file = new File(CUSTOMIZED_ICONS_DIR);
-                            if (file.exists()) {
-                                for (File f : file.listFiles())
-                                    delete(f);
-                            }
+                            removeCustomizedIcons();
                         }
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_ICON);
                     } catch (Exception e) {
@@ -1177,12 +1179,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                         if (icons.exists())
                             delete(icons);
                         if (iconsDirExists()) {
-                            // remove the contents of CUSTOMIZED_ICONS_DIR
-                            File file = new File(CUSTOMIZED_ICONS_DIR);
-                            if (file.exists()) {
-                                for (File f : file.listFiles())
-                                    delete(f);
-                            }
+                            removeCustomizedIcons();
                         }
                         notifyThemeUpdate(ExtraConfiguration.THEME_FLAG_ICON);
                     } catch (Exception e) {}

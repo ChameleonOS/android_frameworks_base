@@ -46,13 +46,17 @@ public final class ThemeResourcesSystem extends ThemeResources {
     }
 
     public static ThemeResourcesSystem getTopLevelThemeResources(Resources resources) {
-        if (sIcons == null)
+        if (sIcons == null) {
             sIcons = ThemeResources.getTopLevelThemeResources(resources, "icons");
+            IconCustomizer.loadFilters();
+        }
         return new ThemeResourcesSystem(null, resources, THEME_PATH_DATA);
     }
 
     public boolean checkUpdate() {
-        sIcons.checkUpdate();
+        if (sIcons.checkUpdate()) {
+            IconCustomizer.loadFilters();
+        }
         if (sSystemUI != null)
             sSystemUI.checkUpdate();
         return super.checkUpdate();
