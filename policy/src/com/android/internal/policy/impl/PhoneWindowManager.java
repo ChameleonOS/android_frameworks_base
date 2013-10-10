@@ -2548,6 +2548,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else if (longPress) {
                 if (!keyguardOn && !mHomeConsumed &&
                         mLongPressOnHomeBehavior != KEY_ACTION_NOTHING) {
+                    mHomePressed = true;
                     if (mLongPressOnHomeBehavior != KEY_ACTION_APP_SWITCH) {
                         cancelPreloadRecentApps();
                     }
