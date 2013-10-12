@@ -3956,12 +3956,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 topIsFullscreen = (lp.flags & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0
                         || (mLastSystemUiFlags & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
                 final boolean allowTransparency = 
-                        (lp.flags & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER) != 0
-                        || topIsFullscreen || 
-                        (Settings.System.getInt(mContext.getContentResolver(),
-                         Settings.System.EXPANDED_DESKTOP_STATE, 0) == 1 &&
-                         Settings.System.getInt(mContext.getContentResolver(),
-                         Settings.System.EXPANDED_DESKTOP_STYLE, 0) == 2);
+                        (lp.flags & WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+                                == WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
+                        || topIsFullscreen || expandedDesktopHidesStatusBar();
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
