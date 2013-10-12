@@ -3796,11 +3796,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private boolean expandedDesktopHidesStatusBar() {
-        return mExpandedDesktopStyle == 2;
+        return mExpandedDesktopStyle == 2 && !mForceStatusBarFromUI;
     }
 
     private boolean expandedDesktopHidesNavigationBar() {
-        return mExpandedDesktopStyle != 0;
+        return mExpandedDesktopStyle != 0 && !mForceNavbarFromUI;
     }
 
     private boolean shouldHideNavigationBarLw(int systemUiVisibility) {
