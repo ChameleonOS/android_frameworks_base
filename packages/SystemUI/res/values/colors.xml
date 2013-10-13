@@ -19,8 +19,6 @@
 <resources>
     <drawable name="notification_number_text_color">#ff000000</drawable>
     <drawable name="ticker_background_color">#ff1d1d1d</drawable>
-    <!--<drawable name="status_bar_background">#ff000000</drawable>-->
-    <drawable name="status_bar_background_transparent">#00000000</drawable>
     <drawable name="status_bar_background_opaque">#ff000000</drawable>
     <color name="notification_panel_solid_background">#ff000000</color>
     <drawable name="status_bar_recents_app_thumbnail_background">#88000000</drawable>
@@ -36,33 +34,4 @@
     <!-- the darkening filter applied to notifications -->
     <drawable name="notification_icon_area_smoke">#aa000000</drawable>
     <color name="notification_panel_scrim_color">#B0000000</color>
-
-    <!-- toggles button label -->
-    <color name="toggles_button_label_off">#ffaaaaaa</color>
-    <color name="toggles_button_label_on">#ffffffff</color>
-
-    <!-- tabs text colors -->
-    <color name="tab_selected_color">#ffffffff</color>
-    <color name="tab_deselected_color">#ff808080</color>
-
-    <!-- status bar clock color -->
-    <color name="status_bar_clock_color">@android:color/holo_blue_light</color>
-
-    <!-- extended status bar clock color -->
-    <color name="status_bar_extended_clock_default_color">#ffffff</color>
-    <color name="status_bar_extended_clock_pressed_color">@android:color/holo_blue_light</color>
-    <color name="status_bar_extended_clock_focused_color">@android:color/holo_blue_light</color>
-
-    <!-- extended status bar date color -->
-    <color name="status_bar_extended_date_default_color">#cccccc</color>
-    <color name="status_bar_extended_date_pressed_color">@android:color/holo_blue_light</color>
-    <color name="status_bar_extended_date_focused_color">@android:color/holo_blue_light</color>
-
-    <!-- quick settings text color -->
-    <color name="quick_settings_text_color">#cccccc</color>
-    <color name="quick_settings_alarm_text_color">#ff3a3b39</color>
-    <color name="quick_settings_clock_text_color">#ff33b5e5</color>
-
-    <!-- app sidebar trigger region color -->
-    <color name="trigger_region_color">#8015a0e5</color>
 </resources>

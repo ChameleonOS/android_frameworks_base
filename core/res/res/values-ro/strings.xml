@@ -1387,7 +1387,7 @@
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="4891916833657929263">"Stocare internă"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"Card SD"</string>
-    <string name="storage_usb" msgid="3017954059538517278">"Dispozitiv de stocare USB"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"Dsipozitiv de stocare USB"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editaţi"</string>
     <string name="data_usage_warning_title" msgid="1955638862122232342">"Avertisment de utiliz. a datelor"</string>
     <string name="data_usage_warning_body" msgid="2814673551471969954">"Atingeţi pt. a afişa utiliz./set."</string>
@@ -1492,33 +1492,6 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Accesibilitatea a fost anulată"</string>
     <string name="user_switched" msgid="3768006783166984410">"Utilizator curent: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietar"</string>
-
-    <string name="reboot_system" product="tablet">"Reporniţi tablet PC"</string>
-    <string name="reboot_system" product="default">"Reporniţi telefonul"</string>
-    <string name="reboot_reboot">"Repornire"</string>
-    <string name="reboot_progress">"Repornire..."</string>
-    <string name="reboot_recovery">"Recuperare"</string>
-    <string name="reboot_confirm">"Telefonul dvs. va reporni."</string>
-    <string name="profileNameDefault">"General"</string>
-    <string name="profileNameWork">"Serviciu"</string>
-    <string name="profileNameHome">"Acasă"</string>
-    <string name="profileNameSilent">"Silenţios"</string>
-    <string name="profileNameNight">"Noapte"</string>
-    <string name="profileGroupPhone">"Telefon"</string>
-    <string name="profileGroupCalendar">"Calendar"</string>
-    <string name="profileGroupGmail">"Gmail"</string>
-    <string name="profileGroupEmail">"Email"</string>
-    <string name="profileGroupSMS">"SMS"</string>
-    <string name="global_actions_toggle_expanded_desktop_mode">"Desktop extins"</string>
-    <string name="global_actions_expanded_desktop_mode_on_status">"Activat"</string>
-    <string name="global_actions_expanded_desktop_mode_off_status">"Dezactivat"</string>
-    <string name="global_action_reboot">"Repornire"</string>
-    <string name="global_action_choose_profile">"Profil"</string>
-    <string name="lockscreen_discharging">"Descărcare, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
-    <string name="toast_rotation_unlocked">"Rotire Ecran Deblocată"</string>
-    <string name="toast_rotation_locked">"Rotire Ecran Blocată"</string>
-    <string name="app_killed_message">"Aplicaţie oprită"</string>
-
     <string name="error_message_title" msgid="4510373083082500195">"Eroare"</string>
     <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Această aplicație nu acceptă conturi pentru profilurile cu permisiuni limitate"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nicio aplicație pentru gestionarea acestei acțiuni"</string>

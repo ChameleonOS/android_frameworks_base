@@ -203,32 +203,4 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ΑΥΤΟΜΑΤΗ"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Οι ειδοποιήσεις εμφανίζονται εδώ"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Μεταβείτε σε αυτές ανά πάσα στιγμή σύροντας προς τα κάτω."\n"Σύρετε ξανά προς τα κάτω για τα στοιχεία ελέγχου συστήματος."</string>
-
-    <string name="powerwidget_screen_timeout_toast">Λήξη χρον. ορίου οθόνης: %1$d %2$s</string>
-
-    <string name="accessibility_quick_settings_ringer">Ήχος <xliff:g id="state" example="Off">%s</xliff:g>.</string>
-    <string name="accessibility_quick_settings_vibration">Δόνηση <xliff:g id="state" example="Off">%s</xliff:g>.</string>
-
-    <string name="quick_settings_gps">GPS</string>
-    <string name="quick_settings_screen_sleep">Αναστολή λειτουργίας</string>
-    <string name="quick_settings_ringer_on">Ήχος ενεργός</string>
-    <string name="quick_settings_ringer_off">Ήχος ανενεργός</string>
-    <string name="quick_settings_vibration_on">Δόνηση ενεργή</string>
-    <string name="quick_settings_vibration_off">Δόνηση ανενεργή</string>
-    <string name="quick_settings_label_enabled">Ενεργό</string>
-    <string name="quick_settings_label_disabled">Ανενεργό</string>
-    <string name="quick_settings_ringer_normal">Ήχος</string>
-    <string name="quick_settings_lockscreen">Οθόνη κλειδώματος</string>
-    <string name="quick_settings_network_type">Δίκτυο</string>
-    <string name="quick_settings_report_bug">Αναφορά σφάλματος</string>
-    <string name="quick_settings_sync">Συγχρονισμός</string>
-    <string name="quick_settings_torch">Φακός</string>
-    <string name="quick_settings_nfc">NFC</string>
-    <string name="quick_settings_screen_timeout">Χρ. όριο οθόνης</string>
-    <string name="quick_settings_screen_timeout_summary">%1$d %2$s</string>
-
-    <string name="quick_settings_profile_label">Προφίλ</string>
-
-    <string name="bean_dream_settings_cid_title">Χρήση κεφαλιού CID</string>
-    <string name="bean_dream_settings_cid_summary">Χρήση του κεφαλιού CID αντί για το jellybean στο dream</string>
 </resources>

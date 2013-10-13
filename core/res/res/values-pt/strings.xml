@@ -1212,8 +1212,8 @@
     <string name="usb_notification_message" msgid="2290859399983720271">"Toque para obter outras opções USB."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="9020092196061007262">"Formatar armaz. USB?"</string>
     <string name="extmedia_format_title" product="default" msgid="3648415921526526069">"Formatar cartão SD?"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Todos os arquivos armazenados em sua unidade armazenamento USB (no caminho \'%1$s\') serão apagados. Não é possível reverter essa ação."</string>
-    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Todos os dados em seu cartão (no caminho \'%1$s\') serão apagados. Não é possível reverter essa ação."</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="3934016853425761078">"Todos os arquivos armazenados em sua unidade armazenamento USB serão apagados. Não é possível reverter essa ação."</string>
+    <string name="extmedia_format_message" product="default" msgid="14131895027543830">"Todos os dados em seu cartão serão perdidos."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Formatar"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuração USB conectada"</string>
     <string name="adb_active_notification_message" msgid="1016654627626476142">"Toque para desativar a depuração do USB."</string>
@@ -1492,41 +1492,6 @@
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Acessibilidade cancelada."</string>
     <string name="user_switched" msgid="3768006783166984410">"Usuário atual <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="owner_name" msgid="2716755460376028154">"Proprietário"</string>
-
-    <string name="profileNameDefault">Padrão</string>
-    <string name="profileNameWork">Trabalho</string>
-    <string name="profileNameHome">Casa</string>
-    <string name="profileNameSilent">Silêncio</string>
-    <string name="profileNameNight">Noite</string>
-    <string name="profileGroupPhone">Telefone</string>
-    <string name="profileGroupCalendar">Agenda</string>
-    <string name="profileGroupGmail">Gmail</string>
-    <string name="profileGroupEmail">Email</string>
-    <string name="profileGroupSMS">SMS</string>
-    <string name="wildcardProfile">Outro</string>
-    <string name="reboot_system" product="tablet">Reiniciar tablet</string>
-    <string name="global_action_screenshot">Capturar tela</string>
-    <string name="global_actions_toggle_expanded_desktop_mode">Área de trabalho expandida</string>
-    <string name="global_actions_expanded_desktop_mode_on_status">Ativada</string>
-    <string name="global_actions_expanded_desktop_mode_off_status">Desativada</string>
-    <string name="reboot_reboot">Reiniciar</string>
-    <string name="reboot_recovery">Recuperação</string>
-    <string name="reboot_bootloader">Bootloader</string>
-    <string name="reboot_bootmenu">Menu de boot</string>
-    <string name="reboot_fastboot">Fastboot</string>
-    <string name="reboot_download">Download</string>
-    <string name="reboot_progress">Reiniciando\u2026</string>
-    <string name="reboot_confirm">Seu telefone vai reiniciar.</string>
-    <string name="permlab_preventpower">substituir tecla de energia</string>
-    <string name="permdesc_preventpower">Permite a uma aplicação a substituir o tecla de energia</string>
-    <string name="lockscreen_discharging">Descarregando, <xliff:g id="number" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%d</xliff:g><xliff:g id="percent" xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">%%</xliff:g></string>
-    <string name="app_killed_message">Aplicação terminada</string>
-    <string name="global_action_reboot">Reiniciar</string>
-    <string name="global_action_choose_profile">Perfil</string>
-    <string name="toast_rotation_unlocked">Rotação da tela está destravada</string>
-    <string name="toast_rotation_locked">Rotação da tela está travada</string>
-    <string name="storage_sd_dock_card">Dock cartão SD</string>
-
     <string name="error_message_title" msgid="4510373083082500195">"Erro"</string>
     <string name="app_no_restricted_accounts" msgid="4011285085817350390">"Este aplicativo não suporta contas para perfis restritos"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nenhum aplicativo encontrado para executar a ação"</string>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2013, The ChameleonOS Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!--<drawable name="status_bar_background">#ff000000</drawable>-->
+    <drawable name="status_bar_background_transparent">#00000000</drawable>
+
+    <!-- toggles button label -->
+    <color name="toggles_button_label_off">#ffaaaaaa</color>
+    <color name="toggles_button_label_on">#ffffffff</color>
+
+    <!-- tabs text colors -->
+    <color name="tab_selected_color">#ffffffff</color>
+    <color name="tab_deselected_color">#ff808080</color>
+
+    <!-- status bar clock color -->
+    <color name="status_bar_clock_color">@android:color/holo_blue_light</color>
+
+    <!-- extended status bar clock color -->
+    <color name="status_bar_extended_clock_default_color">#ffffff</color>
+    <color name="status_bar_extended_clock_pressed_color">@android:color/holo_blue_light</color>
+    <color name="status_bar_extended_clock_focused_color">@android:color/holo_blue_light</color>
+
+    <!-- extended status bar date color -->
+    <color name="status_bar_extended_date_default_color">#cccccc</color>
+    <color name="status_bar_extended_date_pressed_color">@android:color/holo_blue_light</color>
+    <color name="status_bar_extended_date_focused_color">@android:color/holo_blue_light</color>
+
+    <!-- quick settings text color -->
+    <color name="quick_settings_text_color">#cccccc</color>
+    <color name="quick_settings_alarm_text_color">#ff3a3b39</color>
+    <color name="quick_settings_clock_text_color">#ff33b5e5</color>
+
+    <!-- app sidebar trigger region color -->
+    <color name="trigger_region_color">#8015a0e5</color>
+
+</resources>

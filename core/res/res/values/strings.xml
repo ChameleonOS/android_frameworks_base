@@ -68,23 +68,6 @@
          could not be performed because FDN is enabled. This will be displayed in a toast. -->
     <string name="mmiFdnError">Operation is restricted to fixed dialing numbers only.</string>
 
-    <!-- Names of default profiles. -->
-    <string name="profileNameDefault">Default</string>
-    <string name="profileNameWork">Work</string>
-    <string name="profileNameHome">Home</string>
-    <string name="profileNameSilent">Silent</string>
-    <string name="profileNameNight">Night</string>
-
-    <!-- Names of application groups. -->
-    <string name="profileGroupPhone">Phone</string>
-    <string name="profileGroupCalendar">Calendar</string>
-    <string name="profileGroupGmail">Gmail</string>
-    <string name="profileGroupEmail">Email</string>
-    <string name="profileGroupSMS">SMS</string>
-
-    <!-- Name of wildcard profile. -->
-    <string name="wildcardProfile">Other</string>
-
     <!-- Displayed when a phone feature such as call barring was activated. -->
     <string name="serviceEnabled">Service was enabled.</string>
     <!-- Displayed in front of the list of a set of service classes
@@ -309,41 +292,6 @@
     <string name="screen_lock">Screen lock</string>
     <!-- Button to turn off the phone, within the Phone Options dialog -->
     <string name="power_off">Power off</string>
-
-    <!-- Button to reboot the phone, within the Phone Options dialog -->
-    <string name="reboot_system" product="tablet">Reboot tablet</string>
-    <string name="reboot_system" product="default">Reboot phone</string>
-    <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
-    
-    <!-- label for item that screenshots in phone options dialog -->
-    <string name="global_action_screenshot">Screenshot</string>
-
-    <!-- label for item that toggles expand desktop mode -->
-    <string name="global_actions_toggle_expanded_desktop_mode">Expanded desktop</string>
-    <!-- status message in phone options dialog for when expand desktop mode is on -->
-    <string name="global_actions_expanded_desktop_mode_on_status">Enabled</string>
-    <!-- status message in phone options dialog for when expand desktop mode is off -->
-    <string name="global_actions_expanded_desktop_mode_off_status">Disabled</string>
-
-    <!-- Button to reboot the phone, within the Reboot Options dialog -->
-    <string name="reboot_reboot">Reboot</string>
-    <!-- Button to reboot the phone into recovery, within the Reboot Options dialog -->
-    <string name="reboot_recovery">Recovery</string>
-    <!-- Button to reboot the phone into bootloader, within the Reboot Options dialog -->
-    <string name="reboot_bootloader">Bootloader</string>
-    <!-- Button to reboot the phone into bootmenu, within the Reboot Options dialog -->
-    <string name="reboot_bootmenu">Bootmenu</string>
-    <!-- Button to reboot the phone into fastboot, within the Reboot Options dialog -->
-    <string name="reboot_fastboot">Fastboot</string>
-    <!-- Button to reboot the phone into download, within the Reboot Options dialog -->
-    <string name="reboot_download">Download</string>
-
-    <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
-    <string name="reboot_progress">Rebooting\u2026</string>
-    <!-- Reboot Confirmation Dialog.  When the user chooses to reboot the phone, there will be a confirmation dialog.  This is the message. -->
-    <string name="reboot_confirm" product="tablet">Your tablet will reboot.</string>
-    <string name="reboot_confirm" product="default">Your phone will reboot.</string>
-
     <!-- Spoken description for ringer silent option. [CHAR LIMIT=NONE] -->
     <string name="silent_mode_silent">Ringer off</string>
     <!-- Spoken description for ringer vibrate option. [CHAR LIMIT=NONE] -->
@@ -408,6 +356,7 @@
         current device state, to send as an e-mail message.  It will take a little
         time from starting the bug report until it is ready to be sent; please be
         patient.</string>
+
     <!-- label for item that enables silent mode in phone options dialog -->
     <string name="global_action_toggle_silent_mode">Silent mode</string>
 
@@ -1127,11 +1076,6 @@
     <string name="permdesc_movePackage">Allows the app to move app resources from internal to external media and vice versa.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_preventpower">prevent power key</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_preventpower">Allows an application to override the power key</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readLogs">read sensitive log data</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readLogs" product="tablet">Allows the app to read from the
@@ -1503,18 +1447,6 @@
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_vibrate">Allows the app to control the vibrator.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fm_radio_receiver">control FM receiver</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fm_radio_receiver">Allows the application to control
-        the FM receiver.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_fm_radio_transmitter">control FM transmitter</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_fm_radio_transmitter">Allows the application to control
-        the FM transmitter.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_flashlight">control flashlight</string>
@@ -1894,15 +1826,6 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_modifyNetworkAccounting">Allows the app to modify how network usage is accounted against apps. Not for use by normal apps.</string>
 
-    <!-- Title of an application permission that lets an application view/edit revoked permissions. -->
-    <string name="permlab_revokePermissions">Allows view and edit of revoked permissions. Not for use by normal applications.</string>
-    <!-- Description of an application permission that lets lets an application view/edit revoked permissions. -->
-    <string name="permdesc_revokePermissions">Allows read and write for revoked permissions. Not for use by normal applications.</string>
-
-    <!-- Title of an application permission that lets an application access the ThemeManagerService. -->
-    <string name="permlab_accessThemeService">Allows accessing the theme manager service. Not for use by normal applications.</string>
-    <!-- Description of an application permission that lets lets an application access the ThemeManagerService -->
-    <string name="permdesc_accessThemeService">Allows an application to set/reset themes. Not for use by normal applications.</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessNotifications">access notifications</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -2237,19 +2160,12 @@
     <string name="lockscreen_pattern_wrong">Try again</string>
     <!-- On the unlock password screen, shown when the user enters the wrong lock password and must try again. -->
     <string name="lockscreen_password_wrong">Try again</string>
-    <!-- On the unlock gesture screen, shown at the top of the unlock screen to tell the user what to do. Below this text is the place for the user to draw the gesture. -->
-    <string name="lockscreen_gesture_instructions">Draw gesture to unlock</string>
-    <!-- Shown to confirm that the user entered their lock gesture correctly. -->
-    <string name="lockscreen_gesture_correct">Correct!</string>
-    <!-- On the unlock gesture screen, shown when the user enters the wrong lock gesture and must try again. -->
-    <string name="lockscreen_gesture_wrong">Try again</string>
     <!-- Shown when face unlock failed multiple times so we're just using the backup -->
     <string name="faceunlock_multiple_failures">Maximum Face Unlock attempts exceeded</string>
 
     <!-- When the lock screen is showing and the phone plugged in, and the battery
          is not fully charged, show the current charge %.  -->
     <string name="lockscreen_plugged_in">Charging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-    <string name="lockscreen_discharging">Discharging, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
     <!-- When the lock screen is showing, the phone is plugged in and the battery is fully
          charged, say that it is charged. -->
     <string name="lockscreen_charged">Charged</string>
@@ -2455,8 +2371,6 @@
     <string name="keyguard_accessibility_slide_unlock">Slide unlock.</string>
     <!-- Accessibility description of the pattern unlock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pattern_unlock">Pattern unlock.</string>
-    <!-- Accessibility description of the gesture unlock. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_gesture_unlock">Gesture unlock.</string>
     <!-- Accessibility description of the face unlock. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_face_unlock">Face unlock.</string>
     <!-- Accessibility description of the pin lock. [CHAR_LIMIT=none] -->
@@ -2465,8 +2379,6 @@
     <string name="keyguard_accessibility_password_unlock">Password unlock.</string>
     <!-- Accessibility description of the unlock pattern area. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_pattern_area">Pattern area.</string>
-    <!-- Accessibility description of the unlock gesture area. [CHAR_LIMIT=none] -->
-    <string name="keyguard_accessibility_gesture_area">Gesture area.</string>
     <!-- Accessibility description of the unlock slide area. [CHAR_LIMIT=none] -->
     <string name="keyguard_accessibility_slide_area">Slide area.</string>
 
@@ -3153,12 +3065,6 @@
     <string name="aerr_process">Unfortunately, the process <xliff:g id="process">%1$s</xliff:g> has
         stopped.</string>
     <!-- Title of the alert when an application is not responding. -->
-    <string name="aerr_revoked_application">The application <xliff:g id="application">%1$s</xliff:g>
-        (process <xliff:g id="process">%2$s</xliff:g>) has stopped unexpectedly.\nWARNING!\nThis application has one or more of its permissions REVOKED which may cause it to malfunction. Please grant its permissions and try again.</string>
-    <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_revoked_process">The process <xliff:g id="process">%1$s</xliff:g> has
-        stopped unexpectedly.\nWARNING!\nThis process has one or more of its permissions REVOKED which may cause it to malfunction. Please grant its permissions and try again.</string>
-    <!-- Title of the alert when an application is not responding. -->
     <string name="anr_title"></string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
     <string name="anr_activity_application"><xliff:g id="application">%2$s</xliff:g> isn\'t responding.\n\nDo you want to close it?</string>
@@ -3174,8 +3080,6 @@
     <string name="report">Report</string>
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
     <string name="wait">Wait</string>
-    <!-- Button allowing the user reset the revoked permissions for application which has encountered an error. -->
-    <string name="reset_perms">Reset permissions</string>
     <!-- Text of the alert that is displayed when a web page is not responding. [CHAR-LIMIT=NONE] -->
     <string name="webpage_unresponsive">The page has become unresponsive.\n\nDo you want to close it?</string>
     <!-- [CHAR LIMIT=25] Title of the alert when application launches on top of another. -->
@@ -3714,8 +3618,6 @@
     <string name="progress_unmounting" product="nosdcard">Unmounting USB storage\u2026</string>
     <!-- Text for progress dialog while unmounting SD card [CHAR LIMIT=NONE] -->
     <string name="progress_unmounting" product="default">Unmounting SD card\u2026</string>
-    <!-- Text for progress dialog while formatting SD card [CHAR LIMIT=NONE] -->
-    <string name="progress_nomediapresent" product="default">No removable media present\u2026</string>
     <!-- Text for progress dialog while erasing USB storage volume [CHAR LIMIT=NONE] -->
     <string name="progress_erasing" product="nosdcard">Erasing USB storage\u2026</string>
     <!-- Text for progress dialog while erasing SD card [CHAR LIMIT=NONE] -->
@@ -3907,9 +3809,6 @@
     <!-- Storage description for the SD card. [CHAR LIMIT=NONE] -->
     <string name="storage_sd_card">SD card</string>
 
-    <!-- Storage description for the SD card on the dock. [CHAR LIMIT=NONE] -->
-    <string name="storage_sd_dock_card">Dock SD card</string>
-
     <!-- Storage description for USB storage. [CHAR LIMIT=NONE] -->
     <string name="storage_usb">USB storage</string>
 
@@ -4003,9 +3902,6 @@
     <!-- STK setup Call -->
     <string name="SetupCallDefault">Accept call?</string>
 
-    <!-- Long-press back kill application -->
-    <string name="app_killed_message">Application killed</string>
-
     <!-- Title for a button to choose the currently selected activity
          as the default in the activity resolver. [CHAR LIMIT=25] -->
     <string name="activity_resolver_use_always">Always</string>
@@ -4087,10 +3983,6 @@
     <string name="kg_forgot_pattern_button_text">Forgot Pattern</string>
     <!-- Message shown when user enters wrong pattern -->
     <string name="kg_wrong_pattern">Wrong Pattern</string>
-    <!-- Message shown in gesture unlock after some number of unsuccessful attempts -->
-    <string name="kg_forgot_gesture_button_text">Forgot Gesture</string>
-    <!-- Message shown when user enters wrong pattern -->
-    <string name="kg_wrong_gesture">Wrong Gesture</string>
     <!-- Message shown when user enters wrong password -->
     <string name="kg_wrong_password">Wrong Password</string>
     <!-- Message shown when user enters wrong PIN -->
@@ -4099,8 +3991,6 @@
     <string name="kg_too_many_failed_attempts_countdown">Try again in <xliff:g id="number">%d</xliff:g> seconds.</string>
     <!-- Instructions for using the pattern unlock screen -->
     <string name="kg_pattern_instructions">Draw your pattern</string>
-    <!-- Instructions for using the gesture unlock screen -->
-    <string name="kg_gesture_instructions">Draw your gesture</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
     <string name="kg_sim_pin_instructions">Enter SIM PIN</string>
     <!-- Instructions for using the PIN unlock screen -->
@@ -4153,10 +4043,6 @@
     </string>
     <string name="kg_too_many_failed_pattern_attempts_dialog_message">
         You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
-        \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
-    </string>
-    <string name="kg_too_many_failed_gesture_attempts_dialog_message">
-        You have incorrectly drawn your unlock gesture <xliff:g id="number">%d</xliff:g> times.
         \n\nTry again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
     <!-- Message shown when user is almost at the limit of password attempts where the device will be wiped. -->
@@ -4219,31 +4105,6 @@
     <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
     <!-- Default name of the owner user [CHAR LIMIT=20] -->
     <string name="owner_name" msgid="3879126011135546571">Owner</string>
-
-    <!-- label for item that reboots the phone in phone options dialog -->
-    <string name="global_action_reboot">Reboot</string>
-
-    <!-- label for item that opens the profile choosing dialog -->
-    <string name="global_action_choose_profile">Profile</string>
-
-    <!-- Hardware Rotation lock string -->
-    <string name="toast_rotation_unlocked">Display rotation unlocked</string>
-    <string name="toast_rotation_locked">Display rotation locked</string>
-
-    <!-- **** CYANOGENMOD ADDITIONS START **** -->
-
-    <!-- stylus gestures support -->
-    <string name="stylus_app_not_installed">%s is not installed</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_interceptSmsSent">intercept outgoing SMS</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_interceptSmsSent">Allows the app to
-        intercept an outgoing SMS.
-        Malicious apps may use this to prevent outgoing SMS messages.</string>
-
-    <!-- **** CYANOGENMOD ADDITIONS END **** -->
-
     <!-- Error message title [CHAR LIMIT=35] -->
     <string name="error_message_title">Error</string>
     <!-- Message informing user that app is not permitted to access accounts. [CHAR LIMIT=none] -->

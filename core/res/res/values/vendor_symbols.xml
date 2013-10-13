@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2013, The ChameleonOS Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+  <!-- We don't want to publish private symbols in android.R as part of the
+       SDK.  Instead, put them here. -->
+  <private-symbols package="com.android.internal" />
+
+  <!-- Private symbols that we need to reference from framework code.  See
+       frameworks/base/core/res/MakeJavaSymbols.sed for how to easily generate
+       this.
+  -->
+
+  <!-- From framework -->
+  <java-symbol type="attr" name="drawer_shadow"/>
+  <java-symbol type="attr" name="drawer_background"/>
+  <java-symbol type="attr" name="ic_drawer"/>
+  <java-symbol type="bool" name="config_forceAnalogCarDock" />
+  <java-symbol type="bool" name="config_forceAnalogDeskDock" />
+  <java-symbol type="dimen" name="system_bar_height" />
+  <java-symbol type="drawable" name="cidlogo" />
+  <java-symbol type="drawable" name="cidlogo_alt" />
+  <java-symbol type="id" name="drawer_layout" />
+  <java-symbol type="integer" name="min_gesture_prediction_score" />
+  <java-symbol type="layout" name="preference_drawer_content" />
+  <java-symbol type="string" name="progress_nomediapresent" />
+  <java-symbol type="string" name="reset_perms" />
+
+
+  <!-- From android.policy -->
+  <java-symbol type="dimen" name="lockscreen_target_inset" />
+  <java-symbol type="dimen" name="glowpad_notification_font_size" />
+  <java-symbol type="dimen" name="glowpad_notification_text_radius" />
+  <java-symbol type="dimen" name="glowpad_overflow_notifications_margin_top" />
+  <java-symbol type="drawable" name="ic_lockscreen_lock_pressed" />
+  <java-symbol type="drawable" name="ic_lockscreen_target_activated" />
+  <java-symbol type="drawable" name="ic_lockscreen_unlock_activated" />
+  <java-symbol type="drawable" name="ic_lockscreen_unlock_normal" />
+  <java-symbol type="id" name="keyguard_gesture_view" />
+  <java-symbol type="id" name="lockGestureView" />
+  <java-symbol type="layout" name="keyguard_gesture_view" />
+  <java-symbol type="string" name="kg_forgot_gesture_button_text" />
+  <java-symbol type="string" name="kg_wrong_gesture" />
+  <java-symbol type="string" name="kg_gesture_instructions" />
+  <java-symbol type="string" name="kg_too_many_failed_gesture_attempts_dialog_message" />
+
+
+  <!-- From services -->
+  <java-symbol type="anim" name="shrink_fade_out_center" />
+  <java-symbol type="anim" name="grow_fade_in_center" />
+  <java-symbol type="bool" name="config_enableAdbByDefault" />
+  <java-symbol type="bool" name="config_deviceHasVariableButtonBrightness" />
+  <java-symbol type="integer" name="config_buttonBrightnessSettingDefault" />
+  <java-symbol type="integer" name="config_keyboardBrightnessSettingDefault" />
+  <java-symbol type="string" name="aerr_revoked_application" />
+  <java-symbol type="string" name="aerr_revoked_process" />
+
+
+  <!-- From Settings -->
+  <java-symbol type="bool" name="config_intrusiveBatteryLed" />
+
+
+<!-- ===============================================================
+   Resources added in version 10 of CyanogenMod
+   =============================================================== -->
+  <eat-comment />
+
+  <!-- Config.xml entries -->
+  <java-symbol type="bool" name="config_forceDisableHardwareKeyboard" />
+  <java-symbol type="bool" name="config_hasRotationLockSwitch" />
+  <java-symbol type="integer" name="config_backKillTimeout" />
+  <java-symbol type="bool" name="config_show_cmIMESwitcher"/>
+  <java-symbol type="integer" name="config_wallpaperMaxWidth" />
+  <java-symbol type="string" name="config_legacyUmsLunFile" />
+  <java-symbol type="bool" name="config_hasRemovableLid" />
+  <java-symbol type="bool" name="config_hasDockBattery" />
+  <java-symbol type="bool" name="config_noDelayInATwoDP" />
+
+  <!-- Telephony -->
+  <java-symbol type="bool" name="config_smsSamsungCdmaAlternateMessageIDEncoding" />
+  <java-symbol type="bool" name="config_samsung_stk" />
+  <java-symbol type="array" name="config_telephony_set_audioparameters" />
+
+  <!-- Hardware Key ReMapping -->
+  <java-symbol type="integer" name="config_deviceHardwareKeys" />
+
+  <!-- Notification and battery light -->
+  <java-symbol type="bool" name="config_intrusiveBatteryLed" />
+  <java-symbol type="bool" name="config_multiColorBatteryLed" />
+  <java-symbol type="array" name="notification_light_package_mapping" />
+
+  <!-- Power menu -->
+  <java-symbol type="string" name="global_action_screenshot" />
+  <java-symbol type="string" name="global_action_choose_profile" />
+  <java-symbol type="string" name="global_action_reboot" />
+  <java-symbol type="string" name="global_actions_toggle_expanded_desktop_mode" />
+  <java-symbol type="string" name="global_actions_expanded_desktop_mode_off_status" />
+  <java-symbol type="string" name="global_actions_expanded_desktop_mode_on_status" />
+  <java-symbol type="string" name="global_actions" />
+  <java-symbol type="string" name="reboot_system" />
+  <java-symbol type="string" name="reboot_progress" />
+  <java-symbol type="array" name="shutdown_reboot_options" />
+  <java-symbol type="array" name="shutdown_reboot_actions" />
+  <java-symbol type="drawable" name="ic_lock_screenshot" />
+  <java-symbol type="drawable" name="ic_lock_reboot" />
+  <java-symbol type="drawable" name="ic_lock_profile" />
+  <java-symbol type="drawable" name="ic_lock_expanded_desktop" />
+
+  <!-- Profiles -->
+  <java-symbol type="xml" name="profile_default" />
+  <java-symbol type="string" name="wildcardProfile" />
+
+  <!-- Power widget -->
+  <java-symbol type="string" name="hour" />
+  <java-symbol type="string" name="hours" />
+  <java-symbol type="string" name="minute" />
+  <java-symbol type="string" name="minutes" />
+  <java-symbol type="string" name="second" />
+  <java-symbol type="string" name="seconds" />
+
+  <!-- Developer settings - Kill app back press -->
+  <java-symbol type="string" name="app_killed_message" />
+
+  <!-- Lockscreen -->
+  <java-symbol type="bool" name="config_disableHomeUnlockSetting" />
+  <java-symbol type="id" name="expand_challenge_handle" />
+  <!-- Lock screen always show battery -->
+  <java-symbol type="string" name="lockscreen_discharging" />
+
+  <!-- HW rotation lock -->
+  <java-symbol type="string" name="toast_rotation_unlocked" />
+  <java-symbol type="string" name="toast_rotation_locked" />
+
+  <!-- Wifi -->
+  <java-symbol type="bool" name="config_wifiApStartInterface" />
+
+  <!-- Boot message dialog -->
+  <java-symbol type="drawable" name="busy_dlg_animation" />
+  <java-symbol type="drawable" name="busy_dlg_animation_0" />
+  <java-symbol type="drawable" name="busy_dlg_animation_1" />
+  <java-symbol type="drawable" name="busy_dlg_animation_2" />
+  <java-symbol type="drawable" name="busy_dlg_animation_3" />
+  <java-symbol type="drawable" name="busy_dlg_animation_4" />
+  <java-symbol type="drawable" name="busy_dlg_animation_5" />
+  <java-symbol type="drawable" name="busy_dlg_animation_6" />
+  <java-symbol type="drawable" name="busy_dlg_animation_7" />
+  <java-symbol type="drawable" name="busy_dlg_animation_8" />
+  <java-symbol type="drawable" name="busy_dlg_animation_9" />
+  <java-symbol type="drawable" name="busy_dlg_icon" />
+  <java-symbol type="id" name="busy_dlg_animation" />
+  <java-symbol type="id" name="busy_dlg_title" />
+  <java-symbol type="layout" name="busy_dlg" />
+
+  <java-symbol type="bool" name="config_wifiApFirmwareReload" />
+  <java-symbol type="bool" name="config_wifiApFirmwareReload" />
+
+  <!-- Device specific handlers -->
+  <java-symbol type="string" name="config_deviceHandlersLib" />
+  <java-symbol type="string" name="config_deviceKeyHandlerClass" />
+  <java-symbol type="string" name="config_deviceDockBatteryHandlerClass" />
+
+  <!-- Reboot confirmation string -->
+  <java-symbol type="string" name="reboot_confirm" />
+
+  <!-- Navigation Ring -->
+  <java-symbol type="drawable" name="ic_navigation_ring_blank_normal" />
+  <java-symbol type="drawable" name="ic_navigation_ring_blank_activated" />
+  <java-symbol type="drawable" name="ic_navigation_ring_empty" />
+  <java-symbol type="drawable" name="ic_navigation_ring_ime_switcher" />
+  <java-symbol type="drawable" name="ic_navigation_ring_killtask" />
+  <java-symbol type="drawable" name="ic_navigation_ring_power" />
+  <java-symbol type="drawable" name="ic_navigation_ring_screenshot" />
+  <java-symbol type="drawable" name="ic_navigation_ring_silent" />
+  <java-symbol type="drawable" name="ic_navigation_ring_sound_on" />
+  <java-symbol type="drawable" name="ic_navigation_ring_torch" />
+  <java-symbol type="drawable" name="ic_navigation_ring_vibrate" />
+
+  <!-- Stylus gestures -->
+  <java-symbol type="bool" name="config_stylusGestures" />
+  <java-symbol type="string" name="stylus_app_not_installed" />
+
+  <!-- Panel auto brightness -->
+  <java-symbol type="integer" name="config_panelAutoBrightnessValue" />
+
+  <!-- Irda Service -->
+  <java-symbol type="bool" name="config_enableIrdaManagerService" />
+
+</resources>

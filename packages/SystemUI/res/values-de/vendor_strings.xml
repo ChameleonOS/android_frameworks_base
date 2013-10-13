@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2013, The ChameleonOS Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- QuickSettings: Profile [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_profile_label">Profile</string>
+
+    <!-- Screen timeout toast -->
+    <string name="powerwidget_screen_timeout_toast">Bildschirmsperre nach: %1$d %2$s</string>
+
+    <!-- Quick settings -->
+    <string name="quick_settings_gps">GPS</string>
+    <string name="quick_settings_gps_off">GPS aus</string>
+    <string name="quick_settings_screen_sleep">Standby</string>
+    <string name="quick_settings_label_enabled">An</string>
+    <string name="quick_settings_label_disabled">Aus</string>
+    <string name="quick_settings_ringer_normal">Klingelmodus</string>
+    <string name="quick_settings_lockscreen">Sperren</string>
+    <string name="quick_settings_network_type">Netzmodus</string>
+    <string name="quick_settings_report_bug">Fehlerprotokollierung</string>
+    <string name="quick_settings_sync">Sync</string>
+    <string name="quick_settings_sync_off">Sync aus</string>
+    <string name="quick_settings_torch">Lampe</string>
+    <string name="quick_settings_torch_off">Lampe aus</string>
+    <string name="quick_settings_nfc">NFC</string>
+    <string name="quick_settings_nfc_off">NFC aus</string>
+    <string name="quick_settings_screen_timeout">Timeout</string>
+    <string name="quick_settings_screen_timeout_summary">%1$d %2$s</string>
+    <string name="quick_settings_usb_tether_off_label">Getrennt</string>
+    <string name="quick_settings_usb_tether_connected_label">Tethering aus</string>
+    <string name="quick_settings_usb_tether_on_label">Tethering</string>
+    <string name="quick_settings_wifiap">Hotspot</string>
+    <string name="quick_settings_wifiap_off">Hotspot aus</string>
+
+    <string name="notification_tab_notifications">Benachrichtigungen</string>
+    <string name="notification_tab_toggles">Schalter</string>
+
+    <!-- Dialog title for navigation bar button selection -->
+    <string name="navbar_dialog_title">Funktion zuweisen</string>
+    <string name="navbar_home_button">Home</string>
+    <string name="navbar_recent_button">Zuletzt verwendet</string>
+    <string name="navbar_search_button">Suche</string>
+    <string name="navbar_back_button">Zurück</string>
+    <string name="navbar_empty_button">Nicht belegt</string>
+    <string name="navbar_menu_conditional_button">Menü (automatisch ausblenden)</string>
+    <string name="navbar_menu_always_button">Menü (immer sichtbar)</string>
+    <string name="navbar_menu_big_button">Menü</string>
+
+    <!-- App sidebar -->
+    <string name="default_folder_text">Ordner</string>
+    <string name="title_activity_sidebar_configuration">Appbar Inhalts Einstellung</string>
+    <string name="action_save">Speichern</string>
+    <string name="toast_items_saved">Appbar Icons sind gespeichert.</string>
+    <string name="content_setup_instructions">Um Icons der Appbar zuzufügen - lange ein icon auf der rechten Seite drücken und es in über die Appbar ziehen.\n\n Um einen Ordner erstellen einfach ein neues Icon über ein vorhandenes ziehen.\n\nIcons einfach durch rausziehen aus der \@appbar entfernen.</string>
+    <string name="content_setup_dismiss">Weiter</string>
+
+</resources>
