@@ -352,6 +352,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     // tracking calls to View.setSystemUiVisibility()
     int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
 
+    // whether to show status bar when hidden and a new notification is posted
+    boolean mShowOnNotificationPosted = false;
+
     DisplayMetrics mDisplayMetrics = new DisplayMetrics();
 
     // XXX: gesture research
@@ -399,6 +402,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     Settings.System.STATUS_BAR_CENTER_CLOCK), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.APP_SIDEBAR_POSITION), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.SHOW_STATUS_BAR_ON_NOTIFICATION), false, this);
             update();
         }
 
@@ -437,6 +442,9 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mSidebarPosition = sidebarPosition;
                 mWindowManager.updateViewLayout(mAppSidebar, getAppSidebarLayoutParams(sidebarPosition));
             }
+
+            mShowOnNotificationPosted = Settings.System.getInt(
+                    resolver, Settings.System.SHOW_STATUS_BAR_ON_NOTIFICATION, 0) == 1;
         }
     }
 
@@ -1324,6 +1332,16 @@ public class PhoneStatusBar extends BaseStatusBar {
             // show the ticker if there isn't an intruder too
             if (mCurrentlyIntrudingNotification == null) {
                 tick(null, notification, true);
+            }
+
+            // show the status bar if hidden and the user enabled this feature
+            try {
+                if (mShowOnNotificationPosted && mWindowManagerService.shouldHideStatusBar()) {
+                    mWindowManagerService.showStatusBar();
+                    updateAutoHideTimer(ACTION_STATUSBAR_HIDE);
+                    mStatusBarView.requestFocus();
+                }
+            } catch (RemoteException e) {
             }
         }
 
