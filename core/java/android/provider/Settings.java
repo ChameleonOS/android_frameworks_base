@@ -3012,6 +3012,13 @@ public final class Settings {
         public static final String EXPANDED_DESKTOP_STYLE = "expanded_desktop_style";
 
         /**
+         * Show status bar when notification comes in and status bar is not visible due to
+         * a full screen application or expanded desktop being enabled.
+         * @hide
+         */
+        public static final String SHOW_STATUS_BAR_ON_NOTIFICATION = "show_status_bar_on_notification";
+
+        /**
          * Whether to use a separate delay for "slide to unlock" and security
          * lock
          * @hide
