@@ -1,11 +1,10 @@
 package com.android.systemui.quicksettings;
 
 import android.app.ActivityManagerNative;
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -15,6 +14,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.systemui.R;
@@ -26,55 +26,81 @@ import com.android.systemui.statusbar.phone.QuickSettingsTileView;
 public class QuickSettingsTile implements OnClickListener {
 
     protected final Context mContext;
-    protected final ViewGroup mContainerView;
-    protected final LayoutInflater mInflater;
+    protected QuickSettingsContainerView mContainer;
     protected QuickSettingsTileView mTile;
     protected OnClickListener mOnClick;
     protected OnLongClickListener mOnLongClick;
-    protected int mTileLayout;
+    protected final int mTileLayout;
     protected int mDrawable;
     protected String mLabel;
     protected PhoneStatusBar mStatusbarService;
     protected QuickSettingsController mQsc;
+    protected SharedPreferences mPrefs;
 
-    public QuickSettingsTile(Context context, LayoutInflater inflater, QuickSettingsContainerView container, QuickSettingsController qsc) {
+    public QuickSettingsTile(Context context, QuickSettingsController qsc) {
+        this(context, qsc, R.layout.quick_settings_tile_basic);
+    }
+
+    public QuickSettingsTile(Context context, QuickSettingsController qsc, int layout) {
         mContext = context;
-        mContainerView = container;
-        mInflater = inflater;
         mDrawable = R.drawable.ic_notifications;
         mLabel = mContext.getString(R.string.quick_settings_label_enabled);
         mStatusbarService = qsc.mStatusBarService;
         mQsc = qsc;
-        mTileLayout = R.layout.quick_settings_tile_generic;
+        mTileLayout = layout;
+        mPrefs = mContext.getSharedPreferences("quicksettings", Context.MODE_PRIVATE);
     }
 
-    public void setupQuickSettingsTile(){
-        createQuickSettings();
+    public void setupQuickSettingsTile(LayoutInflater inflater,
+            QuickSettingsContainerView container) {
+        mTile = (QuickSettingsTileView) inflater.inflate(
+                R.layout.quick_settings_tile, container, false);
+        mTile.setContent(mTileLayout, inflater);
+        mContainer = container;
+        mContainer.addView(mTile);
         onPostCreate();
         updateQuickSettings();
         mTile.setOnClickListener(this);
         mTile.setOnLongClickListener(mOnLongClick);
     }
 
-    void createQuickSettings(){
-        mTile = (QuickSettingsTileView) mInflater.inflate(R.layout.quick_settings_tile, mContainerView, false);
-        mTile.setContent(mTileLayout, mInflater);
-        mContainerView.addView(mTile);
+    public void setLabelVisibility(boolean visible) {
+        TextView tv = (TextView) mTile.findViewById(R.id.text);
+        if (tv != null) {
+            tv.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+        View sepPadding = mTile.findViewById(R.id.separator_padding);
+        if (sepPadding != null) {
+            sepPadding.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
     }
 
-    void onPostCreate(){}
+    void onPostCreate() {}
+
+    public void onDestroy() {}
 
     public void onReceive(Context context, Intent intent) {}
 
     public void onChangeUri(ContentResolver resolver, Uri uri) {}
 
-    void updateQuickSettings(){
-        TextView tv = (TextView) mTile.findViewById(R.id.tile_textview);
-        tv.setCompoundDrawablesWithIntrinsicBounds(0, mDrawable, 0, 0);
-        tv.setText(mLabel);
+    public void updateResources() {
+        if(mTile != null) {
+            updateQuickSettings();
+        }
     }
 
-    void startSettingsActivity(String action){
+    void updateQuickSettings() {
+        TextView tv = (TextView) mTile.findViewById(R.id.text);
+        if (tv != null) {
+            tv.setText(mLabel);
+        }
+        ImageView image = (ImageView) mTile.findViewById(R.id.image);
+        if (image != null) {
+            image.setImageResource(mDrawable);
+        }
+    }
+
+    void startSettingsActivity(String action) {
         Intent intent = new Intent(action);
         startSettingsActivity(intent);
     }
@@ -96,13 +122,16 @@ public class QuickSettingsTile implements OnClickListener {
     }
 
     @Override
-    public final void onClick(View v) {
-        mOnClick.onClick(v);
+    public void onClick(View v) {
+        if (mOnClick != null) {
+            mOnClick.onClick(v);
+        }
+
         ContentResolver resolver = mContext.getContentResolver();
-        boolean shouldCollapse = Settings.System.getInt(resolver, Settings.System.QS_COLLAPSE_PANEL, 0) == 1;
+        boolean shouldCollapse = Settings.System.getIntForUser(resolver,
+                Settings.System.QS_COLLAPSE_PANEL, 0, UserHandle.USER_CURRENT) == 1;
         if (shouldCollapse) {
             mQsc.mBar.collapseAllPanels(true);
         }
     }
-
 }

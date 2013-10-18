@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.os.BatteryManager;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
@@ -60,9 +61,12 @@ public class BatteryController extends BroadcastReceiver {
 
     private boolean mBatteryPlugged = false;
     private int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
+    private int mBatteryLevel = 0;
     private int mBatteryStyle;
 
     Handler mHandler;
+
+    private final boolean mUiController;
 
     class SettingsObserver extends ContentObserver {
         SettingsObserver(Handler handler) {
@@ -84,16 +88,23 @@ public class BatteryController extends BroadcastReceiver {
             new ArrayList<BatteryStateChangeCallback>();
 
     public interface BatteryStateChangeCallback {
-        public void onBatteryLevelChanged(int level, boolean pluggedIn);
+        public void onBatteryLevelChanged(int level, int status);
     }
 
     public BatteryController(Context context) {
+        this(context, true);
+    }
+
+    public BatteryController(Context context, boolean ui) {
         mContext = context;
         mHandler = new Handler();
+        mUiController = ui;
 
-        SettingsObserver settingsObserver = new SettingsObserver(mHandler);
-        settingsObserver.observe();
-        updateSettings();
+        if (mUiController) {
+            SettingsObserver settingsObserver = new SettingsObserver(mHandler);
+            settingsObserver.observe();
+            updateSettings();
+        }
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
@@ -110,6 +121,12 @@ public class BatteryController extends BroadcastReceiver {
 
     public void addStateChangedCallback(BatteryStateChangeCallback cb) {
         mChangeCallbacks.add(cb);
+        // trigger initial update
+        cb.onBatteryLevelChanged(getBatteryLevel(), getBatteryStatus());
+    }
+
+    public void removeStateChangedCallback(BatteryStateChangeCallback cb) {
+        mChangeCallbacks.remove(cb);
     }
 
     // Allow override battery icons
@@ -129,6 +146,10 @@ public class BatteryController extends BroadcastReceiver {
         return R.drawable.stat_sys_battery_charge_min;
     }
 
+    protected int getBatteryLevel() {
+        return mBatteryLevel;
+    }
+
     protected int getBatteryStyle() {
         return mBatteryStyle;
     }
@@ -146,43 +167,51 @@ public class BatteryController extends BroadcastReceiver {
         return true;
     }
 
-    private boolean isBatteryStatusUnknown() {
+    protected boolean isBatteryStatusUnknown() {
         return getBatteryStatus() == BatteryManager.BATTERY_STATUS_UNKNOWN;
     }
 
-    private boolean isBatteryStatusCharging() {
+    protected boolean isBatteryStatusCharging() {
         return getBatteryStatus() == BatteryManager.BATTERY_STATUS_CHARGING;
+    }
+
+    protected boolean isUiController() {
+        return mUiController;
     }
 
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-            final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            mBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
             mBatteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
             mBatteryStatus = intent.getIntExtra(BatteryManager.EXTRA_STATUS,
                                                 BatteryManager.BATTERY_STATUS_UNKNOWN);
-            updateViews(level);
-            updateBattery();
+            updateViews();
+            if (mUiController) {
+                updateBattery();
+            }
         }
     }
 
-    protected void updateViews(int level) {
-        int N = mIconViews.size();
-        for (int i=0; i<N; i++) {
-            ImageView v = mIconViews.get(i);
-            v.setImageLevel(level);
-            v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
-                    level));
-        }
-        N = mLabelViews.size();
-        for (int i=0; i<N; i++) {
-            TextView v = mLabelViews.get(i);
-            v.setText(mContext.getString(BATTERY_TEXT_STYLE_MIN,
-                    level));
+    protected void updateViews() {
+        int level = getBatteryLevel();
+        if (mUiController) {
+            int N = mIconViews.size();
+            for (int i=0; i<N; i++) {
+                ImageView v = mIconViews.get(i);
+                v.setImageLevel(level);
+                v.setContentDescription(mContext.getString(R.string.accessibility_battery_level,
+                        level));
+            }
+            N = mLabelViews.size();
+            for (int i=0; i<N; i++) {
+                TextView v = mLabelViews.get(i);
+                v.setText(mContext.getString(BATTERY_TEXT_STYLE_MIN, level));
+            }
         }
 
         for (BatteryStateChangeCallback cb : mChangeCallbacks) {
-            cb.onBatteryLevelChanged(level, isBatteryStatusCharging());
+            cb.onBatteryLevelChanged(level, getBatteryStatus());
         }
     }
 
@@ -222,10 +251,11 @@ public class BatteryController extends BroadcastReceiver {
         }
     }
 
-    private void updateSettings() {
+    public void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
-        mBatteryStyle = (Settings.System.getInt(resolver,
-                Settings.System.STATUS_BAR_BATTERY, BATTERY_STYLE_NORMAL));
+        mBatteryStyle = (Settings.System.getIntForUser(resolver,
+                Settings.System.STATUS_BAR_BATTERY, BATTERY_STYLE_NORMAL,
+                UserHandle.USER_CURRENT));
         updateBattery();
     }
 }

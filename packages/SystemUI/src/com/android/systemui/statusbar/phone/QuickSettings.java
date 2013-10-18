@@ -98,10 +98,6 @@ class QuickSettings {
 
     private BluetoothController mBluetoothController;
 
-    private Dialog mBrightnessDialog;
-    private int mBrightnessDialogShortTimeout;
-    private int mBrightnessDialogLongTimeout;
-
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
 
     private LevelListDrawable mBatteryLevels;
@@ -141,10 +137,6 @@ class QuickSettings {
         mBatteryLevels = (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery);
         mChargingBatteryLevels =
                 (LevelListDrawable) r.getDrawable(R.drawable.qs_sys_battery_charging);
-        mBrightnessDialogLongTimeout =
-                r.getInteger(R.integer.quick_settings_brightness_dialog_long_timeout);
-        mBrightnessDialogShortTimeout =
-                r.getInteger(R.integer.quick_settings_brightness_dialog_short_timeout);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED);
@@ -452,7 +444,7 @@ class QuickSettings {
                     RSSIState rssiState = (RSSIState) state;
                     ImageView iv = (ImageView) view.findViewById(R.id.rssi_image);
                     ImageView iov = (ImageView) view.findViewById(R.id.rssi_overlay_image);
-                    TextView tv = (TextView) view.findViewById(R.id.rssi_textview);
+                    TextView tv = (TextView) view.findViewById(R.id.text);
                     // Force refresh
                     iv.setImageDrawable(null);
                     iv.setImageResource(rssiState.signalIconId);
@@ -727,34 +719,7 @@ class QuickSettings {
         }
         ((QuickSettingsContainerView)mContainerView).updateResources();
         mContainerView.requestLayout();
-
-        // Reset the dialog
-        boolean isBrightnessDialogVisible = false;
-        if (mBrightnessDialog != null) {
-            removeAllBrightnessDialogCallbacks();
-
-            isBrightnessDialogVisible = mBrightnessDialog.isShowing();
-            mBrightnessDialog.dismiss();
-        }
-        mBrightnessDialog = null;
-        if (isBrightnessDialogVisible) {
-            showBrightnessDialog();
-        }
     }
-
-    private void removeAllBrightnessDialogCallbacks() {
-        mHandler.removeCallbacks(mDismissBrightnessDialogRunnable);
-    }
-
-    private Runnable mDismissBrightnessDialogRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mBrightnessDialog != null && mBrightnessDialog.isShowing()) {
-                mBrightnessDialog.dismiss();
-            }
-            removeAllBrightnessDialogCallbacks();
-        };
-    };
 
     private void showBrightnessDialog() {
         Intent intent = new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);

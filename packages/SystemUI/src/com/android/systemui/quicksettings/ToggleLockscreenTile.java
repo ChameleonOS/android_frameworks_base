@@ -4,6 +4,7 @@ import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -12,37 +13,27 @@ import android.view.View.OnLongClickListener;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
-import com.android.systemui.statusbar.powerwidget.PowerButton;
 
-public class ToggleLockscreenTile extends QuickSettingsTile {
+@SuppressWarnings("deprecation")
+public class ToggleLockscreenTile extends QuickSettingsTile
+        implements OnSharedPreferenceChangeListener {
 
-    private KeyguardLock mLock = null;
     private static final String KEY_DISABLED = "lockscreen_disabled";
 
-    private final KeyguardManager mKeyguardManager;
-    private boolean mDisabledLockscreen = false;
-    private SharedPreferences sp;
+    private static KeyguardLock sLock = null;
+    private static int sLockTileCount = 0;
+    private static boolean sDisabledLockscreen = false;
 
-    public ToggleLockscreenTile(Context context,
-            LayoutInflater inflater, QuickSettingsContainerView container, QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
-
-        mLabel = mContext.getString(R.string.quick_settings_lockscreen);
-
-        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+    public ToggleLockscreenTile(Context context, QuickSettingsController qsc) {
+        super(context, qsc);
 
         mOnClick = new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                mDisabledLockscreen = !mDisabledLockscreen;
-
-                sp = mContext.getSharedPreferences("PowerButton-" + PowerButton.BUTTON_LOCKSCREEN, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putBoolean(KEY_DISABLED, mDisabledLockscreen);
-                editor.apply();
-
-                applyLockscreenChanges();
+                sDisabledLockscreen = !sDisabledLockscreen;
+                mPrefs.edit().putBoolean(KEY_DISABLED, sDisabledLockscreen).apply();
+                updateLockscreenState();
             }
         };
 
@@ -58,24 +49,56 @@ public class ToggleLockscreenTile extends QuickSettingsTile {
 
     @Override
     void onPostCreate() {
-        applyLockscreenChanges();
+        mPrefs.registerOnSharedPreferenceChangeListener(this);
+        if (sLockTileCount == 0) {
+            sDisabledLockscreen = mPrefs.getBoolean(KEY_DISABLED, false);
+            updateLockscreenState();
+        }
+        sLockTileCount++;
+        updateTile();
         super.onPostCreate();
     }
 
-    void applyLockscreenChanges() {
-        if (mLock == null) {
-            KeyguardManager keyguardManager = (KeyguardManager)
-                    mContext.getSystemService(Context.KEYGUARD_SERVICE);
-            mLock = keyguardManager.newKeyguardLock("PowerWidget");
+    @Override
+    public void onDestroy() {
+        mPrefs.unregisterOnSharedPreferenceChangeListener(this);
+        sLockTileCount--;
+        if (sLock != null && sLockTileCount < 1 && sDisabledLockscreen) {
+            sLock.reenableKeyguard();
+            sLock = null;
         }
-        if (mDisabledLockscreen) {
-            mDrawable = R.drawable.ic_qs_lock_screen_off;
-            mLock.disableKeyguard();
-        } else {
-            mDrawable = R.drawable.ic_qs_lock_screen_on;
-            mLock.reenableKeyguard();
-        }
-        updateQuickSettings();
+        super.onDestroy();
     }
 
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
+        mLabel = mContext.getString(R.string.quick_settings_lockscreen);
+        mDrawable = sDisabledLockscreen ?
+                R.drawable.ic_qs_lock_screen_off : R.drawable.ic_qs_lock_screen_on;
+    }
+
+    private void updateLockscreenState() {
+        if (sLock == null) {
+            KeyguardManager keyguardManager = (KeyguardManager)
+                    mContext.getApplicationContext().getSystemService(Context.KEYGUARD_SERVICE);
+            sLock = keyguardManager.newKeyguardLock("LockscreenTile");
+        }
+        if (sDisabledLockscreen) {
+            sLock.disableKeyguard();
+        } else {
+            sLock.reenableKeyguard();
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (KEY_DISABLED.equals(key)) {
+            updateResources();
+        }
+    }
 }

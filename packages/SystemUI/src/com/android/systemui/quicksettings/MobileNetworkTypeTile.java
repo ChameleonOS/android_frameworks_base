@@ -2,6 +2,7 @@ package com.android.systemui.quicksettings;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
@@ -13,8 +14,10 @@ import com.android.internal.telephony.Phone;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
+import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
-public class MobileNetworkTypeTile extends QuickSettingsTile {
+public class MobileNetworkTypeTile extends QuickSettingsTile implements NetworkSignalChangedCallback {
 
     private static final String TAG = "NetworkModeQuickSettings";
 
@@ -36,17 +39,16 @@ public class MobileNetworkTypeTile extends QuickSettingsTile {
     private static final int CM_MODE_3GONLY = 1;
     private static final int CM_MODE_BOTH = 2;
 
+    private NetworkController mController;
     private int mMode = NO_NETWORK_MODE_YET;
     private int mIntendedMode = NO_NETWORK_MODE_YET;
     private int mInternalState = STATE_INTERMEDIATE;
     private int mState;
 
-    public MobileNetworkTypeTile(Context context,
-            LayoutInflater inflater, QuickSettingsContainerView container,
-            QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
+    public MobileNetworkTypeTile(Context context, QuickSettingsController qsc, NetworkController controller) {
+        super(context, qsc);
 
-        updateState();
+        mController = controller;
 
         mOnClick = new OnClickListener() {
             @Override
@@ -114,15 +116,29 @@ public class MobileNetworkTypeTile extends QuickSettingsTile {
 
         //need to clear intermediate states and update the tile
         mInternalState = networkModeToState();
-        applyNetworkTypeChanges();
+        updateResources();
     }
 
-    private void applyNetworkTypeChanges(){
-        updateState();
-        updateQuickSettings();
+    @Override
+    void onPostCreate() {
+        mController.addNetworkSignalChangedCallback(this);
+        updateTile();
+        super.onPostCreate();
     }
 
-    protected void updateState() {
+    @Override
+    public void onDestroy() {
+        mController.removeNetworkSignalChangedCallback(this);
+        super.onDestroy();
+    }
+
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
         mMode = get2G3G(mContext);
         mState = networkModeToState();
 
@@ -191,8 +207,25 @@ public class MobileNetworkTypeTile extends QuickSettingsTile {
     }
 
     private int getCurrentCMMode() {
-        return Settings.System.getInt(mContext.getContentResolver(),
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
                 Settings.System.EXPANDED_NETWORK_MODE,
-                CM_MODE_3G2G);
+                CM_MODE_3G2G, UserHandle.USER_CURRENT);
+    }
+
+    @Override
+    public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
+        String wifitSignalContentDescriptionId, String description) {
+    }
+
+    @Override
+    public void onMobileDataSignalChanged(boolean enabled,
+        int mobileSignalIconId, String mobileSignalContentDescriptionId,
+        int dataTypeIconId, String dataTypeContentDescriptionId,
+        String description) {
+        updateResources();
+    }
+
+    @Override
+    public void onAirplaneModeChanged(boolean enabled) {
     }
 }

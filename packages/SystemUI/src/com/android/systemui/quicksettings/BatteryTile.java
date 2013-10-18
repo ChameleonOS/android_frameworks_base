@@ -3,7 +3,7 @@ package com.android.systemui.quicksettings;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LevelListDrawable;
+import android.os.BatteryManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -16,24 +16,16 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
 
 public class BatteryTile extends QuickSettingsTile implements BatteryStateChangeCallback{
+    private BatteryController mController;
 
-    private boolean charging = false;
-    private int batteryLevel = 0;
-    private Drawable batteryIcon;
+    private int mBatteryLevel = 0;
+    private int mBatteryStatus;
+    private Drawable mBatteryIcon;
 
-    private LevelListDrawable batteryLevels;
-    private LevelListDrawable chargingBatteryLevels;
+    public BatteryTile(Context context, QuickSettingsController qsc, BatteryController controller) {
+        super(context, qsc);
 
-    public BatteryTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container, QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
-
-        mTileLayout = R.layout.quick_settings_tile_battery;
-        batteryLevels = (LevelListDrawable) mContext.getResources().getDrawable(R.drawable.qs_sys_battery);
-        chargingBatteryLevels = (LevelListDrawable) mContext.getResources().getDrawable(R.drawable.qs_sys_battery_charging);
-
-        BatteryController controller = new BatteryController(mContext);
-        controller.addStateChangedCallback(this);
+        mController = controller;
 
         mOnClick = new View.OnClickListener() {
             @Override
@@ -45,41 +37,55 @@ public class BatteryTile extends QuickSettingsTile implements BatteryStateChange
 
     @Override
     void onPostCreate() {
-        applyBatteryChanges();
+        updateTile();
+        mController.addStateChangedCallback(this);
         super.onPostCreate();
     }
 
     @Override
-    public void onBatteryLevelChanged(int level, boolean pluggedIn) {
-        batteryLevel = level;
-        charging = pluggedIn;
-        applyBatteryChanges();
+    public void onDestroy() {
+        mController.removeStateChangedCallback(this);
+        super.onDestroy();
     }
 
-    void applyBatteryChanges() {
-        batteryIcon = charging
-                ? chargingBatteryLevels :
-                    batteryLevels;
-        if(batteryLevel == 100) {
-            mLabel = mContext.getString(R.string.quick_settings_battery_charged_label);
-        }else{
-            mLabel = charging
-                    ? mContext.getString(R.string.quick_settings_battery_charging_label,
-                            batteryLevel)
-                    : mContext.getString(R.string.status_bar_settings_battery_meter_format,
-                            batteryLevel);
+    @Override
+    public void onBatteryLevelChanged(int level, int status) {
+        mBatteryLevel = level;
+        mBatteryStatus = status;
+        updateResources();
+    }
 
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
+        final int drawableResId = mBatteryStatus == BatteryManager.BATTERY_STATUS_CHARGING
+                ? R.drawable.qs_sys_battery_charging : R.drawable.qs_sys_battery;
+
+        mBatteryIcon = mContext.getResources().getDrawable(drawableResId);
+
+        if (mBatteryStatus == BatteryManager.BATTERY_STATUS_FULL) {
+            mLabel = mContext.getString(R.string.quick_settings_battery_charged_label);
+        } else if (mBatteryStatus == BatteryManager.BATTERY_STATUS_CHARGING) {
+            mLabel = mContext.getString(R.string.quick_settings_battery_charging_label,
+                    mBatteryLevel);
+        } else {
+            mLabel = mContext.getString(R.string.status_bar_settings_battery_meter_format,
+                    mBatteryLevel);
         }
-        updateQuickSettings();
     }
 
     @Override
     void updateQuickSettings() {
         TextView tv = (TextView) mTile.findViewById(R.id.text);
-        tv.setText(mLabel);
         ImageView iv = (ImageView) mTile.findViewById(R.id.image);
-        iv.setImageDrawable(batteryIcon);
-        iv.setImageLevel(batteryLevel);
+
+        tv.setText(mLabel);
+        iv.setImageDrawable(mBatteryIcon);
+        iv.setImageLevel(mBatteryLevel);
     }
 
 }

@@ -26,22 +26,13 @@ public class BugReportTile extends QuickSettingsTile{
     private boolean enabled = false;
     private final Handler mHandler;
 
-    public BugReportTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container,
+    public BugReportTile(Context context, 
             QuickSettingsController qsc, Handler handler) {
-        super(context, inflater, container, qsc);
+        super(context, qsc);
 
         mHandler = handler;
-        mLabel = mContext.getString(R.string.quick_settings_report_bug);
-        mDrawable = com.android.internal.R.drawable.stat_sys_adb;
-
-        try {
-            enabled = (Settings.Secure.getInt(mContext.getContentResolver(), Settings.Secure.BUGREPORT_IN_POWER_MENU) != 0);
-        } catch (SettingNotFoundException e) {
-        }
 
         mOnClick = new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 mQsc.mBar.collapseAllPanels(true);
@@ -52,17 +43,34 @@ public class BugReportTile extends QuickSettingsTile{
     }
 
     @Override
-    public void onChangeUri(ContentResolver resolver, Uri uri) {
-        onBugreportChanged();
+    void onPostCreate() {
+        updateTile();
+        super.onPostCreate();
     }
 
-    public void onBugreportChanged() {
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
+        mLabel = mContext.getString(R.string.quick_settings_report_bug);
+        mDrawable = com.android.internal.R.drawable.stat_sys_adb;
         final ContentResolver cr = mContext.getContentResolver();
         try {
             enabled = (Settings.Secure.getInt(cr, Settings.Secure.BUGREPORT_IN_POWER_MENU) != 0);
         } catch (SettingNotFoundException e) {
         }
-        updateQuickSettings();
+    }
+
+    @Override
+    public void onChangeUri(ContentResolver resolver, Uri uri) {
+        updateResources();
+    }
+
+    public void onBugreportChanged() {
+        updateResources();
     }
 
     @Override

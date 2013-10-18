@@ -20,6 +20,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Slog;
@@ -42,6 +43,7 @@ public class SignalClusterView
     static final String TAG = "SignalClusterView";
 
     NetworkController mNC;
+    private SettingsObserver mObserver;
 
     private static final int SIGNAL_CLUSTER_STYLE_NORMAL = 0;
 
@@ -52,10 +54,12 @@ public class SignalClusterView
     private int mMobileStrengthId = 0, mMobileActivityId = 0, mMobileTypeId = 0;
     private boolean mIsAirplaneMode = false;
     private int mAirplaneIconId = 0;
-    private String mWifiDescription, mMobileDescription, mMobileTypeDescription;
+    private boolean mEtherVisible = false;
+    private int mEtherIconId = 0;
+    private String mWifiDescription, mMobileDescription, mMobileTypeDescription, mEtherDescription;
 
     ViewGroup mWifiGroup, mMobileGroup;
-    ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane;
+    ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType, mAirplane, mEther;
     View mSpacer;
 
     Handler mHandler;
@@ -69,6 +73,10 @@ public class SignalClusterView
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_SIGNAL_TEXT), false, this);
+        }
+
+        void unobserve() {
+            mContext.getContentResolver().unregisterContentObserver(this);
         }
 
         @Override
@@ -90,8 +98,7 @@ public class SignalClusterView
 
         mHandler = new Handler();
 
-        SettingsObserver settingsObserver = new SettingsObserver(mHandler);
-        settingsObserver.observe();
+        mObserver = new SettingsObserver(mHandler);
     }
 
     public void setNetworkController(NetworkController nc) {
@@ -103,6 +110,8 @@ public class SignalClusterView
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        mObserver.observe();
+
         mWifiGroup      = (ViewGroup) findViewById(R.id.wifi_combo);
         mWifi           = (ImageView) findViewById(R.id.wifi_signal);
         mWifiActivity   = (ImageView) findViewById(R.id.wifi_inout);
@@ -112,12 +121,15 @@ public class SignalClusterView
         mMobileType     = (ImageView) findViewById(R.id.mobile_type);
         mSpacer         =             findViewById(R.id.spacer);
         mAirplane       = (ImageView) findViewById(R.id.airplane);
+        mEther          = (ImageView) findViewById(R.id.ethernet);
 
         apply();
     }
 
     @Override
     protected void onDetachedFromWindow() {
+        mObserver.unobserve();
+
         mWifiGroup      = null;
         mWifi           = null;
         mWifiActivity   = null;
@@ -127,6 +139,7 @@ public class SignalClusterView
         mMobileType     = null;
         mSpacer         = null;
         mAirplane       = null;
+        mEther          = null;
 
         super.onDetachedFromWindow();
     }
@@ -159,6 +172,15 @@ public class SignalClusterView
     public void setIsAirplaneMode(boolean is, int airplaneIconId) {
         mIsAirplaneMode = is;
         mAirplaneIconId = airplaneIconId;
+
+        apply();
+    }
+
+    @Override
+    public void setEtherIndicators(boolean visible, int etherIcon, String contentDescription) {
+        mEtherVisible = visible;
+        mEtherIconId = etherIcon;
+        mEtherDescription = contentDescription;
 
         apply();
     }
@@ -239,6 +261,14 @@ public class SignalClusterView
             mAirplane.setVisibility(View.GONE);
         }
 
+        if (mEtherVisible) {
+            mEther.setVisibility(View.VISIBLE);
+            mEther.setImageResource(mEtherIconId);
+            mEther.setContentDescription(mEtherDescription);
+        } else {
+            mEther.setVisibility(View.GONE);
+        }
+
         if (mMobileVisible && mWifiVisible && mIsAirplaneMode) {
             mSpacer.setVisibility(View.INVISIBLE);
         } else {
@@ -258,16 +288,16 @@ public class SignalClusterView
 
     private void updateSignalClusterStyle() {
         if (!mIsAirplaneMode) {
-            if (mMobileGroup != null)
-                mMobileGroup.setVisibility(mSignalClusterStyle !=
-                        SIGNAL_CLUSTER_STYLE_NORMAL ? View.GONE : View.VISIBLE);
+            mMobileGroup.setVisibility(mSignalClusterStyle !=
+                    SIGNAL_CLUSTER_STYLE_NORMAL ? View.GONE : View.VISIBLE);
         }
     }
 
-    private void updateSettings() {
+    public void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
-        mSignalClusterStyle = (Settings.System.getInt(resolver,
-                Settings.System.STATUS_BAR_SIGNAL_TEXT, SIGNAL_CLUSTER_STYLE_NORMAL));
+        mSignalClusterStyle = Settings.System.getIntForUser(resolver,
+                Settings.System.STATUS_BAR_SIGNAL_TEXT, SIGNAL_CLUSTER_STYLE_NORMAL,
+                UserHandle.USER_CURRENT);
         updateSignalClusterStyle();
     }
 }

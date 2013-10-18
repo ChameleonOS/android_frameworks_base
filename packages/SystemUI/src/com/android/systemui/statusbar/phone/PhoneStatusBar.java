@@ -889,11 +889,17 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
             }
 
+            if (mQS != null) {
+                mQS.shutdown();
+                mQS = null;
+            }
+
             // wherever you find it, Quick Settings needs a container to survive
             mSettingsContainer = (QuickSettingsContainerView)
                     mStatusBarWindow.findViewById(R.id.quick_settings_container);
             if (mSettingsContainer != null) {
-                mQS = new QuickSettingsController(mContext, mSettingsContainer, this);
+                mQS = new QuickSettingsController(mContext, mSettingsContainer, this,
+                        Settings.System.QUICK_SETTINGS_TILES);
                 if (!mNotificationPanelIsFullScreenWidth) {
                     mSettingsContainer.setSystemUiVisibility(
                             View.STATUS_BAR_DISABLE_NOTIFICATION_TICKER
@@ -904,14 +910,13 @@ public class PhoneStatusBar extends BaseStatusBar {
                 }
                 mQS.setService(this);
                 mQS.setBar(mStatusBarView);
-                mQS.updateResources();
+                mQS.setupQuickSettings();
 
                 // Start observing for changes
-                mTilesChangedObserver = new TilesChangedObserver(mHandler);
-                mTilesChangedObserver.startObserving();
-
-            } else {
-                mQS = null; // fly away, be free
+                if (mTilesChangedObserver == null) {
+                    mTilesChangedObserver = new TilesChangedObserver(mHandler);
+                    mTilesChangedObserver.startObserving();
+                }
             }
         }
 
@@ -3364,7 +3369,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void onChange(boolean selfChange) {
             if (mSettingsContainer != null) {
-                mQS.updateResources();
+                mQS.setupQuickSettings();
             }
         }
 
@@ -3372,27 +3377,31 @@ public class PhoneStatusBar extends BaseStatusBar {
             final ContentResolver cr = mContext.getContentResolver();
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QUICK_SETTINGS_TILES),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
 
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QS_DYNAMIC_ALARM),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
 
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QS_DYNAMIC_BUGREPORT),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
+
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.QS_DYNAMIC_DOCK_BATTERY),
+                    false, this, UserHandle.USER_ALL);
 
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QS_DYNAMIC_IME),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
 
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QS_DYNAMIC_USBTETHER),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
 
             cr.registerContentObserver(
                     Settings.System.getUriFor(Settings.System.QS_DYNAMIC_WIFI),
-                    false, this);
+                    false, this, UserHandle.USER_ALL);
         }
     }
 

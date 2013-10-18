@@ -1,13 +1,11 @@
 package com.android.systemui.quicksettings;
 
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Handler;
+import android.os.UserHandle;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -39,27 +37,18 @@ public class RingerModeTile extends QuickSettingsTile {
     private int mRingerValuesIndex;
 
     private AudioManager mAudioManager;
-    private Handler mHandler;
 
-    public RingerModeTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container, QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
+    public RingerModeTile(Context context, QuickSettingsController qsc) {
+        super(context, qsc);
 
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        mHandler = new Handler();
-
-        // Load the available ringer modes
-        updateSettings(mContext.getContentResolver());
-
-        // Make sure we show the initial state correctly
-        updateState();
 
         // Tile actions
         mOnClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 toggleState();
-                applyVibrationChanges();
+                updateResources();
             }
         };
 
@@ -79,21 +68,33 @@ public class RingerModeTile extends QuickSettingsTile {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        applyVibrationChanges();
+        updateResources();
     }
 
     @Override
     public void onChangeUri(ContentResolver resolver, Uri uri) {
         updateSettings(mContext.getContentResolver());
-        applyVibrationChanges();
+        updateResources();
     }
 
-    private void applyVibrationChanges(){
-        updateState();
-        updateQuickSettings();
+    @Override
+    void onPostCreate() {
+        // Load the available ringer modes
+        updateSettings(mContext.getContentResolver());
+
+        // Make sure we show the initial state correctly
+        updateTile();
+
+        super.onPostCreate();
     }
 
-    protected void updateState() {
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
         // The title does not change
         mLabel = mContext.getString(R.string.quick_settings_ringer_normal);
 
@@ -146,8 +147,8 @@ public class RingerModeTile extends QuickSettingsTile {
     }
 
     private void updateSettings(ContentResolver resolver) {
-        String[] modes = parseStoredValue(Settings.System.getString(
-                resolver, Settings.System.EXPANDED_RING_MODE));
+        String[] modes = parseStoredValue(Settings.System.getStringForUser(
+                resolver, Settings.System.EXPANDED_RING_MODE, UserHandle.USER_CURRENT));
         if (modes == null || modes.length == 0) {
             mRingerValues = new int[] {
                     0, 1, 2, 3
@@ -162,8 +163,8 @@ public class RingerModeTile extends QuickSettingsTile {
 
     private void findCurrentState() {
         ContentResolver resolver = mContext.getContentResolver();
-        boolean vibrateWhenRinging = Settings.System.getInt(resolver,
-                Settings.System.VIBRATE_WHEN_RINGING, 0) == 1;
+        boolean vibrateWhenRinging = Settings.System.getIntForUser(resolver,
+                Settings.System.VIBRATE_WHEN_RINGING, 0, UserHandle.USER_CURRENT) == 1;
         int ringerMode = mAudioManager.getRingerMode();
 
         Ringer ringer = new Ringer(ringerMode, vibrateWhenRinging);
@@ -193,8 +194,8 @@ public class RingerModeTile extends QuickSettingsTile {
 
             // Set the desired state
             ContentResolver resolver = context.getContentResolver();
-            Settings.System.putInt(resolver, Settings.System.VIBRATE_WHEN_RINGING,
-                    (mVibrateWhenRinging ? 1 : 0));
+            Settings.System.putIntForUser(resolver, Settings.System.VIBRATE_WHEN_RINGING,
+                    mVibrateWhenRinging ? 1 : 0, UserHandle.USER_CURRENT);
             mAudioManager.setRingerMode(mRingerMode);
         }
 

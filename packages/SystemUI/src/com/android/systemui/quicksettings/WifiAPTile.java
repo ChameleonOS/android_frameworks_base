@@ -1,10 +1,8 @@
 package com.android.systemui.quicksettings;
 
-import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -18,13 +16,11 @@ public class WifiAPTile extends QuickSettingsTile {
 
     private static WifiManager mWifiManager;
 
-    public WifiAPTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container, QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
+    public WifiAPTile(Context context, QuickSettingsController qsc) {
+        super(context, qsc);
 
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
 
-        updateTileState();
         mOnClick = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,11 +51,22 @@ public class WifiAPTile extends QuickSettingsTile {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        updateTileState();
-        updateQuickSettings();
+        updateResources();
     }
 
-    private void updateTileState() {
+    @Override
+    void onPostCreate() {
+        updateTile();
+        super.onPostCreate();
+    }
+
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
         int state = mWifiManager.getWifiApState();
         switch (state) {
             case WifiManager.WIFI_AP_STATE_ENABLING:

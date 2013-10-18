@@ -589,4 +589,19 @@
     <string name="toast_items_saved">Appbar items have been saved.</string>
     <string name="content_setup_instructions">Add items to the Appbar by long pressing any item on the right and drag it over to the Appbar.\n\nCombine items into folders by droping an item onto any existing item in the Appbar.\n\nTo remove an item simply drag it out of the \@appbar.</string>
     <string name="content_setup_dismiss">Continue</string>
+
+    <!-- Quick Settings -->
+    <string name="quick_settings_lte">LTE</string>
+    <string name="quick_settings_lte_off">LTE off</string>
+    <string name="quick_settings_volume">Volume</string>
+    <string name="quick_settings_camera_label">Camera</string>
+    <string name="quick_settings_network_adb_disabled_label">Disabled</string>
+    <string name="quick_settings_network_adb_enabled_label">Enabled</string>
+
+    <!-- Expanded desktop strings break the rules a bit - the icon identifies the feature, the string indicates current state -->
+    <string name="quick_settings_expanded_desktop">Expanded</string>
+    <string name="quick_settings_expanded_desktop_off">Normal</string>
+
+    <!-- Camera tile toasts -->
+    <string name="quick_settings_camera_error_connect">Can\'t connect to camera</string>
 </resources>

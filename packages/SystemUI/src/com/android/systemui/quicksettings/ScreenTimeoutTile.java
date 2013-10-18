@@ -3,16 +3,14 @@ package com.android.systemui.quicksettings;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.UserHandle;
 import android.provider.Settings;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.widget.Toast;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
@@ -31,17 +29,14 @@ public class ScreenTimeoutTile extends QuickSettingsTile {
     private static final int CM_MODE_15_60_300 = 0;
     private static final int CM_MODE_30_120_300 = 1;
 
-    public ScreenTimeoutTile(Context context,
-            LayoutInflater inflater, QuickSettingsContainerView container, QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
-
-        updateTileState();
+    public ScreenTimeoutTile(Context context, QuickSettingsController qsc) {
+        super(context, qsc);
 
         mOnClick = new OnClickListener() {
             @Override
             public void onClick(View v) {
                 toggleState();
-                applyTimeoutChanges();
+                updateResources();
             }
         };
 
@@ -60,15 +55,22 @@ public class ScreenTimeoutTile extends QuickSettingsTile {
 
     @Override
     public void onChangeUri(ContentResolver resolver, Uri uri) {
-        applyTimeoutChanges();
+        updateResources();
     }
 
-    void applyTimeoutChanges() {
-        updateTileState();
-        updateQuickSettings();
+    @Override
+    void onPostCreate() {
+        updateTile();
+        super.onPostCreate();
     }
 
-    protected void updateTileState() {
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
         int timeout = getScreenTimeout();
         mLabel = makeTimeoutSummaryString(mContext, timeout);
         mDrawable = R.drawable.ic_qs_screen_timeout_off;
@@ -120,9 +122,9 @@ public class ScreenTimeoutTile extends QuickSettingsTile {
             screenTimeout = SCREEN_TIMEOUT_MIN;
         }
 
-        Settings.System.putInt(
+        Settings.System.putIntForUser(
                 mContext.getContentResolver(),
-                Settings.System.SCREEN_OFF_TIMEOUT, screenTimeout);
+                Settings.System.SCREEN_OFF_TIMEOUT, screenTimeout, UserHandle.USER_CURRENT);
     }
 
     private String makeTimeoutSummaryString(Context context, int timeout) {
@@ -157,12 +159,13 @@ public class ScreenTimeoutTile extends QuickSettingsTile {
     }
 
     private int getScreenTimeout() {
-        return Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.SCREEN_OFF_TIMEOUT, 0);
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_OFF_TIMEOUT, 0, UserHandle.USER_CURRENT);
     }
 
     private int getCurrentCMMode() {
-        return Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.EXPANDED_SCREENTIMEOUT_MODE, CM_MODE_15_60_300);
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.EXPANDED_SCREENTIMEOUT_MODE, CM_MODE_15_60_300,
+                UserHandle.USER_CURRENT);
     }
 }

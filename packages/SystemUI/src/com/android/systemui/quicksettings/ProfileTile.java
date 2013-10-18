@@ -19,16 +19,15 @@ package com.android.systemui.quicksettings;
 import android.app.AlertDialog;
 import android.app.Profile;
 import android.app.ProfileManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.os.RemoteException;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
-import com.android.server.ProfileManagerService;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
@@ -39,17 +38,14 @@ public class ProfileTile extends QuickSettingsTile {
     private Profile mChosenProfile;
     private ProfileManager mProfileManager;
 
-    public ProfileTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container,
+    public ProfileTile(Context context, 
             QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
+        super(context, qsc);
 
-        qsc.registerAction(ProfileManagerService.INTENT_ACTION_PROFILE_SELECTED, this);
+        qsc.registerAction(ProfileManager.INTENT_ACTION_PROFILE_SELECTED, this);
+        qsc.registerAction(ProfileManager.INTENT_ACTION_PROFILE_UPDATED, this);
 
         mProfileManager = (ProfileManager) mContext.getSystemService(Context.PROFILE_SERVICE);
-        mDrawable = R.drawable.ic_qs_profiles;
-
-        mLabel = mProfileManager.getActiveProfile().getName();
 
         mOnClick = new View.OnClickListener() {
             @Override
@@ -68,9 +64,25 @@ public class ProfileTile extends QuickSettingsTile {
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    void onPostCreate() {
+        updateTile();
+        super.onPostCreate();
+    }
+
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
+        mDrawable = R.drawable.ic_qs_profiles;
         mLabel = mProfileManager.getActiveProfile().getName();
-        updateQuickSettings();
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        updateResources();
     }
 
     // copied from com.android.internal.policy.impl.GlobalActions
@@ -107,6 +119,10 @@ public class ProfileTile extends QuickSettingsTile {
                 }).create();
         mStatusbarService.animateCollapsePanels();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
+        try {
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
+        } catch (RemoteException e) {
+        }
         dialog.show();
     }
 

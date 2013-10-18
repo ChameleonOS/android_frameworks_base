@@ -18,23 +18,27 @@ import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 
+import static com.android.internal.util.chaos.QSUtils.deviceSupportsMobileData;
+
 public class MobileNetworkTile extends QuickSettingsTile implements NetworkSignalChangedCallback{
 
-    private int mDataTypeIconId;
+    private static final int NO_OVERLAY = 0;
+    private static final int DISABLED_OVERLAY = -1;
+
+    private NetworkController mController;
+    private boolean mEnabled;
+    private String mDescription;
+    private int mDataTypeIconId = NO_OVERLAY;
     private String dataContentDescription;
     private String signalContentDescription;
     private boolean wifiOn = false;
 
     private ConnectivityManager mCm;
 
-    private int NO_OVERLAY = 0;
-    private int DISABLED_OVERLAY = -1;
+    public MobileNetworkTile(Context context, QuickSettingsController qsc, NetworkController controller) {
+        super(context, qsc, R.layout.quick_settings_tile_rssi);
 
-    public MobileNetworkTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container, QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
-
-        mTileLayout = R.layout.quick_settings_tile_rssi;
+        mController = controller;
         mCm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         mOnClick = new View.OnClickListener() {
@@ -65,9 +69,31 @@ public class MobileNetworkTile extends QuickSettingsTile implements NetworkSigna
 
     @Override
     void onPostCreate() {
-        NetworkController controller = new NetworkController(mContext);
-        controller.addNetworkSignalChangedCallback(this);
+        mController.addNetworkSignalChangedCallback(this);
+        updateTile();
         super.onPostCreate();
+    }
+
+    @Override
+    public void onDestroy() {
+        mController.removeNetworkSignalChangedCallback(this);
+        super.onDestroy();
+    }
+
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
+        Resources r = mContext.getResources();
+        dataContentDescription = mEnabled && (mDataTypeIconId > 0) && !wifiOn
+                ? dataContentDescription
+                : r.getString(R.string.accessibility_no_data);
+        mLabel = mEnabled
+                ? removeTrailingPeriod(mDescription)
+                : r.getString(R.string.quick_settings_rssi_emergency_only);
     }
 
     @Override
@@ -81,7 +107,7 @@ public class MobileNetworkTile extends QuickSettingsTile implements NetworkSigna
             int mobileSignalIconId, String mobileSignalContentDescriptionId,
             int dataTypeIconId, String dataTypeContentDescriptionId,
             String description) {
-        if (deviceSupportsTelephony()) {
+        if (deviceSupportsMobileData(mContext)) {
             // TODO: If view is in awaiting state, disable
             Resources r = mContext.getResources();
             mDrawable = enabled && (mobileSignalIconId > 0)
@@ -100,29 +126,20 @@ public class MobileNetworkTile extends QuickSettingsTile implements NetworkSigna
                 mDataTypeIconId = NO_OVERLAY;
             }
 
-            dataContentDescription = enabled && (dataTypeIconId > 0) && !wifiOn
-                    ? dataContentDescription
-                    : r.getString(R.string.accessibility_no_data);
-            mLabel = enabled
-                    ? removeTrailingPeriod(description)
-                    : r.getString(R.string.quick_settings_rssi_emergency_only);
-            updateQuickSettings();
+            mEnabled = enabled;
+            mDescription = description;
+
+            updateResources();
         }
     }
 
     @Override
     public void onAirplaneModeChanged(boolean enabled) {
-        // TODO Auto-generated method stub
-    }
-
-    boolean deviceSupportsTelephony() {
-        PackageManager pm = mContext.getPackageManager();
-        return pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
     }
 
     @Override
     void updateQuickSettings() {
-        TextView tv = (TextView) mTile.findViewById(R.id.rssi_textview);
+        TextView tv = (TextView) mTile.findViewById(R.id.text);
         ImageView iv = (ImageView) mTile.findViewById(R.id.rssi_image);
 
         iv.setImageResource(mDrawable);

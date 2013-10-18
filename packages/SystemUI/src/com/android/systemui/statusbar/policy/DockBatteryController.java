@@ -22,30 +22,65 @@ import android.os.BatteryManager;
 
 import com.android.systemui.R;
 
+import java.util.ArrayList;
+
 public class DockBatteryController extends BatteryController {
     private static final String TAG = "StatusBar.DockBatteryController";
 
     private int mDockBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
+    private int mBatteryLevel = 0;
     private boolean mBatteryPlugged = false;
     private boolean mBatteryPresent = false;
 
     public DockBatteryController(Context context) {
-        super(context);
+        this(context, true);
+    }
+
+    public DockBatteryController(Context context, boolean ui) {
+        super(context, ui);
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
-            final int level = intent.getIntExtra(BatteryManager.EXTRA_DOCK_LEVEL, 0);
+            mBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_DOCK_LEVEL, 0);
             mDockBatteryStatus = intent.getIntExtra(
                                         BatteryManager.EXTRA_DOCK_STATUS,
                                         BatteryManager.BATTERY_STATUS_UNKNOWN);
             mBatteryPlugged = intent.getIntExtra(BatteryManager.EXTRA_DOCK_PLUGGED, 0) != 0;
             mBatteryPresent = intent.getBooleanExtra(BatteryManager.EXTRA_DOCK_PRESENT, false);
-            updateViews(level);
+            updateViews();
             updateBattery();
         }
+    }
+
+    @Override
+    protected void updateViews() {
+        if (isUiController()) {
+            super.updateViews();
+        }
+
+        for (DockBatteryStateChangeCallback cb : mChangeCallbacks) {
+            cb.onDockBatteryLevelChanged(getBatteryLevel(), isBatteryPresent(), getBatteryStatus());
+        }
+    }
+
+    private ArrayList<DockBatteryStateChangeCallback> mChangeCallbacks =
+            new ArrayList<DockBatteryStateChangeCallback>();
+
+    public interface DockBatteryStateChangeCallback {
+        public void onDockBatteryLevelChanged(int level, boolean present, int status);
+    }
+
+    public void addStateChangedCallback(DockBatteryStateChangeCallback cb) {
+        mChangeCallbacks.add(cb);
+        // trigger initial update
+        cb.onDockBatteryLevelChanged(getBatteryLevel(), isBatteryPresent(), getBatteryStatus());
+    }
+
+    public void removeStateChangedCallback(DockBatteryStateChangeCallback cb) {
+        mChangeCallbacks.remove(cb);
     }
 
     @Override
@@ -67,6 +102,11 @@ public class DockBatteryController extends BatteryController {
     @Override
     public int getIconStyleChargeMin() {
         return R.drawable.stat_sys_kb_battery_charge_min;
+    }
+
+    @Override
+    protected int getBatteryLevel() {
+        return mBatteryLevel;
     }
 
     @Override

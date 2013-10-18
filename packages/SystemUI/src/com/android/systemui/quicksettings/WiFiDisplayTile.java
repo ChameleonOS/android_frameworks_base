@@ -1,9 +1,7 @@
 package com.android.systemui.quicksettings;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.WifiDisplayStatus;
 import android.view.LayoutInflater;
@@ -19,10 +17,9 @@ public class WiFiDisplayTile extends QuickSettingsTile{
     private boolean enabled = false;
     private boolean connected = false;
 
-    public WiFiDisplayTile(Context context, LayoutInflater inflater,
-            QuickSettingsContainerView container,
+    public WiFiDisplayTile(Context context, 
             QuickSettingsController qsc) {
-        super(context, inflater, container, qsc);
+        super(context, qsc);
 
         mOnClick = new OnClickListener() {
 
@@ -32,7 +29,6 @@ public class WiFiDisplayTile extends QuickSettingsTile{
             }
         };
         qsc.registerAction(DisplayManager.ACTION_WIFI_DISPLAY_STATUS_CHANGED, this);
-        applyWiFiDisplayChanges();
     }
 
     @Override
@@ -40,19 +36,28 @@ public class WiFiDisplayTile extends QuickSettingsTile{
         WifiDisplayStatus status = (WifiDisplayStatus)intent.getParcelableExtra(DisplayManager.EXTRA_WIFI_DISPLAY_STATUS);
         enabled = status.getFeatureState() == WifiDisplayStatus.FEATURE_STATE_ON;
         connected = status.getActiveDisplay() != null;
-        applyWiFiDisplayChanges();
+        updateResources();
     }
 
-    private void applyWiFiDisplayChanges() {
+    @Override
+    void onPostCreate() {
+        updateTile();
+        super.onPostCreate();
+    }
+
+    @Override
+    public void updateResources() {
+        updateTile();
+        super.updateResources();
+    }
+
+    private synchronized void updateTile() {
         if(enabled && connected) {
             mLabel = mContext.getString(R.string.quick_settings_wifi_display_label);
             mDrawable = R.drawable.ic_qs_remote_display_connected;
         }else{
             mLabel = mContext.getString(R.string.quick_settings_wifi_display_no_connection_label);
             mDrawable = R.drawable.ic_qs_remote_display;
-        }
-        if(mTile != null) {
-            updateQuickSettings();
         }
     }
 
