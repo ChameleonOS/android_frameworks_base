@@ -19,15 +19,19 @@ package com.android.systemui.recent;
 import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.animation.TimeInterpolator;
+import android.annotation.ChaosLab;
+import android.annotation.ChaosLab.Classification;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.ActivityOptions;
 import android.app.TaskStackBuilder;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Shader.TileMode;
@@ -35,6 +39,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -59,7 +64,10 @@ import android.widget.ImageView.ScaleType;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
+import android.widget.ViewFlipper;
 import com.android.systemui.R;
+import com.android.systemui.chaos.lab.quickstats.QuickStatsContainerView;
+import com.android.systemui.chaos.lab.quickstats.QuickStatsController;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
@@ -76,6 +84,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private PopupMenu mPopup;
     private View mRecentsScrim;
     private View mRecentsNoApps;
+    private View mQuickStatsGroup;
     private ViewGroup mRecentsContainer;
     private StatusBarTouchProxy mStatusBarTouchProxy;
 
@@ -97,6 +106,17 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     private ImageView mClearRecents;
 
     private static Set<Integer> sLockedTasks = new HashSet<Integer>();
+
+    @ChaosLab(name="QuickStats", classification=Classification.NEW_FIELD)
+    private ImageView mQuickStatsToggle;
+    @ChaosLab(name="QuickStats", classification=Classification.NEW_FIELD)
+    private ViewFlipper mFlipper;
+    @ChaosLab(name="QuickStats", classification=Classification.NEW_FIELD)
+    private QuickStatsContainerView mSysInfoContainer;
+    @ChaosLab(name="QuickStats", classification=Classification.NEW_FIELD)
+    private QuickStatsController mQSC;
+    @ChaosLab(name="QuickStats", classification=Classification.NEW_FIELD)
+    private QuickStatsChangedObserver mQuickStatsChangedObserver;
 
     public static interface RecentsScrollView {
         public int numItemsInOneScreenful();
@@ -385,11 +405,33 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         }
     }
 
+    @ChaosLab(name="QuickStats", classification=Classification.CHANGE_CODE)
     protected void onAttachedToWindow () {
         super.onAttachedToWindow();
         final ViewRootImpl root = getViewRootImpl();
         if (root != null) {
             root.setDrawDuringWindowsAnimating(true);
+        }
+        if (mSysInfoContainer != null) {
+            if (mQSC == null) {
+                mQSC = new QuickStatsController(mContext, mSysInfoContainer,
+                    Settings.System.QUICK_STATS_TILES);
+            }
+
+            // Start observing for changes
+            if (mQuickStatsChangedObserver == null) {
+                mQuickStatsChangedObserver = new QuickStatsChangedObserver(new Handler());
+            }
+            mQuickStatsChangedObserver.startObserving();
+        }
+    }
+
+    @ChaosLab(name="QuickStats", classification=Classification.NEW_METHOD)
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mQSC != null) {
+            mQSC.shutdown();
+            mQuickStatsChangedObserver.stopObserving();
         }
     }
 
@@ -466,6 +508,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     @Override
+    @ChaosLab(name="QuickStats", classification=Classification.CHANGE_CODE)
     protected void onFinishInflate() {
         super.onFinishInflate();
 
@@ -503,6 +546,28 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                 ((BitmapDrawable) mRecentsScrim.getBackground()).setTileModeY(TileMode.REPEAT);
             }
         }
+
+        mQuickStatsGroup = findViewById(R.id.system_info_group);
+        mFlipper = (ViewFlipper) findViewById(R.id.flipper);
+        mQuickStatsToggle = (ImageView) findViewById(R.id.system_info_toggle);
+        if (mQuickStatsToggle != null && mFlipper != null) {
+            mQuickStatsToggle.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mFlipper.setInAnimation(mContext, R.anim.qstats_fade_in);
+                    mFlipper.setOutAnimation(mContext, R.anim.qstats_fade_out);
+                    if (mFlipper.getCurrentView() == mQuickStatsGroup) {
+                        mQSC.pause();
+                    } else {
+                        mQSC.resume();
+                    }
+                    mFlipper.showNext();
+                }
+            });
+        }
+
+        mSysInfoContainer = (QuickStatsContainerView)
+                findViewById(R.id.sys_info_container);
     }
 
     /**
@@ -915,6 +980,64 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
                     sLockedTasks.add(holder.taskDescription.persistentTaskId);
                 }
             }
+        }
+    }
+
+    /**
+     *  ContentObserver to watch for Quick Stats changes
+     * @author dvtonder
+     *
+     */
+    @ChaosLab(name="QuickStats", classification=Classification.NEW_CLASS)
+    private class QuickStatsChangedObserver extends ContentObserver {
+        public QuickStatsChangedObserver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            final ContentResolver cr = mContext.getContentResolver();
+
+            boolean enabled = Settings.System.getInt(cr,
+                    Settings.System.QUICK_STATS_ENABLED, 0) == 1;
+            if (enabled) {
+                mQuickStatsToggle.setVisibility(View.VISIBLE);
+                if (mQuickStatsGroup != null) {
+                    mQSC.setupQuickStats();
+
+                    if (mFlipper != null && mFlipper.getCurrentView() == mQuickStatsGroup) {
+                        mQSC.resume();
+                    } else {
+                        mQSC.pause();
+                    }
+                }
+            } else {
+                if (mQSC != null) {
+                    mQSC.shutdown();
+                }
+                if (mFlipper != null && mFlipper.getCurrentView() == mQuickStatsGroup) {
+                    mFlipper.showNext();
+                }
+                mQuickStatsToggle.setVisibility(View.GONE);
+            }
+        }
+
+        public void startObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.QUICK_STATS_TILES),
+                    false, this, UserHandle.USER_ALL);
+
+            cr.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.QUICK_STATS_ENABLED),
+                    false, this, UserHandle.USER_ALL);
+
+            onChange(true);
+        }
+
+        public void stopObserving() {
+            final ContentResolver cr = mContext.getContentResolver();
+            cr.unregisterContentObserver(this);
         }
     }
 }

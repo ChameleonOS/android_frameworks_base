@@ -36,52 +36,91 @@
         android:clipChildren="false"
         android:fitsSystemWindows="true">
 
-        <com.android.systemui.recent.RecentsHorizontalScrollView android:id="@+id/recents_container"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:fadingEdge="horizontal"
-            android:scrollbars="none"
-            android:layout_gravity="right"
-            android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length">
-
-            <LinearLayout android:id="@+id/recents_linear_layout"
-                android:layout_width="wrap_content"
+        <ViewFlipper
+                android:id="@+id/flipper"
                 android:layout_height="match_parent"
-                android:layoutDirection="ltr"
-                android:layout_gravity="left"
-                android:orientation="horizontal">
-            </LinearLayout>
+                android:layout_width="match_parent" >
 
-        </com.android.systemui.recent.RecentsHorizontalScrollView>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
 
-        <FrameLayout
+                <com.android.systemui.recent.RecentsHorizontalScrollView android:id="@+id/recents_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:fadingEdge="horizontal"
+                    android:scrollbars="none"
+                    android:layout_gravity="right"
+                    android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length">
+
+                    <LinearLayout android:id="@+id/recents_linear_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layoutDirection="ltr"
+                        android:layout_gravity="left"
+                        android:orientation="horizontal">
+                    </LinearLayout>
+                </com.android.systemui.recent.RecentsHorizontalScrollView>
+
+                <FrameLayout
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginRight="2dp"
+                    android:layout_gravity="top|right" >
+
+                    <com.android.systemui.recent.CircleMemoryMeter
+                        android:id="@+id/circle_meter"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <ImageView
+                        android:id="@+id/recents_clear"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="10dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_notify_clear" />
+
+                </FrameLayout>
+
+                <include layout="@layout/status_bar_no_recent_apps"
+                     android:id="@+id/recents_no_apps"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                     android:visibility="invisible" />
+            </FrameLayout>
+
+            <FrameLayout
+                    android:id="@+id/system_info_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                <com.android.systemui.chaos.lab.quickstats.QuickStatsContainerView
+                        android:id="@+id/sys_info_container"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_marginTop="50dp" />
+
+                <TextView
+                        android:layout_height="50dp"
+                        android:layout_width="wrap_content"
+                        android:layout_gravity="top|center_horizontal"
+                        android:gravity="center_vertical"
+                        style="@style/TextAppearance.QuickStats.Title"
+                        android:text="@string/quick_stats_header_title" />
+
+            </FrameLayout>
+        </ViewFlipper>
+
+        <ImageView
+            android:id="@+id/system_info_toggle"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_gravity="top|right" >
-
-            <com.android.systemui.recent.CircleMemoryMeter
-                android:id="@+id/circle_meter"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <ImageView
-                android:id="@+id/recents_clear"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="10dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_notify_clear" />
-
-        </FrameLayout>
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_sys_info" />
 
     </FrameLayout>
-
-    <include layout="@layout/status_bar_no_recent_apps"
-        android:id="@+id/recents_no_apps"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible" />
 
 </com.android.systemui.recent.RecentsPanelView>

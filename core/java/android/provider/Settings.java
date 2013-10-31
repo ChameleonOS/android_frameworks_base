@@ -2622,6 +2622,22 @@ public final class Settings {
         public static final String IDENTICONS_STYLE = "identicons_style";
 
         /**
+         * System Info Panel Tiles to Use
+         *
+         * @hide
+         */
+        @ChaosLab(name="QuickStats", classification=Classification.NEW_FIELD)
+        public static final String QUICK_STATS_ENABLED = "quick_stats_enabled";
+
+        /**
+         * System Info Panel Tiles to Use
+         *
+         * @hide
+         */
+        @ChaosLab(name="QuickStats", classification=Classification.NEW_FIELD)
+        public static final String QUICK_STATS_TILES = "quick_stats_tiles";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
          * instead
          * @hide

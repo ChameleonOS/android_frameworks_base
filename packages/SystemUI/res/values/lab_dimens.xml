@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- QuickStats tile geometry: top interior margin, above icon -->
+    <dimen name="quick_stats_tile_margin_above_icon">27dp</dimen>
+    <!-- QuickStats tile geometry: gap between icon and text -->
+    <dimen name="quick_stats_tile_margin_below_icon">17dp</dimen>
+    <!-- QuickStats tile geometry: icon size -->
+    <dimen name="quick_stats_tile_icon_size">32dp</dimen>
+
+    <!-- The fixed height of each tile -->
+    <dimen name="quick_stats_cell_height">110dp</dimen>
+
+    <!-- The padding between each tile within the SystemInfo layout -->
+    <dimen name="quick_stats_cell_gap">4dp</dimen>
+
+</resources>

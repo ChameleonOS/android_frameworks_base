@@ -34,58 +34,102 @@
         android:layout_alignParentBottom="true"
         android:fitsSystemWindows="true">
 
-        <com.android.systemui.recent.RecentsVerticalScrollView
-            android:id="@+id/recents_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="0dp"
-            android:divider="@null"
-            android:stackFromBottom="true"
-            android:fadingEdge="vertical"
-            android:scrollbars="none"
-            android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length"
-            android:layout_gravity="bottom|start"
-            android:clipToPadding="false"
-            android:clipChildren="false">
+        <ViewFlipper
+            android:id="@+id/flipper"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent" >
 
-            <LinearLayout android:id="@+id/recents_linear_layout"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:clipToPadding="false"
-                android:clipChildren="false">
-            </LinearLayout>
+                android:layout_height="match_parent" >
 
-        </com.android.systemui.recent.RecentsVerticalScrollView>
+                <com.android.systemui.recent.RecentsVerticalScrollView
+                    android:id="@+id/recents_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="0dp"
+                    android:divider="@null"
+                    android:stackFromBottom="true"
+                    android:fadingEdge="vertical"
+                    android:scrollbars="none"
+                    android:fadingEdgeLength="@dimen/status_bar_recents_scroll_fading_edge_length"
+                    android:layout_gravity="bottom|start"
+                    android:clipToPadding="false"
+                    android:clipChildren="false">
 
-        <FrameLayout
+                    <LinearLayout android:id="@+id/recents_linear_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:clipToPadding="false"
+                        android:clipChildren="false">
+                    </LinearLayout>
+
+                </com.android.systemui.recent.RecentsVerticalScrollView>
+
+                <FrameLayout
+                    android:id="@+id/clear_recents_view_group"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginRight="2dp"
+                    android:layout_gravity="top|right" >
+
+                    <com.android.systemui.recent.CircleMemoryMeter
+                        android:id="@+id/circle_meter"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <ImageView
+                        android:id="@+id/recents_clear"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="10dp"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_notify_clear" />
+
+                </FrameLayout>
+
+                <include layout="@layout/status_bar_no_recent_apps"
+                     android:id="@+id/recents_no_apps"
+                     android:layout_width="match_parent"
+                     android:layout_height="match_parent"
+                     android:visibility="invisible" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/system_info_group"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+                <ScrollView
+                    android:layout_height="match_parent"
+                    android:layout_width="match_parent"
+                    android:layout_marginTop="50dp">
+                    <com.android.systemui.chaos.lab.quickstats.QuickStatsContainerView
+                        android:id="@+id/sys_info_container"
+                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent" />
+                </ScrollView>
+                <TextView
+                    android:layout_height="50dp"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="top|center_horizontal"
+                    android:gravity="center_vertical"
+                    style="@style/TextAppearance.QuickStats.Title"
+                    android:text="@string/quick_stats_header_title" />
+
+            </FrameLayout>
+        </ViewFlipper>
+
+        <ImageView
+            android:id="@+id/system_info_toggle"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginRight="2dp"
-            android:layout_gravity="top|right" >
-
-            <com.android.systemui.recent.CircleMemoryMeter
-                android:id="@+id/circle_meter"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-
-            <ImageView
-                android:id="@+id/recents_clear"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="10dp"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_notify_clear" />
-
-        </FrameLayout>
+            android:padding="10dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_sys_info" />
 
     </FrameLayout>
-
-    <include layout="@layout/status_bar_no_recent_apps"
-        android:id="@+id/recents_no_apps"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible" />
 
 </com.android.systemui.recent.RecentsPanelView>

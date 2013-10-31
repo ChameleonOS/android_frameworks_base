@@ -16,10 +16,14 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.annotation.ChaosLab;
+import android.annotation.ChaosLab.Classification;
+
 import com.android.systemui.R;
 
-class WifiIcons {
-    static final int[][] WIFI_SIGNAL_STRENGTH = {
+public class WifiIcons {
+    @ChaosLab(name="QuickStats", classification=Classification.CHANGE_ACCESS)
+    public static final int[][] WIFI_SIGNAL_STRENGTH = {
             { R.drawable.stat_sys_wifi_signal_0,
               R.drawable.stat_sys_wifi_signal_1,
               R.drawable.stat_sys_wifi_signal_2,
@@ -32,7 +36,8 @@ class WifiIcons {
               R.drawable.stat_sys_wifi_signal_4_fully }
         };
 
-    static final int[][] QS_WIFI_SIGNAL_STRENGTH = {
+    @ChaosLab(name="QuickStats", classification=Classification.CHANGE_ACCESS)
+    public static final int[][] QS_WIFI_SIGNAL_STRENGTH = {
             { R.drawable.ic_qs_wifi_0,
               R.drawable.ic_qs_wifi_1,
               R.drawable.ic_qs_wifi_2,
@@ -45,5 +50,5 @@ class WifiIcons {
               R.drawable.ic_qs_wifi_full_4 }
         };
 
-    static final int WIFI_LEVEL_COUNT = WIFI_SIGNAL_STRENGTH[0].length;
+    public static final int WIFI_LEVEL_COUNT = WIFI_SIGNAL_STRENGTH[0].length;
 }

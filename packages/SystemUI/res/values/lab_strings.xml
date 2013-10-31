@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- QuickStats title -->
+    <string name="quick_stats_header_title">Quick Stats</string>
+
+    <!-- QuickStats: Battery Charging [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_battery_charging_label">Charging\n<xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g> <xliff:g id="type">%s</xliff:g></string>
+    <!-- QuickStats: Battery Charged [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_battery_charged_label">Charged</string>
+    <!-- QuickStats: Battery Charging AC [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_battery_charging_ac">AC</string>
+    <!-- QuickStats: Battery Charging USB [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_battery_charging_usb">USB</string>
+    <!-- QuickStats: Battery Charging Wireless [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_battery_charging_wireless">Wireless</string>
+    <!-- Used to show an amount of time in the form "d days, h hours, m minutes, s seconds" in BatteryTile -->
+    <string name="quick_stats_battery_uptime_days"><xliff:g id="days">%1$d</xliff:g>d <xliff:g id="hours">%2$d</xliff:g>h <xliff:g id="minutes">%3$d</xliff:g>m <xliff:g id="seconds">%4$d</xliff:g>s</string>
+    <!-- Used to show an amount of time in the form "h hours, m minutes, s seconds" in BatteryTile -->
+    <string name="quick_stats_battery_uptime_hours"><xliff:g id="hours">%1$d</xliff:g>h <xliff:g id="minutes">%2$d</xliff:g>m <xliff:g id="seconds">%3$d</xliff:g>s</string>
+    <!-- Used to show an amount of time in the form "m minutes, s seconds" in BatteryTile -->
+    <string name="quick_stats_battery_uptime_minutes"><xliff:g id="minutes">%1$d</xliff:g>m <xliff:g id="seconds">%2$d</xliff:g>s</string>
+    <!-- Used to show an amount of time in the form "s seconds" in BatteryTile -->
+    <string name="quick_stats_battery_uptime_seconds"><xliff:g id="seconds">%1$d</xliff:g>s</string>
+
+
+    <!-- QuickStats: WiFi signal [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_wifi_connected_label"><xliff:g id="ssid">%s</xliff:g>\n<xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
+    <!-- QuickStats: Wifi (Not connected) [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_wifi_not_connected">Not Connected</string>
+    <!-- QuickStats: Wifi (No network) [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_wifi_no_network">No Network</string>
+    <!-- QuickStats: Wifi (Off) [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_wifi_off_label">Off</string>
+
+    <!-- QuickStats: Messaging [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_messaging_label">Sent: <xliff:g id="sent">%d</xliff:g>\nRcvd: <xliff:g id="received">%d</xliff:g></string>
+
+    <!-- QuickStats: Calls [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_calls_label">In:<xliff:g id="incoming">%d</xliff:g> Out:<xliff:g id="outgoing">%d</xliff:g> Miss:<xliff:g id="missed">%d</xliff:g>\nTime:<xliff:g id="duration">%s</xliff:g></string>
+    <!-- Used to show an amount of time in the form "d days, h hours, m minutes, s seconds" in BatteryTile -->
+    <string name="quick_stats_calls_duration_days"><xliff:g id="days">%1$d</xliff:g>d <xliff:g id="hours">%2$d</xliff:g>h <xliff:g id="minutes">%3$d</xliff:g>m <xliff:g id="seconds">%4$d</xliff:g>s</string>
+    <!-- Used to show an amount of time in the form "h hours, m minutes, s seconds" in BatteryTile -->
+    <string name="quick_stats_calls_duration_hours"><xliff:g id="hours">%1$d</xliff:g>h <xliff:g id="minutes">%2$d</xliff:g>m <xliff:g id="seconds">%3$d</xliff:g>s</string>
+    <!-- Used to show an amount of time in the form "m minutes, s seconds" in BatteryTile -->
+    <string name="quick_stats_calls_duration_minutes"><xliff:g id="minutes">%1$d</xliff:g>m <xliff:g id="seconds">%2$d</xliff:g>s</string>
+    <!-- Used to show an amount of time in the form "s seconds" in BatteryTile -->
+    <string name="quick_stats_calls_duration_seconds"><xliff:g id="seconds">%1$d</xliff:g>s</string>
+
+    <!-- QuickStats: Processor Label [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_processor_label"><xliff:g id="speed">%s</xliff:g> MHz\n<xliff:g id="governor">%s</xliff:g></string>
+
+    <!-- QuickStats: Temperature [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_temperature_both_label">Batt: <xliff:g id="battery">%d</xliff:g>\u2103\nCPU: <xliff:g id="cpu">%d</xliff:g>\u2103</string>
+    <!-- QuickStats: Temperature [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_temperature_cpu_label">CPU: <xliff:g id="cpu">%d</xliff:g>\u2103</string>
+    <!-- QuickStats: Temperature [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_temperature_battery_label">Batt: <xliff:g id="battery">%d</xliff:g>\u2103</string>
+
+    <!-- QuickStats: Memory [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_memory_label">Used: <xliff:g id="used">%s</xliff:g>\nFree: <xliff:g id="free">%s</xliff:g></string>
+
+    <!-- QuickStats: Storage [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_storage_both_label">Int: <xliff:g id="internal_used">%s</xliff:g>/<xliff:g id="internal_total">%s</xliff:g>\nExt: <xliff:g id="external_used">%s</xliff:g>/<xliff:g id="external_total">%s</xliff:g></string>
+    <!-- QuickStats: Storage [CHAR LIMIT=NONE] -->
+    <string name="quick_stats_storage_internal_label">Int: <xliff:g id="internal_used">%s</xliff:g>/<xliff:g id="internal_total">%s</xliff:g></string>
+
+</resources>

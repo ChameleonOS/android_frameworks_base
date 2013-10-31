@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TextAppearance" />
+    <style name="TextAppearance.QuickStats" />
+
+    <style name="TextAppearance.QuickStats.TileView">
+        <item name="android:textSize">11dp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/quick_settings_text_color</item>
+        <item name="android:lines">3</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:paddingStart">2dp</item>
+        <item name="android:paddingEnd">2dp</item>
+    </style>
+
+    <style name="TextAppearance.QuickStats.Title">
+        <item name="android:textSize">14dp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/quick_settings_text_color</item>
+    </style>
+
+</resources>

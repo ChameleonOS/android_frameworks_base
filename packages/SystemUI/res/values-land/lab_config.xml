@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- The number of columns in the SystemInfo -->
+    <integer name="quick_stats_num_columns">5</integer>
+
+</resources>
