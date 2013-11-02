@@ -19,8 +19,8 @@ package com.android.systemui.statusbar;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-
 import android.service.notification.StatusBarNotification;
+
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
@@ -56,7 +56,8 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_PRELOAD_RECENT_APPS        = 14 << MSG_SHIFT;
     private static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 15 << MSG_SHIFT;
     private static final int MSG_SET_NAVIGATION_ICON_HINTS  = 16 << MSG_SHIFT;
-    private static final int MSG_OPAQUE_STATUS_BAR          = 17 << MSG_SHIFT;
+    private static final int MSG_SET_WINDOW_STATE           = 17 << MSG_SHIFT;
+    private static final int MSG_OPAQUE_STATUS_BAR          = 18 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -99,6 +100,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void hideSearchPanel();
         public void cancelPreloadRecentApps();
         public void setNavigationIconHints(int hints);
+        public void setWindowState(int window, int state);
         public void opaqueStatusBar(boolean opaque);
     }
 
@@ -234,11 +236,17 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void setWindowState(int window, int state) {
+        synchronized (mList) {
+            // don't coalesce these
+            mHandler.obtainMessage(MSG_SET_WINDOW_STATE, window, state, null).sendToTarget();
+        }
+    }
+
     public void opaqueStatusBar(boolean opaque) {
         synchronized (mList) {
             mHandler.removeMessages(MSG_OPAQUE_STATUS_BAR);
             mHandler.obtainMessage(MSG_OPAQUE_STATUS_BAR, opaque ? 1 : 0, 0, null).sendToTarget();
-        }
     }
 
     private final class H extends Handler {
@@ -321,8 +329,12 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_SET_NAVIGATION_ICON_HINTS:
                     mCallbacks.setNavigationIconHints(msg.arg1);
                     break;
+                case MSG_SET_WINDOW_STATE:
+                    mCallbacks.setWindowState(msg.arg1, msg.arg2);
+                    break;
                 case MSG_OPAQUE_STATUS_BAR:
                     mCallbacks.opaqueStatusBar(msg.arg1 != 0);
+                    break;
             }
         }
     }

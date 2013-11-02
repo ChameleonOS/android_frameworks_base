@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>GamesClient | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -1583,7 +1590,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener)">loadAchievements</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementsLoadedListener.html">OnAchievementsLoadedListener</a> listener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener, boolean)">loadAchievements</a></span>(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementsLoadedListener.html">OnAchievementsLoadedListener</a> listener, boolean forceReload)</nobr>
         
         <div class="jd-descrdiv">Asynchronously load achievement data for the currently signed in player.</div>
   
@@ -1656,9 +1663,9 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, boolean forceReload)</nobr>
         
-        <div class="jd-descrdiv">Asynchronously load a specific leaderboard's metadata for this game.</div>
+        <div class="jd-descrdiv">Asynchronously load the list of leaderboard metadata for this game.</div>
   
   </td></tr>
 
@@ -1674,9 +1681,54 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId)</nobr>
+        
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    This form of the API is deprecated and will be removed in a future release. 
+ Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, String, boolean)</a></code>
+ instead.
+</em></div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener)</nobr>
         
-        <div class="jd-descrdiv">Asynchronously load the list of leaderboard metadata for this game.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    This form of the API is deprecated and will be removed in a future release. 
+ Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, boolean)</a></code> instead.
+</em></div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata</a></span>(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId, boolean forceReload)</nobr>
+        
+        <div class="jd-descrdiv">Asynchronously load a specific leaderboard's metadata for this game.</div>
   
   </td></tr>
 
@@ -4376,7 +4428,8 @@ From interface
  your manifest in order to use this method.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>Account name for the currently selected account.</li></ul>
+      <ul class="nolist"><li>Account name for the currently selected account. May be null if an error occurred
+         while communicating with the games service.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
@@ -4455,7 +4508,8 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/Player.html">Player</a></code> representing the currently signed in player.
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/games/Player.html">Player</a></code> representing the currently signed in player. May be null if an error
+         occurred while communicating with the games service.
 </li></ul>
   </div>
 
@@ -4489,7 +4543,8 @@ From interface
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The player ID for the currently signed in player.
+      <ul class="nolist"><li>The player ID for the currently signed in player. May be null if an error occurred
+         while communicating with the games service.
 </li></ul>
   </div>
 
@@ -5170,7 +5225,10 @@ From interface
       
   <div class="jd-tagdata jd-tagdescr"><p>Leave the specified room. This will disconnect the player from the room, but allow other
  players to continue playing the game. The result is delivered by the callback
- <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html#onLeftRoom(int, java.lang.String)">onLeftRoom(int, String)</a></code> to the given listener on the main thread.</p></div>
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html#onLeftRoom(int, java.lang.String)">onLeftRoom(int, String)</a></code> to the given listener on the main thread.
+ <p>
+ After this method is called, you cannot perform any further actions on the room. You can
+ create or join another room only after <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html#onLeftRoom(int, java.lang.String)">onLeftRoom(int, String)</a></code> is received.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -5191,7 +5249,7 @@ From interface
 </div>
 
 
-<A NAME="loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener)"></A>
+<A NAME="loadAchievements(com.google.android.gms.games.achievement.OnAchievementsLoadedListener, boolean)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
@@ -5204,7 +5262,7 @@ From interface
         void
       </span>
       <span class="sympad">loadAchievements</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementsLoadedListener.html">OnAchievementsLoadedListener</a> listener)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/achievement/OnAchievementsLoadedListener.html">OnAchievementsLoadedListener</a> listener, boolean forceReload)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -5224,7 +5282,14 @@ From interface
         <tr>
           <th>listener</td>
           <td>The listener that is called when the load is complete. The listener is called
-            on the main thread.
+            on the main thread.</td>
+        </tr>
+        <tr>
+          <th>forceReload</td>
+          <td>If true, this call will clear any locally cached data and attempt to fetch
+            the latest data from the server. This would commonly be used for something like a
+            user-initiated refresh. Normally, this should be set to false to gain advantages
+            of data caching.
 </td>
         </tr>
       </table>
@@ -5375,6 +5440,56 @@ From interface
 </div>
 
 
+<A NAME="loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadLeaderboardMetadata</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, boolean forceReload)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of leaderboard metadata for this game.
+ <p>
+ The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
+ called before the result is ready it will not be delivered.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the load is complete. The listener is called
+            on the main thread.</td>
+        </tr>
+        <tr>
+          <th>forceReload</td>
+          <td>If true, this call will clear any locally cached data and attempt to fetch
+            the latest data from the server. This would commonly be used for something like a
+            user-initiated refresh. Normally, this should be set to false to gain advantages
+            of data caching.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -5397,7 +5512,14 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    This form of the API is deprecated and will be removed in a future release. 
+ Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, String, boolean)</a></code>
+ instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load a specific leaderboard's metadata for this game.
  <p>
  The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
@@ -5412,8 +5534,7 @@ From interface
         </tr>
         <tr>
           <th>leaderboardId</td>
-          <td>ID of the leaderboard to load metadata for.
-</td>
+          <td>ID of the leaderboard to load metadata for.</td>
         </tr>
       </table>
   </div>
@@ -5444,7 +5565,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    This form of the API is deprecated and will be removed in a future release. 
+ Please use <code><a href="/reference/com/google/android/gms/games/GamesClient.html#loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, boolean)">loadLeaderboardMetadata(OnLeaderboardMetadataLoadedListener, boolean)</a></code> instead.
+
+  </p>
   <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load the list of leaderboard metadata for this game.
  <p>
  The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
@@ -5455,7 +5582,60 @@ From interface
         <tr>
           <th>listener</td>
           <td>The listener that is called when the load is complete. The listener is called
-            on the main thread.
+            on the main thread.</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="loadLeaderboardMetadata(com.google.android.gms.games.leaderboard.OnLeaderboardMetadataLoadedListener, java.lang.String, boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">loadLeaderboardMetadata</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/games/leaderboard/OnLeaderboardMetadataLoadedListener.html">OnLeaderboardMetadataLoadedListener</a> listener, String leaderboardId, boolean forceReload)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Asynchronously load a specific leaderboard's metadata for this game.
+ <p>
+ The result is delivered to the given listener on the main thread. If <code><a href="/reference/com/google/android/gms/games/GamesClient.html#disconnect()">disconnect()</a></code> is
+ called before the result is ready it will not be delivered.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The listener that is called when the load is complete. The listener is called
+            on the main thread.</td>
+        </tr>
+        <tr>
+          <th>leaderboardId</td>
+          <td>ID of the leaderboard to load metadata for.</td>
+        </tr>
+        <tr>
+          <th>forceReload</td>
+          <td>If true, this call will clear any locally cached data and attempt to fetch
+            the latest data from the server. This would commonly be used for something like a
+            user-initiated refresh. Normally, this should be set to false to gain advantages
+            of data caching.
 </td>
         </tr>
       </table>

@@ -34,11 +34,12 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.harmony.xnet.provider.jsse.OpenSSLEngine;
-import org.apache.harmony.xnet.provider.jsse.TrustedCertificateStore;
+import com.android.org.conscrypt.OpenSSLEngine;
+import com.android.org.conscrypt.TrustedCertificateStore;
 
 /**
  * The {@code KeyChain} class provides access to private keys and
@@ -346,6 +347,8 @@ public final class KeyChain {
             List<X509Certificate> chain = store
                     .getCertificateChain(toCertificate(certificateBytes));
             return chain.toArray(new X509Certificate[chain.size()]);
+        } catch (CertificateException e) {
+            throw new KeyChainException(e);
         } catch (RemoteException e) {
             throw new KeyChainException(e);
         } catch (RuntimeException e) {
@@ -362,7 +365,8 @@ public final class KeyChain {
      * "RSA").
      */
     public static boolean isKeyAlgorithmSupported(String algorithm) {
-        return "RSA".equals(algorithm);
+        final String algUpper = algorithm.toUpperCase(Locale.US);
+        return "DSA".equals(algUpper) || "EC".equals(algUpper) || "RSA".equals(algUpper);
     }
 
     /**
@@ -377,7 +381,7 @@ public final class KeyChain {
             return false;
         }
 
-        return KeyStore.getInstance().isHardwareBacked();
+        return KeyStore.getInstance().isHardwareBacked(algorithm);
     }
 
     private static X509Certificate toCertificate(byte[] bytes) {
@@ -441,7 +445,10 @@ public final class KeyChain {
             }
             @Override public void onServiceDisconnected(ComponentName name) {}
         };
-        boolean isBound = context.bindService(new Intent(IKeyChainService.class.getName()),
+        Intent intent = new Intent(IKeyChainService.class.getName());
+        ComponentName comp = intent.resolveSystemService(context.getPackageManager(), 0);
+        intent.setComponent(comp);
+        boolean isBound = context.bindService(intent,
                                               keyChainServiceConnection,
                                               Context.BIND_AUTO_CREATE);
         if (!isBound) {

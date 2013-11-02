@@ -23,10 +23,8 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.util.EventLog;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.EventLogTags;
@@ -36,6 +34,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
+import com.android.systemui.statusbar.policy.RotationLockController;
 
 public class SettingsPanelView extends PanelView {
     public static final boolean DEBUG_GESTURES = true;
@@ -82,6 +81,25 @@ public class SettingsPanelView extends PanelView {
         if (mQS != null) {
             mQS.setImeWindowStatus(visible);
         }
+    }
+
+    public void setup(NetworkController networkController, BluetoothController bluetoothController,
+            BatteryController batteryController, LocationController locationController,
+            RotationLockController rotationLockController) {
+        if (mQS != null) {
+            mQS.setup(networkController, bluetoothController, batteryController,
+                    locationController, rotationLockController);
+        }
+    }
+
+    void updateResources() {
+        if (mQS != null) {
+            mQS.updateResources();
+        }
+        if (mQSContainer != null) {
+            mQSContainer.updateResources();
+        }
+        requestLayout();
     }
 
     @Override

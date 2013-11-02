@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.Manifest;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
@@ -25,6 +26,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.media.RemoteController.OnClientUpdateListener;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -326,6 +328,12 @@ public class AudioManager {
     public static final int FLAG_FIXED_VOLUME = 1 << 5;
 
     /**
+     * Indicates the volume set/adjust call is for Bluetooth absolute volume
+     * @hide
+     */
+    public static final int FLAG_BLUETOOTH_ABS_VOLUME = 1 << 6;
+
+    /**
      * Ringer mode that will be silent and will not vibrate. (This overrides the
      * vibrate setting.)
      *
@@ -438,6 +446,38 @@ public class AudioManager {
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
         sService = IAudioService.Stub.asInterface(b);
         return sService;
+    }
+
+    /**
+     * Sends a simulated key event for a media button.
+     * To simulate a key press, you must first send a KeyEvent built with a
+     * {@link KeyEvent#ACTION_DOWN} action, then another event with the {@link KeyEvent#ACTION_UP}
+     * action.
+     * <p>The key event will be sent to the current media key event consumer which registered with
+     * {@link AudioManager#registerMediaButtonEventReceiver(PendingIntent)}.
+     * @param keyEvent a {@link KeyEvent} instance whose key code is one of
+     *     {@link KeyEvent#KEYCODE_MUTE},
+     *     {@link KeyEvent#KEYCODE_HEADSETHOOK},
+     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY},
+     *     {@link KeyEvent#KEYCODE_MEDIA_PAUSE},
+     *     {@link KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE},
+     *     {@link KeyEvent#KEYCODE_MEDIA_STOP},
+     *     {@link KeyEvent#KEYCODE_MEDIA_NEXT},
+     *     {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS},
+     *     {@link KeyEvent#KEYCODE_MEDIA_REWIND},
+     *     {@link KeyEvent#KEYCODE_MEDIA_RECORD},
+     *     {@link KeyEvent#KEYCODE_MEDIA_FAST_FORWARD},
+     *     {@link KeyEvent#KEYCODE_MEDIA_CLOSE},
+     *     {@link KeyEvent#KEYCODE_MEDIA_EJECT},
+     *     or {@link KeyEvent#KEYCODE_MEDIA_AUDIO_TRACK}.
+     */
+    public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
+        IAudioService service = getService();
+        try {
+            service.dispatchMediaKeyEvent(keyEvent);
+        } catch (RemoteException e) {
+            Log.e(TAG, "dispatchMediaKeyEvent threw exception ", e);
+        }
     }
 
     /**
@@ -555,9 +595,10 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             if (mUseMasterVolume) {
-                service.adjustMasterVolume(direction, flags);
+                service.adjustMasterVolume(direction, flags, mContext.getOpPackageName());
             } else {
-                service.adjustStreamVolume(streamType, direction, flags);
+                service.adjustStreamVolume(streamType, direction, flags,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustStreamVolume", e);
@@ -585,9 +626,9 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             if (mUseMasterVolume) {
-                service.adjustMasterVolume(direction, flags);
+                service.adjustMasterVolume(direction, flags, mContext.getOpPackageName());
             } else {
-                service.adjustVolume(direction, flags);
+                service.adjustVolume(direction, flags, mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustVolume", e);
@@ -615,9 +656,10 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             if (mUseMasterVolume) {
-                service.adjustMasterVolume(direction, flags);
+                service.adjustMasterVolume(direction, flags, mContext.getOpPackageName());
             } else {
-                service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags);
+                service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags,
+                        mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustSuggestedStreamVolume", e);
@@ -636,7 +678,7 @@ public class AudioManager {
     public void adjustMasterVolume(int steps, int flags) {
         IAudioService service = getService();
         try {
-            service.adjustMasterVolume(steps, flags);
+            service.adjustMasterVolume(steps, flags, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustMasterVolume", e);
         }
@@ -788,9 +830,9 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             if (mUseMasterVolume) {
-                service.setMasterVolume(index, flags);
+                service.setMasterVolume(index, flags, mContext.getOpPackageName());
             } else {
-                service.setStreamVolume(streamType, index, flags);
+                service.setStreamVolume(streamType, index, flags, mContext.getOpPackageName());
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setStreamVolume", e);
@@ -847,16 +889,16 @@ public class AudioManager {
      * Sets the volume index for master volume.
      *
      * @param index The volume index to set. See
-     *            {@link #getMasterMaxVolume(int)} for the largest valid value.
+     *            {@link #getMasterMaxVolume()} for the largest valid value.
      * @param flags One or more flags.
-     * @see #getMasterMaxVolume(int)
-     * @see #getMasterVolume(int)
+     * @see #getMasterMaxVolume()
+     * @see #getMasterVolume()
      * @hide
      */
     public void setMasterVolume(int index, int flags) {
         IAudioService service = getService();
         try {
-            service.setMasterVolume(index, flags);
+            service.setMasterVolume(index, flags, mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in setMasterVolume", e);
         }
@@ -1338,19 +1380,6 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * Signals whether remote submix audio rerouting is enabled.
-     */
-    public void setRemoteSubmixOn(boolean on, int address) {
-        IAudioService service = getService();
-        try {
-            service.setRemoteSubmixOn(on, address);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setRemoteSubmixOn", e);
-        }
-    }
-
-    /**
      * Sets audio routing to the wired headset on or off.
      *
      * @param on set <var>true</var> to route audio to/from wired
@@ -1567,12 +1596,36 @@ public class AudioManager {
 
     /**
      * @hide
-     * Checks whether speech recognition is active
-     * @return true if a recording with source {@link MediaRecorder.AudioSource#VOICE_RECOGNITION}
-     *    is underway.
+     * Checks whether any local or remote media playback is active.
+     * Local playback refers to playback for instance on the device's speakers or wired headphones.
+     * Remote playback refers to playback for instance on a wireless display mirroring the
+     *    devices's, or on a device using a Cast-like protocol.
+     * @return true if media playback, from which the device is aware, is active.
      */
-    public boolean isSpeechRecognitionActive() {
-        return AudioSystem.isSourceActive(MediaRecorder.AudioSource.VOICE_RECOGNITION);
+    public boolean isLocalOrRemoteMusicActive() {
+        IAudioService service = getService();
+        try {
+            return service.isLocalOrRemoteMusicActive();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isLocalOrRemoteMusicActive()", e);
+            return false;
+        }
+    }
+
+    /**
+     * @hide
+     * Checks whether the current audio focus is exclusive.
+     * @return true if the top of the audio focus stack requested focus
+     *     with {@link #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE}
+     */
+    public boolean isAudioFocusExclusive() {
+        IAudioService service = getService();
+        try {
+            return service.getCurrentAudioFocus() == AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isAudioFocusExclusive()", e);
+            return false;
+        }
     }
 
     /**
@@ -1587,7 +1640,8 @@ public class AudioManager {
         }
         IAudioService service = getService();
         try {
-            service.adjustLocalOrRemoteStreamVolume(streamType, direction);
+            service.adjustLocalOrRemoteStreamVolume(streamType, direction,
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in adjustLocalOrRemoteStreamVolume", e);
         }
@@ -1606,7 +1660,7 @@ public class AudioManager {
      */
     /**
      * @hide
-     * @deprecated Use {@link #setPrameters(String)} instead
+     * @deprecated Use {@link #setParameters(String)} instead
      */
     @Deprecated public void setParameter(String key, String value) {
         setParameters(key+"="+value);
@@ -1680,10 +1734,16 @@ public class AudioManager {
      * @see #playSoundEffect(int)
      */
     public static final int FX_KEYPRESS_RETURN = 8;
+
+    /**
+     * Invalid keypress sound
+     * @see #playSoundEffect(int)
+     */
+    public static final int FX_KEYPRESS_INVALID = 9;
     /**
      * @hide Number of sound effects
      */
-    public static final int NUM_SOUND_EFFECTS = 9;
+    public static final int NUM_SOUND_EFFECTS = 10;
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
@@ -1697,6 +1757,7 @@ public class AudioManager {
      *            {@link #FX_KEYPRESS_SPACEBAR},
      *            {@link #FX_KEYPRESS_DELETE},
      *            {@link #FX_KEYPRESS_RETURN},
+     *            {@link #FX_KEYPRESS_INVALID},
      * NOTE: This version uses the UI settings to determine
      * whether sounds are heard or not.
      */
@@ -1729,6 +1790,7 @@ public class AudioManager {
      *            {@link #FX_KEYPRESS_SPACEBAR},
      *            {@link #FX_KEYPRESS_DELETE},
      *            {@link #FX_KEYPRESS_RETURN},
+     *            {@link #FX_KEYPRESS_INVALID},
      * @param volume Sound effect volume.
      * The volume value is a raw scalar so UI controls should be scaled logarithmically.
      * If a volume of -1 is specified, the AudioManager.STREAM_MUSIC stream volume minus 3dB will be used.
@@ -1784,6 +1846,12 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Used to indicate no audio focus has been gained or lost.
+     */
+    public static final int AUDIOFOCUS_NONE = 0;
+
+    /**
      * Used to indicate a gain of audio focus, or a request of audio focus, of unknown duration.
      * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
      * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
@@ -1807,6 +1875,15 @@ public class AudioManager {
      * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
      */
     public static final int AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK = 3;
+    /**
+     * Used to indicate a temporary request of audio focus, anticipated to last a short
+     * amount of time, during which no other applications, or system components, should play
+     * anything. Examples of exclusive and transient audio focus requests are voice
+     * memo recording and speech recognition, during which the system shouldn't play any
+     * notifications, and media playback should have paused.
+     * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
+     */
+    public static final int AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE = 4;
     /**
      * Used to indicate a loss of audio focus of unknown duration.
      * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
@@ -1971,14 +2048,17 @@ public class AudioManager {
      *      for the playback of driving directions, or notifications sounds.
      *      Use {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} to indicate also that it's ok for
      *      the previous focus owner to keep playing if it ducks its audio output.
+     *      Alternatively use {@link #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE} for a temporary request
+     *      that benefits from the system not playing disruptive sounds like notifications, for
+     *      usecases such as voice memo recording, or speech recognition.
      *      Use {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
      *      as the playback of a song or a video.
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}
      */
     public int requestAudioFocus(OnAudioFocusChangeListener l, int streamType, int durationHint) {
         int status = AUDIOFOCUS_REQUEST_FAILED;
-        if ((durationHint < AUDIOFOCUS_GAIN) || (durationHint > AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK))
-        {
+        if ((durationHint < AUDIOFOCUS_GAIN) ||
+                (durationHint > AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)) {
             Log.e(TAG, "Invalid duration hint, audio focus request denied");
             return status;
         }
@@ -1988,7 +2068,7 @@ public class AudioManager {
         try {
             status = service.requestAudioFocus(streamType, durationHint, mICallBack,
                     mAudioFocusDispatcher, getIdForAudioFocusListener(l),
-                    mContext.getPackageName() /* package name */);
+                    mContext.getOpPackageName() /* package name */);
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call requestAudioFocus() on AudioService due to "+e);
         }
@@ -2009,8 +2089,8 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             service.requestAudioFocus(streamType, durationHint, mICallBack, null,
-                    AudioService.IN_VOICE_COMM_FOCUS_ID,
-                    "system" /* dump-friendly package name */);
+                    MediaFocusControl.IN_VOICE_COMM_FOCUS_ID,
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService due to "+e);
         }
@@ -2025,7 +2105,7 @@ public class AudioManager {
     public void abandonAudioFocusForCall() {
         IAudioService service = getService();
         try {
-            service.abandonAudioFocus(null, AudioService.IN_VOICE_COMM_FOCUS_ID);
+            service.abandonAudioFocus(null, MediaFocusControl.IN_VOICE_COMM_FOCUS_ID);
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call abandonAudioFocusForCall() on AudioService due to "+e);
         }
@@ -2230,6 +2310,55 @@ public class AudioManager {
     }
 
     /**
+     * Registers a {@link RemoteController} instance for it to receive media metadata updates
+     * and playback state information from applications using {@link RemoteControlClient}, and
+     * control their playback.
+     * <p>Registration requires the {@link OnClientUpdateListener} listener to be one of the
+     * enabled notification listeners (see
+     * {@link android.service.notification.NotificationListenerService}).
+     * @param rctlr the object to register.
+     * @return true if the {@link RemoteController} was successfully registered, false if an
+     *     error occurred, due to an internal system error, or insufficient permissions.
+     */
+    public boolean registerRemoteController(RemoteController rctlr) {
+        if (rctlr == null) {
+            return false;
+        }
+        IAudioService service = getService();
+        final RemoteController.OnClientUpdateListener l = rctlr.getUpdateListener();
+        final ComponentName listenerComponent = new ComponentName(mContext, l.getClass());
+        try {
+            int[] artworkDimensions = rctlr.getArtworkSize();
+            boolean reg = service.registerRemoteController(rctlr.getRcDisplay(),
+                    artworkDimensions[0]/*w*/, artworkDimensions[1]/*h*/,
+                    listenerComponent);
+            rctlr.setIsRegistered(reg);
+            return reg;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in registerRemoteController " + e);
+            return false;
+        }
+    }
+
+    /**
+     * Unregisters a {@link RemoteController}, causing it to no longer receive media metadata and
+     * playback state information, and no longer be capable of controlling playback.
+     * @param rctlr the object to unregister.
+     */
+    public void unregisterRemoteController(RemoteController rctlr) {
+        if (rctlr == null) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            service.unregisterRemoteControlDisplay(rctlr.getRcDisplay());
+            rctlr.setIsRegistered(false);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in unregisterRemoteControlDisplay " + e);
+        }
+    }
+
+    /**
      * @hide
      * Registers a remote control display that will be sent information by remote control clients.
      * Use this method if your IRemoteControlDisplay is not going to display artwork, otherwise
@@ -2237,6 +2366,7 @@ public class AudioManager {
      * artwork size directly, or
      * {@link #remoteControlDisplayUsesBitmapSize(IRemoteControlDisplay, int, int)} later if artwork
      * is not yet needed.
+     * <p>Registration requires the {@link Manifest.permission#MEDIA_CONTENT_CONTROL} permission.
      * @param rcd the IRemoteControlDisplay
      */
     public void registerRemoteControlDisplay(IRemoteControlDisplay rcd) {
@@ -2247,6 +2377,7 @@ public class AudioManager {
     /**
      * @hide
      * Registers a remote control display that will be sent information by remote control clients.
+     * <p>Registration requires the {@link Manifest.permission#MEDIA_CONTENT_CONTROL} permission.
      * @param rcd
      * @param w the maximum width of the expected bitmap. Negative values indicate it is
      *   useless to send artwork.
@@ -2259,8 +2390,6 @@ public class AudioManager {
         }
         IAudioService service = getService();
         try {
-            // passing a negative value for art work width and height as they are unknown at
-            // this stage
             service.registerRemoteControlDisplay(rcd, w, h);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerRemoteControlDisplay " + e);
@@ -2352,6 +2481,26 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Notify the user of a RemoteControlClient that it should update its metadata with the
+     * new value for the given key.
+     * @param generationId the RemoteControlClient generation counter for which this request is
+     *         issued. Requests for an older generation than current one will be ignored.
+     * @param key the metadata key for which a new value exists
+     * @param value the new metadata value
+     */
+    public void updateRemoteControlClientMetadata(int generationId, int key,
+            Rating value) {
+        IAudioService service = getService();
+        try {
+            service.updateRemoteControlClientMetadata(generationId, key, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in updateRemoteControlClientMetadata("+ generationId + ", "
+                    + key +", " + value + ")", e);
+        }
+    }
+
+    /**
      *  @hide
      *  Reload audio settings. This method is called by Settings backup
      *  agent when audio settings are restored and causes the AudioService
@@ -2363,6 +2512,21 @@ public class AudioManager {
             service.reloadAudioSettings();
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in reloadAudioSettings"+e);
+        }
+    }
+
+    /**
+     * @hide
+     * Notifies AudioService that it is connected to an A2DP device that supports absolute volume,
+     * so that AudioService can send volume change events to the A2DP device, rather than handling
+     * them.
+     */
+    public void avrcpSupportsAbsoluteVolume(String address, boolean support) {
+        IAudioService service = getService();
+        try {
+            service.avrcpSupportsAbsoluteVolume(address, support);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in avrcpSupportsAbsoluteVolume", e);
         }
     }
 

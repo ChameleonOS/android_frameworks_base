@@ -20,6 +20,7 @@ import android.R;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.UndoManager;
 import android.content.res.ColorStateList;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
@@ -291,6 +292,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private boolean mPreDrawRegistered;
 
+    // A flag to prevent repeated movements from escaping the enclosing text view. The idea here is
+    // that if a user is holding down a movement key to traverse text, we shouldn't also traverse
+    // the view hierarchy. On the other hand, if the user is using the movement key to traverse views
+    // (i.e. the first movement was to traverse out of this view, or this view was traversed into by
+    // the user holding the movement key down) then we shouldn't prevent the focus from changing.
+    private boolean mPreventDefaultMovement;
+
     private TextUtils.TruncateAt mEllipsize;
 
     static class Drawables {
@@ -351,9 +359,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             mDrawableRight = mDrawableStart;
                             mDrawableSizeRight = mDrawableSizeStart;
                             mDrawableHeightRight = mDrawableHeightStart;
-                        }
 
-                        if (mOverride) {
                             mDrawableLeft = mDrawableEnd;
                             mDrawableSizeLeft = mDrawableSizeEnd;
                             mDrawableHeightLeft = mDrawableHeightEnd;
@@ -366,9 +372,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             mDrawableLeft = mDrawableStart;
                             mDrawableSizeLeft = mDrawableSizeStart;
                             mDrawableHeightLeft = mDrawableHeightStart;
-                        }
 
-                        if (mOverride) {
                             mDrawableRight = mDrawableEnd;
                             mDrawableSizeRight = mDrawableSizeEnd;
                             mDrawableHeightRight = mDrawableHeightEnd;
@@ -547,7 +551,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private InputFilter[] mFilters = NO_FILTERS;
 
     private volatile Locale mCurrentSpellCheckerLocaleCache;
-    private final ReentrantLock mCurrentTextServicesLocaleLock = new ReentrantLock();
 
     // It is possible to have a selection even when mEditor is null (programmatically set, like when
     // a link is pressed). These highlight-related fields do not go in mEditor.
@@ -1376,6 +1379,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 dr.mDrawableSizeEnd = dr.mDrawableHeightEnd = 0;
             }
+            resetResolvedDrawables();
+            resolveDrawables();
         }
     }
 
@@ -1512,6 +1517,51 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     final Layout getHintLayout() {
         return mHintLayout;
+    }
+
+    /**
+     * Retrieve the {@link android.content.UndoManager} that is currently associated
+     * with this TextView.  By default there is no associated UndoManager, so null
+     * is returned.  One can be associated with the TextView through
+     * {@link #setUndoManager(android.content.UndoManager, String)}
+     *
+     * @hide
+     */
+    public final UndoManager getUndoManager() {
+        return mEditor == null ? null : mEditor.mUndoManager;
+    }
+
+    /**
+     * Associate an {@link android.content.UndoManager} with this TextView.  Once
+     * done, all edit operations on the TextView will result in appropriate
+     * {@link android.content.UndoOperation} objects pushed on the given UndoManager's
+     * stack.
+     *
+     * @param undoManager The {@link android.content.UndoManager} to associate with
+     * this TextView, or null to clear any existing association.
+     * @param tag String tag identifying this particular TextView owner in the
+     * UndoManager.  This is used to keep the correct association with the
+     * {@link android.content.UndoOwner} of any operations inside of the UndoManager.
+     *
+     * @hide
+     */
+    public final void setUndoManager(UndoManager undoManager, String tag) {
+        if (undoManager != null) {
+            createEditorIfNeeded();
+            mEditor.mUndoManager = undoManager;
+            mEditor.mUndoOwner = undoManager.getOwner(tag, this);
+            mEditor.mUndoInputFilter = new Editor.UndoInputFilter(mEditor);
+            if (!(mText instanceof Editable)) {
+                setText(mText, BufferType.EDITABLE);
+            }
+
+            setFilters((Editable) mText, mFilters);
+        } else if (mEditor != null) {
+            // XXX need to destroy all associated state.
+            mEditor.mUndoManager = null;
+            mEditor.mUndoOwner = null;
+            mEditor.mUndoInputFilter = null;
+        }
     }
 
     /**
@@ -1678,7 +1728,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setText(mText);
 
         if (hasPasswordTransformationMethod()) {
-            notifyAccessibilityStateChanged();
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -1999,6 +2050,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             dr.mDrawableRightInitial = right;
         }
 
+        resetResolvedDrawables();
+        resolveDrawables();
         invalidate();
         requestLayout();
     }
@@ -3779,6 +3832,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
 
+        notifyViewAccessibilityStateChangedIfNeeded(AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
+
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
         }
@@ -4363,6 +4418,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setError(CharSequence error, Drawable icon) {
         createEditorIfNeeded();
         mEditor.setError(error, icon);
+        notifyViewAccessibilityStateChangedIfNeeded(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     @Override
@@ -4406,16 +4463,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * and includes mInput in the list if it is an InputFilter.
      */
     private void setFilters(Editable e, InputFilter[] filters) {
-        if (mEditor != null && mEditor.mKeyListener instanceof InputFilter) {
-            InputFilter[] nf = new InputFilter[filters.length + 1];
+        if (mEditor != null) {
+            final boolean undoFilter = mEditor.mUndoInputFilter != null;
+            final boolean keyFilter = mEditor.mKeyListener instanceof InputFilter;
+            int num = 0;
+            if (undoFilter) num++;
+            if (keyFilter) num++;
+            if (num > 0) {
+                InputFilter[] nf = new InputFilter[filters.length + num];
 
-            System.arraycopy(filters, 0, nf, 0, filters.length);
-            nf[filters.length] = (InputFilter) mEditor.mKeyListener;
+                System.arraycopy(filters, 0, nf, 0, filters.length);
+                num = 0;
+                if (undoFilter) {
+                    nf[filters.length] = mEditor.mUndoInputFilter;
+                    num++;
+                }
+                if (keyFilter) {
+                    nf[filters.length + num] = (InputFilter) mEditor.mKeyListener;
+                }
 
-            e.setFilters(nf);
-        } else {
-            e.setFilters(filters);
+                e.setFilters(nf);
+                return;
+            }
         }
+        e.setFilters(filters);
     }
 
     /**
@@ -4613,8 +4684,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             assumeLayout();
         }
 
-        boolean changed = false;
-
         if (mMovement != null) {
             /* This code also provides auto-scrolling when a cursor is moved using a
              * CursorController (insertion point or selection limits).
@@ -4637,10 +4706,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (curs >= 0) {
-                changed = bringPointIntoView(curs);
+                bringPointIntoView(curs);
             }
         } else {
-            changed = bringTextIntoView();
+            bringTextIntoView();
         }
 
         // This has to be checked here since:
@@ -4661,7 +4730,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         getViewTreeObserver().removeOnPreDrawListener(this);
         mPreDrawRegistered = false;
 
-        return !changed;
+        return true;
     }
 
     @Override
@@ -4806,8 +4875,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     @Override
     public boolean hasOverlappingRendering() {
+        // horizontal fading edge causes SaveLayerAlpha, which doesn't support alpha modulation
         return ((getBackground() != null && getBackground().getCurrent() != null)
-                || mText instanceof Spannable || hasSelection());
+                || mText instanceof Spannable || hasSelection()
+                || isHorizontalFadingEdgeEnabled());
     }
 
     /**
@@ -5287,7 +5358,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         int which = doKeyDown(keyCode, event, null);
         if (which == 0) {
-            // Go through default dispatching.
             return super.onKeyDown(keyCode, event);
         }
 
@@ -5383,6 +5453,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int doKeyDown(int keyCode, KeyEvent event, KeyEvent otherEvent) {
         if (!isEnabled()) {
             return 0;
+        }
+
+        // If this is the initial keydown, we don't want to prevent a movement away from this view.
+        // While this shouldn't be necessary because any time we're preventing default movement we
+        // should be restricting the focus to remain within this view, thus we'll also receive
+        // the key up event, occasionally key up events will get dropped and we don't want to
+        // prevent the user from traversing out of this on the next key down.
+        if (event.getRepeatCount() == 0 && !KeyEvent.isModifierKey(keyCode)) {
+            mPreventDefaultMovement = false;
         }
 
         switch (keyCode) {
@@ -5493,12 +5572,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
             if (doDown) {
-                if (mMovement.onKeyDown(this, (Spannable)mText, keyCode, event))
+                if (mMovement.onKeyDown(this, (Spannable)mText, keyCode, event)) {
+                    if (event.getRepeatCount() == 0 && !KeyEvent.isModifierKey(keyCode)) {
+                        mPreventDefaultMovement = true;
+                    }
                     return 2;
+                }
             }
         }
 
-        return 0;
+        return mPreventDefaultMovement && !KeyEvent.isModifierKey(keyCode) ? -1 : 0;
     }
 
     /**
@@ -5529,6 +5612,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (!isEnabled()) {
             return super.onKeyUp(keyCode, event);
+        }
+
+        if (!KeyEvent.isModifierKey(keyCode)) {
+            mPreventDefaultMovement = false;
         }
 
         switch (keyCode) {
@@ -7245,7 +7332,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
         sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
-        notifyAccessibilityStateChanged();
     }
 
     /**
@@ -7290,24 +7376,39 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // The spans that are inside or intersect the modified region no longer make sense
-        removeIntersectingSpans(start, start + before, SpellCheckSpan.class);
-        removeIntersectingSpans(start, start + before, SuggestionSpan.class);
+        removeIntersectingNonAdjacentSpans(start, start + before, SpellCheckSpan.class);
+        removeIntersectingNonAdjacentSpans(start, start + before, SuggestionSpan.class);
     }
 
     // Removes all spans that are inside or actually overlap the start..end range
-    private <T> void removeIntersectingSpans(int start, int end, Class<T> type) {
+    private <T> void removeIntersectingNonAdjacentSpans(int start, int end, Class<T> type) {
         if (!(mText instanceof Editable)) return;
         Editable text = (Editable) mText;
 
         T[] spans = text.getSpans(start, end, type);
         final int length = spans.length;
         for (int i = 0; i < length; i++) {
-            final int s = text.getSpanStart(spans[i]);
-            final int e = text.getSpanEnd(spans[i]);
-            // Spans that are adjacent to the edited region will be handled in
-            // updateSpellCheckSpans. Result depends on what will be added (space or text)
-            if (e == start || s == end) break;
+            final int spanStart = text.getSpanStart(spans[i]);
+            final int spanEnd = text.getSpanEnd(spans[i]);
+            if (spanEnd == start || spanStart == end) break;
             text.removeSpan(spans[i]);
+        }
+    }
+
+    void removeAdjacentSuggestionSpans(final int pos) {
+        if (!(mText instanceof Editable)) return;
+        final Editable text = (Editable) mText;
+
+        final SuggestionSpan[] spans = text.getSpans(pos, pos, SuggestionSpan.class);
+        final int length = spans.length;
+        for (int i = 0; i < length; i++) {
+            final int spanStart = text.getSpanStart(spans[i]);
+            final int spanEnd = text.getSpanEnd(spans[i]);
+            if (spanEnd == pos || spanStart == pos) {
+                if (SpellChecker.haveWordBoundariesChanged(text, pos, pos, spanStart, spanEnd)) {
+                    text.removeSpan(spans[i]);
+                }
+            }
         }
     }
 
@@ -7742,7 +7843,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 getCompoundPaddingLeft() - getCompoundPaddingRight() -
                                 mLayout.getLineLeft(0)) / getHorizontalFadingEdgeLength();
                     case Gravity.CENTER_HORIZONTAL:
-                        return 0.0f;
+                    case Gravity.FILL_HORIZONTAL:
+                        final int textDirection = mLayout.getParagraphDirection(0);
+                        if (textDirection == Layout.DIR_LEFT_TO_RIGHT) {
+                            return 0.0f;
+                        } else {
+                            return (mLayout.getLineRight(0) - (mRight - mLeft) -
+                                getCompoundPaddingLeft() - getCompoundPaddingRight() -
+                                mLayout.getLineLeft(0)) / getHorizontalFadingEdgeLength();
+                        }
                 }
             }
         }
@@ -7771,9 +7880,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         return 0.0f;
                     case Gravity.CENTER_HORIZONTAL:
                     case Gravity.FILL_HORIZONTAL:
-                        return (mLayout.getLineWidth(0) - ((mRight - mLeft) -
+                        final int textDirection = mLayout.getParagraphDirection(0);
+                        if (textDirection == Layout.DIR_RIGHT_TO_LEFT) {
+                            return 0.0f;
+                        } else {
+                            return (mLayout.getLineWidth(0) - ((mRight - mLeft) -
                                 getCompoundPaddingLeft() - getCompoundPaddingRight())) /
                                 getHorizontalFadingEdgeLength();
+                        }
                 }
             }
         }
@@ -7963,16 +8077,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void updateTextServicesLocaleAsync() {
+        // AsyncTask.execute() uses a serial executor which means we don't have
+        // to lock around updateTextServicesLocaleLocked() to prevent it from
+        // being executed n times in parallel.
         AsyncTask.execute(new Runnable() {
             @Override
             public void run() {
-                if (mCurrentTextServicesLocaleLock.tryLock()) {
-                    try {
-                        updateTextServicesLocaleLocked();
-                    } finally {
-                        mCurrentTextServicesLocaleLock.unlock();
-                    }
-                }
+                updateTextServicesLocaleLocked();
             }
         });
     }
@@ -8061,6 +8172,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             info.setEditable(true);
         }
 
+        if (mEditor != null) {
+            info.setInputType(mEditor.mInputType);
+
+            if (mEditor.mError != null) {
+                info.setContentInvalid(true);
+            }
+        }
+
         if (!TextUtils.isEmpty(mText)) {
             info.addAction(AccessibilityNodeInfo.ACTION_NEXT_AT_MOVEMENT_GRANULARITY);
             info.addAction(AccessibilityNodeInfo.ACTION_PREVIOUS_AT_MOVEMENT_GRANULARITY);
@@ -8085,6 +8204,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 info.addAction(AccessibilityNodeInfo.ACTION_CUT);
             }
         }
+
+        if (!isSingleLine()) {
+            info.setMultiLine(true);
+        }
     }
 
     @Override
@@ -8093,7 +8216,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case AccessibilityNodeInfo.ACTION_COPY: {
                 if (isFocused() && canCopy()) {
                     if (onTextContextMenuItem(ID_COPY)) {
-                        notifyAccessibilityStateChanged();
                         return true;
                     }
                 }
@@ -8101,7 +8223,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case AccessibilityNodeInfo.ACTION_PASTE: {
                 if (isFocused() && canPaste()) {
                     if (onTextContextMenuItem(ID_PASTE)) {
-                        notifyAccessibilityStateChanged();
                         return true;
                     }
                 }
@@ -8109,7 +8230,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case AccessibilityNodeInfo.ACTION_CUT: {
                 if (isFocused() && canCut()) {
                     if (onTextContextMenuItem(ID_CUT)) {
-                        notifyAccessibilityStateChanged();
                         return true;
                     }
                 }
@@ -8128,7 +8248,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         // No arguments clears the selection.
                         if (start == end && end == -1) {
                             Selection.removeSelection((Spannable) text);
-                            notifyAccessibilityStateChanged();
                             return true;
                         }
                         if (start >= 0 && start <= end && end <= text.length()) {
@@ -8137,7 +8256,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             if (mEditor != null) {
                                 mEditor.startSelectionActionMode();
                             }
-                            notifyAccessibilityStateChanged();
                             return true;
                         }
                     }

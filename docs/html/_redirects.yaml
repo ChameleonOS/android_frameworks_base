@@ -19,7 +19,10 @@ redirects:
   to: /sdk/exploring.html
 
 - from: /sdk/compatibility-library.html
-  to: /tools/extras/support-library.html
+  to: /tools/support-library/index.html
+
+- from: /training/basics/fragments/support-lib.html
+  to: /tools/support-library/setup.html
 
 - from: /sdk/eclipse-adt.html
   to: /tools/sdk/eclipse-adt.html
@@ -298,6 +301,9 @@ redirects:
   # comment: this redirects guide/ and guide/index.html only
 
 # ------------------- TRAINING -------------------
+
+- from: /guide/topics/ui/layout/tabs.html
+  to: /training/implementing-navigation/lateral.html
 
 - from: /training/cloudsync/aesync.html
   to: /google/gcm/index.html

@@ -19,6 +19,7 @@ sdk.platform.apiLevel=18
     <ol>
       <li><a href="#BehaviorsIntents">If your app uses implicit intents...</a></li>
       <li><a href="#BehaviorsAccounts">If your app depends on accounts...</a></li>
+      <li><a href="#BehaviorsVideoView">If your app uses VideoView...</a></li>
     </ol>
   </li>
   <li><a href="#RestrictedProfiles">Restricted Profiles</a>
@@ -36,7 +37,7 @@ sdk.platform.apiLevel=18
   </li>
   <li><a href="#Multimedia">Multimedia</a>
     <ol>
-      <li><a href="#DASH">MPEG DASH support</a></li>
+      <li><a href="#MediaExtractor">MediaExtractor and MediaCodec enhancements</a></li>
       <li><a href="#DRM">Media DRM</a></li>
       <li><a href="#EncodingSurface">Video encoding from a Surface</a></li>
       <li><a href="#MediaMuxing">Media muxing</a></li>
@@ -109,7 +110,7 @@ sdk.platform.apiLevel=18
 <li><a href="{@docRoot}sdk/api_diff/18/changes.html">API
 Differences Report &raquo;</a> </li>
 <li><a
-href="{@docRoot}tools/extras/support-library.html">Support Library</a></li>
+href="{@docRoot}tools/support-library/index.html">Support Library</a></li>
 </ol>
 
 </div>
@@ -150,7 +151,7 @@ href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Di
 Platform Versions</a>.</p>
 
 <p>Various APIs are also available in the Android <a
-href="{@docRoot}tools/extras/support-library.html">Support Library</a> that allow you to implement
+href="{@docRoot}tools/support-library/index.html">Support Library</a> that allow you to implement
 new features on older versions of the platform.</p>
 
 <p>For more information about how API levels work, read <a
@@ -211,6 +212,21 @@ create their own accounts, then you can either disable your app features that re
 or allow restricted profiles to access the accounts created by the primary user. For more
 information, see the section
 below about <a href="#AccountsInProfile">Supporting accounts in a restricted profile</a>.</p>
+
+
+<h3 id="BehaviorsVideoView">If your app uses VideoView...</h3>
+
+<p>Your video might appear smaller on Android 4.3.</p>
+
+<p>On previous versions of Android, the {@link android.widget.VideoView} widget incorrectly
+calculated the {@code "wrap_content"} value for {@link android.R.attr#layout_height} and {@link
+android.R.attr#layout_width} to be the same as {@code "match_parent"}. So while using {@code
+"wrap_content"} for the height or width may have previously provided your desired video layout,
+doing so may result in a much smaller video on Android 4.3 and higher. To fix the issue, replace
+{@code "wrap_content"} with {@code "match_parent"} and verify your video appears as expected on
+Android 4.3 as well as on older versions.</p>
+
+
 
 
 
@@ -439,10 +455,11 @@ android.Manifest.permission#SEND_RESPOND_VIA_MESSAGE} permission.</p>
 
 <h2 id="Multimedia">Multimedia</h2>
 
-<h3 id="DASH">MPEG DASH support</h3>
+<h3 id="MediaExtractor">MediaExtractor and MediaCodec enhancements</h3>
 
-<p>Android now supports Dynamic Adaptive Streaming over HTTP (DASH) in accordance with the
-ISO/IEC 23009-1 standard, using existing APIs in {@link android.media.MediaCodec} and {@link
+<p>Android now makes it easier for you to write your own Dynamic Adaptive
+Streaming over HTTP (DASH) players in accordance with the ISO/IEC 23009-1 standard,
+using existing APIs in {@link android.media.MediaCodec} and {@link
 android.media.MediaExtractor}. The framework underlying these APIs has been updated to support
 parsing of fragmented MP4 files, but your app is still responsible for parsing the MPD metadata
 and passing the individual streams to {@link android.media.MediaExtractor}.</p>
@@ -584,7 +601,13 @@ tag and the {@code android:glEsVersion} attribute. For example:</p>
 &lt;/manifest>
 </pre>
 
-<p>And remember to specify the OpenGL ES context by calling {@link android.opengl.GLSurfaceView#setEGLContextClientVersion setEGLContextClientVersion()}, passing {@code 3} as the version.</p>
+<p>And remember to specify the OpenGL ES context by calling {@link
+android.opengl.GLSurfaceView#setEGLContextClientVersion setEGLContextClientVersion()},
+passing {@code 3} as the version.</p>
+
+<p>For more information about using OpenGL ES, including how to check the device's supported
+OpenGL ES version at runtime, see the <a href="{@docRoot}guide/topics/graphics/opengl.html"
+>OpenGL ES</a> API guide.</p>
 
 
 <h3 id="MipMap">Mipmapping for drawables</h3>
@@ -936,7 +959,7 @@ android.text.TextDirectionHeuristic} constants from {@link android.text.TextDire
 to {@link android.text.BidiFormatter#unicodeWrap(String,TextDirectionHeuristic) unicodeWrap()}.</p>
 
 <p class="note"><strong>Note:</strong> These new APIs are also available for previous versions
-of Android through the Android <a href="{@docRoot}tools/extras/support-library.html">Support
+of Android through the Android <a href="{@docRoot}tools/support-library/index.html">Support
 Library</a>, with the {@link android.support.v4.text.BidiFormatter} class and related APIs.</p>
 
 
@@ -974,7 +997,7 @@ android.view.accessibility.AccessibilityNodeInfo#ACTION_ARGUMENT_EXTEND_SELECTIO
 
 
 <p class="note"><strong>Note:</strong> These new APIs are also available for previous versions
-of Android through the Android <a href="{@docRoot}tools/extras/support-library.html">Support
+of Android through the Android <a href="{@docRoot}tools/support-library/index.html">Support
 Library</a>, with the {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}
 class.</p>
 

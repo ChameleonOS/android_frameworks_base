@@ -34,7 +34,7 @@
         <item name="android:wallpaperIntraOpenExitAnimation">@anim/wallpaper_recents_launch_from_launcher_exit</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.IntruderAlert"
+    <style name="TextAppearance.StatusBar.HeadsUp"
         parent="@*android:style/TextAppearance.StatusBar">
     </style>
 
@@ -122,6 +122,10 @@
         <item name="android:textColor">@color/quick_settings_alarm_text_color</item>
     </style>
 
+    <style name="TextAppearance.QuickSettings.CaCertWarning" parent="@style/TextAppearance.QuickSettings.TileView">
+        <item name="android:textAllCaps">false</item>
+    </style>
+
     <style name="TextAppearance.QuickSettings.TileView.User" parent="@style/TextAppearance.QuickSettings.TileView">
         <item name="android:background">#CC000000</item>
         <item name="android:padding">4dp</item>
@@ -154,9 +158,9 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <style name="Animation.StatusBar.IntruderAlert">
-        <item name="android:windowEnterAnimation">@anim/priority_alert_enter</item>
-        <item name="android:windowExitAnimation">@anim/priority_alert_exit</item>
+    <style name="Animation.StatusBar.HeadsUp">
+        <item name="android:windowEnterAnimation">@anim/heads_up_enter</item>
+        <item name="android:windowExitAnimation">@anim/heads_up_exit</item>
     </style>
 
     <style name="TextAppearance.StatusBar.PhoneTicker"
@@ -165,33 +169,4 @@
         <item name="android:textSize">14dp</item>
     </style>
     
-    <style name="ClingButton">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingTop">10dp</item>
-        <item name="android:paddingBottom">15dp</item>
-        <item name="android:paddingLeft">35dp</item>
-        <item name="android:paddingRight">35dp</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:background">@drawable/cling_button_bg</item>
-    </style>
-    <style name="ClingTitleText">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginBottom">5dp</item>
-        <item name="android:textSize">23sp</item>
-        <item name="android:textColor">#49C0EC</item>
-        <item name="android:shadowColor">#000000</item>
-        <item name="android:shadowDy">2</item>
-        <item name="android:shadowRadius">2.0</item>
-    </style>
-    <style name="ClingText">
-        <item name="android:textSize">15sp</item>
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="android:shadowColor">#000000</item>
-        <item name="android:shadowDy">2</item>
-        <item name="android:shadowRadius">2.0</item>
-        <item name="android:lineSpacingMultiplier">1.1</item>
-    </style>
-
 </resources>

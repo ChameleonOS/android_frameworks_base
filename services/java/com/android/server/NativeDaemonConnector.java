@@ -18,8 +18,8 @@ package com.android.server;
 
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.os.Build;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.LocalLog;
@@ -28,12 +28,12 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.google.android.collect.Lists;
 
-import java.nio.charset.Charsets;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -81,9 +81,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
     @Override
     public void run() {
-        HandlerThread thread = new HandlerThread(TAG + ".CallbackHandler");
-        thread.start();
-        mCallbackHandler = new Handler(thread.getLooper(), this);
+        mCallbackHandler = new Handler(FgThread.get().getLooper(), this);
 
         while (true) {
             try {
@@ -108,13 +106,24 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         return true;
     }
 
+    private LocalSocketAddress determineSocketAddress() {
+        // If we're testing, set up a socket in a namespace that's accessible to test code.
+        // In order to ensure that unprivileged apps aren't able to impersonate native daemons on
+        // production devices, even if said native daemons ill-advisedly pick a socket name that
+        // starts with __test__, only allow this on debug builds.
+        if (mSocket.startsWith("__test__") && Build.IS_DEBUGGABLE) {
+            return new LocalSocketAddress(mSocket);
+        } else {
+            return new LocalSocketAddress(mSocket, LocalSocketAddress.Namespace.RESERVED);
+        }
+    }
+
     private void listenToSocket() throws IOException {
         LocalSocket socket = null;
 
         try {
             socket = new LocalSocket();
-            LocalSocketAddress address = new LocalSocketAddress(mSocket,
-                    LocalSocketAddress.Namespace.RESERVED);
+            LocalSocketAddress address = determineSocketAddress();
 
             socket.connect(address);
 
@@ -142,7 +151,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                 for (int i = 0; i < count; i++) {
                     if (buffer[i] == 0) {
                         final String rawEvent = new String(
-                                buffer, start, i - start, Charsets.UTF_8);
+                                buffer, start, i - start, StandardCharsets.UTF_8);
                         log("RCV <- {" + rawEvent + "}");
 
                         try {
@@ -163,7 +172,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                     }
                 }
                 if (start == 0) {
-                    final String rawEvent = new String(buffer, start, count, Charsets.UTF_8);
+                    final String rawEvent = new String(buffer, start, count, StandardCharsets.UTF_8);
                     log("RCV incomplete <- {" + rawEvent + "}");
                 }
 
@@ -352,7 +361,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                 throw new NativeDaemonConnectorException("missing output stream");
             } else {
                 try {
-                    mOutputStream.write(rawCmd.getBytes(Charsets.UTF_8));
+                    mOutputStream.write(rawCmd.getBytes(StandardCharsets.UTF_8));
                 } catch (IOException e) {
                     throw new NativeDaemonConnectorException("problem sending command", e);
                 }

@@ -33,6 +33,7 @@ import android.media.AudioService;
 import android.media.AudioSystem;
 import android.media.RingtoneManager;
 import android.media.ToneGenerator;
+import android.media.VolumeController;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
@@ -58,7 +59,8 @@ import java.util.HashMap;
  *
  * @hide
  */
-public class VolumePanel extends Handler implements OnSeekBarChangeListener, View.OnClickListener
+public class VolumePanel extends Handler implements OnSeekBarChangeListener, View.OnClickListener,
+        VolumeController
 {
     private static final String TAG = "VolumePanel";
     private static boolean LOGD = false;

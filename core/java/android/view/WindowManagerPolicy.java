@@ -165,9 +165,11 @@ public interface WindowManagerPolicy {
          * This can be used as a hint for scrolling (avoiding resizing)
          * the window to make certain that parts of its content
          * are visible.
+         * @param decorFrame The decor frame specified by policy specific to this window,
+         * to use for proper cropping during animation.
          */
         public void computeFrameLw(Rect parentFrame, Rect displayFrame,
-                Rect overlayFrame, Rect contentFrame, Rect visibleFrame);
+                Rect overlayFrame, Rect contentFrame, Rect visibleFrame, Rect decorFrame);
 
         /**
          * Retrieve the current frame of the window that has been assigned by
@@ -399,18 +401,13 @@ public interface WindowManagerPolicy {
          */
         public FakeWindow addFakeWindow(Looper looper,
                 InputEventReceiver.Factory inputEventReceiverFactory,
-                String name, int windowType, int layoutParamsFlags, boolean canReceiveKeys,
-                boolean hasFocus, boolean touchFullscreen);
+                String name, int windowType, int layoutParamsFlags, int layoutParamsPrivateFlags,
+                boolean canReceiveKeys, boolean hasFocus, boolean touchFullscreen);
 
         /**
          * Returns a code that describes the current state of the lid switch.
          */
         public int getLidState();
-
-        /**
-         * Creates an input channel that will receive all input from the input dispatcher.
-         */
-        public InputChannel monitorInput(String name);
 
         /**
          * Switch the keyboard layout for the given device.
@@ -421,6 +418,26 @@ public interface WindowManagerPolicy {
         public void shutdown(boolean confirm);
         public void rebootSafeMode(boolean confirm);
         public void reboot();
+
+        /**
+         * Return the window manager lock needed to correctly call "Lw" methods.
+         */
+        public Object getWindowManagerLock();
+
+        /** Register a system listener for touch events */
+        void registerPointerEventListener(PointerEventListener listener);
+
+        /** Unregister a system listener for touch events */
+        void unregisterPointerEventListener(PointerEventListener listener);
+    }
+
+    public interface PointerEventListener {
+        /**
+         * 1. onPointerEvent will be called on the service.UiThread.
+         * 2. motionEvent will be recycled after onPointerEvent returns so if it is needed later a
+         * copy() must be made and the copy must be recycled.
+         **/
+        public void onPointerEvent(MotionEvent motionEvent);
     }
 
     /** Window has been added to the screen. */
@@ -462,6 +479,11 @@ public interface WindowManagerPolicy {
      */
     public void init(Context context, IWindowManager windowManager,
             WindowManagerFuncs windowManagerFuncs);
+
+    /**
+     * @return true if com.android.internal.R.bool#config_forceDefaultOrientation is true.
+     */
+    public boolean isDefaultOrientationForced();
 
     /**
      * Called by window manager once it has the initial, default native
@@ -564,12 +586,6 @@ public interface WindowManagerPolicy {
     public int getAboveUniverseLayer();
 
     /**
-     * Return true if the policy desires a full unified system nav bar.  Otherwise,
-     * it is a phone-style status bar with optional nav bar.
-     */
-    public boolean hasSystemNavBar();
-
-    /**
      * Return the display width available after excluding any screen
      * decorations that can never be removed.  That is, system bar or
      * button bar.
@@ -638,7 +654,7 @@ public interface WindowManagerPolicy {
      */
     public View addStartingWindow(IBinder appToken, String packageName,
             int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel,
-            int labelRes, int icon, int windowFlags);
+            int labelRes, int icon, int logo, int windowFlags);
 
     /**
      * Called when the first window of an application has been displayed, while
@@ -802,19 +818,18 @@ public interface WindowManagerPolicy {
                               int displayRotation);
 
     /**
-     * Return the rectangle of the screen currently covered by system decorations.
-     * This will be called immediately after {@link #layoutWindowLw}.  It can
-     * fill in the rectangle to indicate any part of the screen that it knows
-     * for sure is covered by system decor such as the status bar.  The rectangle
-     * is initially set to the actual size of the screen, indicating nothing is
-     * covered.
-     *
-     * @param systemRect The rectangle of the screen that is not covered by
-     * system decoration.
-     * @return Returns the layer above which the system rectangle should
-     * not be applied.
+     * Returns the bottom-most layer of the system decor, above which no policy decor should
+     * be applied.
      */
-    public int getSystemDecorRectLw(Rect systemRect);
+    public int getSystemDecorLayerLw();
+
+    /**
+     * Return the rectangle of the screen that is available for applications to run in.
+     * This will be called immediately after {@link #beginLayoutLw}.
+     *
+     * @param r The rectangle to be filled with the boundaries available to applications.
+     */
+    public void getContentRectLw(Rect r);
 
     /**
      * Called for each window attached to the window manager as layout is
@@ -1160,11 +1175,49 @@ public interface WindowManagerPolicy {
     public void dump(String prefix, PrintWriter writer, String[] args);
 
     /**
-     * Ask keyguard to invoke the assist intent after dismissing keyguard
-     * {@link android.content.Intent#ACTION_ASSIST}
+     * Returns whether a given window type can be magnified.
+     *
+     * @param windowType The window type.
+     * @return True if the window can be magnified.
      */
-    public void showAssistant();
+    public boolean canMagnifyWindow(int windowType);
 
+    /**
+     * Returns whether a given window type is considered a top level one.
+     * A top level window does not have a container, i.e. attached window,
+     * or if it has a container it is laid out as a top-level window, not
+     * as a child of its container.
+     *
+     * @param windowType The window type.
+     * @return True if the window is a top level one.
+     */
+    public boolean isTopLevelWindow(int windowType);
+
+    /**
+     * Sets the current touch exploration state.
+     *
+     * @param enabled Whether touch exploration is enabled.
+     */
+    public void setTouchExplorationEnabled(boolean enabled);
+
+    /**
+     * Determine the animation to run for a transition after display
+     * metrics changed.
+     *
+     * @param anim The exiting animation resource id is stored in anim[0], the
+     * entering animation resource id is stored in anim[1].
+     */
+    public void selectDisplayMetricsUpdateAnimationLw(int anim[]);
+
+    /**
+     * A window animation has been scheduled
+     */
+    public void windowAnimationStarted();
+
+    /**
+     * Animating windows has finished
+     */
+    public void windowAnimationFinished();
     /**
      * Used to force the status bar to be shown when it is hidden by full screen applications.
      */
@@ -1194,42 +1247,4 @@ public interface WindowManagerPolicy {
      * Returns true when the status bar is, or should be, hidden because of a full screen application.
      */
     public boolean shouldHideNavbar();
-
-    /**
-     * Returns whether a given window type can be magnified.
-     *
-     * @param windowType The window type.
-     * @return True if the window can be magnified.
-     */
-    public boolean canMagnifyWindow(int windowType);
-
-    /**
-     * Returns whether a given window type is considered a top level one.
-     * A top level window does not have a container, i.e. attached window,
-     * or if it has a container it is laid out as a top-level window, not
-     * as a child of its container.
-     *
-     * @param windowType The window type.
-     * @return True if the window is a top level one.
-     */
-    public boolean isTopLevelWindow(int windowType);
-
-    /**
-     * Determine the animation to run for a transition after display
-     * metrics changed.
-     *
-     * @param anim The exiting animation resource id is stored in anim[0], the
-     * entering animation resource id is stored in anim[1].
-     */
-    public void selectDisplayMetricsUpdateAnimationLw(int anim[]);
-
-    /**
-     * A window animation has been scheduled
-     */
-    public void windowAnimationStarted();
-
-    /**
-     * Animating windows has finished
-     */
-    public void windowAnimationFinished();
 }

@@ -74,7 +74,7 @@ http://developer.android.com/downloads/design/Android_Design_Fireworks_Stencil_2
 http://developer.android.com/downloads/design/Android_Design_Illustrator_Vectors_20120814.ai
 http://developer.android.com/downloads/design/Android_Design_OmniGraffle_Stencil_20120814.graffle
 http://developer.android.com/downloads/design/Android_Design_Holo_Widgets_20120814.zip
-http://developer.android.com/downloads/design/Android_Design_Icons_20120814.zip
+http://developer.android.com/downloads/design/Android_Design_Icons_20130926.zip
 http://developer.android.com/downloads/design/Roboto_Hinted_20120823.zip
 http://developer.android.com/downloads/design/Roboto_Specimen_Book_20111129.pdf
 http://developer.android.com/downloads/design/Android_Design_Color_Swatches_20120229.zip
@@ -164,7 +164,7 @@ http://developer.android.com/tools/sdk/tools-notes.html
 http://developer.android.com/tools/sdk/eclipse-adt.html
 http://developer.android.com/tools/revisions/platforms.html
 http://developer.android.com/tools/extras/index.html
-http://developer.android.com/tools/extras/support-library.html
+http://developer.android.com/tools/support-library/index.html
 http://developer.android.com/tools/extras/oem-usb.html
 http://developer.android.com/tools/samples/index.html
 http://developer.android.com/tools/adk/index.html
@@ -362,7 +362,6 @@ http://developer.android.com/training/basics/supporting-devices/index.html
 http://developer.android.com/training/basics/supporting-devices/languages.html
 http://developer.android.com/training/basics/supporting-devices/screens.html
 http://developer.android.com/training/basics/supporting-devices/platforms.html
-http://developer.android.com/training/basics/fragments/support-lib.html
 http://developer.android.com/training/basics/fragments/creating.html
 http://developer.android.com/training/basics/fragments/fragment-ui.html
 http://developer.android.com/training/basics/fragments/communicating.html

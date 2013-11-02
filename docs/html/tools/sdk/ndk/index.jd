@@ -1,29 +1,59 @@
 ndk=true
 page.template=sdk
 
+ndk.mac64.legacy_download=android-ndk-r9-darwin-x86_64-legacy-toolchains.tar.bz2
+ndk.mac64.legacy_bytes=271922968
+ndk.mac64.legacy_checksum=251c21defcf90a2f0e8283bab90ed861
+
 ndk.mac64_download=android-ndk-r9-darwin-x86_64.tar.bz2
-ndk.mac64_bytes=726430529
-ndk.mac64_checksum=b975271d8f064611e7e12bf87b736826
+ndk.mac64_bytes=454408117
+ndk.mac64_checksum=ff27c8b9efc8260d9f883dc42d08f651
+
+
+ndk.mac32.legacy_download=android-ndk-r9-darwin-x86-legacy-toolchains.tar.bz2
+ndk.mac32.legacy_bytes=264053696
+ndk.mac32.legacy_checksum=9fd7f76a1f1f59386a34b019dcd20976
 
 ndk.mac32_download=android-ndk-r9-darwin-x86.tar.bz2
-ndk.mac32_bytes=710781553
-ndk.mac32_checksum=6f7c4dd38df9079bb4b13846add5c0da
+ndk.mac32_bytes=446858202
+ndk.mac32_checksum=781da0e6bb5b072512e67b879b56a74c
+
+
+ndk.linux64.legacy_download=android-ndk-r9-linux-x86_64-legacy-toolchains.tar.bz2
+ndk.linux64.legacy_bytes=244427866
+ndk.linux64.legacy_checksum=3976a8237d75526b8a0f275375dd68b5
 
 ndk.linux64_download=android-ndk-r9-linux-x86_64.tar.bz2
-ndk.linux64_bytes=669064468
-ndk.linux64_checksum=3eedc86b20ec09fcd1fd03f4481a706d
+ndk.linux64_bytes=425113267
+ndk.linux64_checksum=0ccfd9960526e61d1527155fa6f84ac0
+
+
+ndk.linux32.legacy_download=android-ndk-r9-linux-x86-legacy-toolchains.tar.bz2
+ndk.linux32.legacy_bytes=241172797
+ndk.linux32.legacy_checksum=957c415de9d7c7ce1c2377ec4d3d60f1
 
 ndk.linux32_download=android-ndk-r9-linux-x86.tar.bz2
-ndk.linux32_bytes=660787157
-ndk.linux32_checksum=999d155ba772c49baacee6d41d664922
+ndk.linux32_bytes=419862465
+ndk.linux32_checksum=beadafdc187461c057d513c40f0ac33b
+
+
+ndk.win64.legacy_download=android-ndk-r9-windows-x86_64-legacy-toolchains.zip
+ndk.win64.legacy_bytes=312340413
+ndk.win64.legacy_checksum=707d1eaa6f5d427ad439c764c8bd68d2
 
 ndk.win64_download=android-ndk-r9-windows-x86_64.zip
-ndk.win64_bytes=826661995
-ndk.win64_checksum=cd56cc1036235f16369f2112fa27be91
+ndk.win64_bytes=514321606
+ndk.win64_checksum=96c725d16ace7fd487bf1bc1427af3a0
+
+
+ndk.win32.legacy_download=android-ndk-r9-windows-x86-legacy-toolchains.zip
+ndk.win32.legacy_bytes=292738221
+ndk.win32.legacy_checksum=ae3756d3773ec068fb653ff6fa411e35
 
 ndk.win32_download=android-ndk-r9-windows-x86.zip
-ndk.win32_bytes=777938252
-ndk.win32_checksum=9c1f66ff963cc61e338964c5f97a4d34
+ndk.win32_bytes=485200055
+ndk.win32_checksum=8895aec43f5141212c8dac6e9f07d5a8
+
 
 page.title=Android NDK
 @jd:body
@@ -33,7 +63,7 @@ page.title=Android NDK
 
 <div id="tos" style="display:none;width:760px;height:0;margin:0 auto">
 
-<div class="ndk" style="
+<div id="download" class="ndk" style="
 z-index: 99;
 width: 720px;
 position: absolute;
@@ -251,6 +281,13 @@ This is the Android Software Development Kit License Agreement
 <script>
 $('#Downloads').after($('#download-table'));
 </script>
+
+
+<p>With NDK revision 9 and higher, the release packages have been split to reduce download size.
+  The first download for each platform contains the default NDK toolchain. The second download
+  contains legacy NDK toolchains for that platform, which is only required if you are not using
+  the current, recommended toolchain for your NDK builds.</p>
+
 
 
 <h2 id="Revisions">Revisions</h2>

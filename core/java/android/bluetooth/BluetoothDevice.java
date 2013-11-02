@@ -219,7 +219,7 @@ public final class BluetoothDevice implements Parcelable {
      * {@link #BOND_NONE},
      * {@link #BOND_BONDING},
      * {@link #BOND_BONDED}.
-      */
+     */
     public static final String EXTRA_BOND_STATE = "android.bluetooth.device.extra.BOND_STATE";
     /**
      * Used as an int extra field in {@link #ACTION_BOND_STATE_CHANGED} intents.
@@ -228,7 +228,7 @@ public final class BluetoothDevice implements Parcelable {
      * {@link #BOND_NONE},
      * {@link #BOND_BONDING},
      * {@link #BOND_BONDED}.
-      */
+     */
     public static final String EXTRA_PREVIOUS_BOND_STATE =
             "android.bluetooth.device.extra.PREVIOUS_BOND_STATE";
     /**
@@ -253,14 +253,29 @@ public final class BluetoothDevice implements Parcelable {
      */
     public static final int BOND_BONDED = 12;
 
-    /** @hide */
+    /**
+     * Used as an int extra field in {@link #ACTION_PAIRING_REQUEST}
+     * intents for unbond reason.
+     * @hide
+     */
     public static final String EXTRA_REASON = "android.bluetooth.device.extra.REASON";
-    /** @hide */
+
+    /**
+     * Used as an int extra field in {@link #ACTION_PAIRING_REQUEST}
+     * intents to indicate pairing method used. Possible values are:
+     * {@link #PAIRING_VARIANT_PIN},
+     * {@link #PAIRING_VARIANT_PASSKEY_CONFIRMATION},
+     */
     public static final String EXTRA_PAIRING_VARIANT =
             "android.bluetooth.device.extra.PAIRING_VARIANT";
     /** @hide */
     public static final String EXTRA_SECURE_PAIRING = "codeaurora.bluetooth.device.extra.SECURE";
     /** @hide */
+
+    /**
+     * Used as an int extra field in {@link #ACTION_PAIRING_REQUEST}
+     * intents as the value of passkey.
+     */
     public static final String EXTRA_PAIRING_KEY = "android.bluetooth.device.extra.PAIRING_KEY";
 
     /**
@@ -308,7 +323,11 @@ public final class BluetoothDevice implements Parcelable {
     public static final String ACTION_NAME_FAILED =
             "android.bluetooth.device.action.NAME_FAILED";
 
-    /** @hide */
+    /**
+     * Broadcast Action: This intent is used to broadcast PAIRING REQUEST
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} to
+     * receive.
+     */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PAIRING_REQUEST =
             "android.bluetooth.device.action.PAIRING_REQUEST";
@@ -448,8 +467,8 @@ public final class BluetoothDevice implements Parcelable {
     public static final int UNBOND_REASON_REMOVED = 9;
 
     /**
-     * The user will be prompted to enter a pin
-     * @hide
+     * The user will be prompted to enter a pin or
+     * an app will enter a pin for user.
      */
     public static final int PAIRING_VARIANT_PIN = 0;
 
@@ -460,8 +479,8 @@ public final class BluetoothDevice implements Parcelable {
     public static final int PAIRING_VARIANT_PASSKEY = 1;
 
     /**
-     * The user will be prompted to confirm the passkey displayed on the screen
-     * @hide
+     * The user will be prompted to confirm the passkey displayed on the screen or
+     * an app will confirm the passkey for the user.
      */
     public static final int PAIRING_VARIANT_PASSKEY_CONFIRMATION = 2;
 
@@ -712,7 +731,6 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return false on immediate error, true if bonding will begin
-     * @hide
      */
     public boolean createBond() {
         if (sService == null) {
@@ -867,16 +885,13 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public boolean getTrustState() {
-        if (sService == null) {
-            Log.e(TAG, "BT not enabled. Cannot get Remote Device Alias");
-            return false;
-        }
-
+        //TODO(BT)
+        /*
         try {
-            return sService.getRemoteTrust(this);
+            return sService.getTrustState(this);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
-        }
+        }*/
         return false;
     }
 
@@ -887,16 +902,14 @@ public final class BluetoothDevice implements Parcelable {
      * @return true/false
      * @hide
      */
-    public boolean setTrust(boolean trustValue) {
-        if (sService == null) {
-            Log.e(TAG, "BT not enabled. Cannot set Remote Device name");
-            return false;
-        }
+    public boolean setTrust(boolean value) {
+        //TODO(BT)
+        /*
         try {
-            return sService.setRemoteTrust(this, trustValue);
+            return sService.setTrust(this, value);
         } catch (RemoteException e) {
             Log.e(TAG, "", e);
-        }
+        }*/
         return false;
     }
 
@@ -955,7 +968,13 @@ public final class BluetoothDevice implements Parcelable {
          return BluetoothDevice.ERROR;
     }
 
-    /** @hide */
+    /**
+     * Set the pin during pairing when the pairing method is {@link #PAIRING_VARIANT_PIN}
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     *
+     * @return true pin has been set
+     *         false for error
+     */
     public boolean setPin(byte[] pin) {
         if (sService == null) {
             Log.e(TAG, "BT not enabled. Cannot set Remote Device pin");
@@ -977,7 +996,13 @@ public final class BluetoothDevice implements Parcelable {
         return false;
     }
 
-    /** @hide */
+    /**
+     * Confirm passkey for {@link #PAIRING_VARIANT_PASSKEY_CONFIRMATION} pairing.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
+     *
+     * @return true confirmation has been sent out
+     *         false for error
+     */
     public boolean setPairingConfirmation(boolean confirm) {
         if (sService == null) {
             Log.e(TAG, "BT not enabled. Cannot set pairing confirmation");

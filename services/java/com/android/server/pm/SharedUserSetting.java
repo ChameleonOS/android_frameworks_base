@@ -28,12 +28,16 @@ final class SharedUserSetting extends GrantedPermissions {
 
     boolean isThemeCompatibilityEnabled;
 
+    // flags that are associated with this uid, regardless of any package flags
+    int uidFlags;
+
     final HashSet<PackageSetting> packages = new HashSet<PackageSetting>();
 
     final PackageSignatures signatures = new PackageSignatures();
 
     SharedUserSetting(String _name, int _pkgFlags) {
         super(_pkgFlags);
+        uidFlags =  _pkgFlags;
         name = _name;
     }
 
@@ -41,5 +45,24 @@ final class SharedUserSetting extends GrantedPermissions {
     public String toString() {
         return "SharedUserSetting{" + Integer.toHexString(System.identityHashCode(this)) + " "
                 + name + "/" + userId + "}";
+    }
+
+    void removePackage(PackageSetting packageSetting) {
+        if (packages.remove(packageSetting)) {
+            // recalculate the pkgFlags for this shared user if needed
+            if ((this.pkgFlags & packageSetting.pkgFlags) != 0) {
+                int aggregatedFlags = uidFlags;
+                for (PackageSetting ps : packages) {
+                    aggregatedFlags |= ps.pkgFlags;
+                }
+                setFlags(aggregatedFlags);
+            }
+        }
+    }
+
+    void addPackage(PackageSetting packageSetting) {
+        if (packages.add(packageSetting)) {
+            setFlags(this.pkgFlags | packageSetting.pkgFlags);
+        }
     }
 }

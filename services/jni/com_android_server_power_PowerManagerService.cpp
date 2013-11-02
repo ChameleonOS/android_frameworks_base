@@ -26,13 +26,13 @@
 #include <limits.h>
 
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <utils/Timers.h>
 #include <utils/misc.h>
 #include <utils/String8.h>
 #include <utils/Log.h>
 #include <hardware/power.h>
 #include <hardware_legacy/power.h>
-#include <cutils/android_reboot.h>
 #include <suspend/autosuspend.h>
 
 #include "com_android_server_power_PowerManagerService.h"

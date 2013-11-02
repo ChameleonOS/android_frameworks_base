@@ -5,43 +5,43 @@ header.hide=1
 page.metaDescription=Download the official Android SDK to develop apps for Android-powered devices.
 
 
-sdk.linux32_bundle_download=adt-bundle-linux-x86-20130717.zip
-sdk.linux32_bundle_bytes=440035305
-sdk.linux32_bundle_checksum=ecfacb91df1ee63cce1edd4f1a5cda5a
+sdk.linux32_bundle_download=adt-bundle-linux-x86-20130917.zip
+sdk.linux32_bundle_bytes=474924071
+sdk.linux32_bundle_checksum=912b2dac6e0a4fa4ae1417271bf42863
 
-sdk.linux64_bundle_download=adt-bundle-linux-x86_64-20130717.zip
-sdk.linux64_bundle_bytes=440322117
-sdk.linux64_bundle_checksum=ab177a06784340b8f1d136651e3dc62a
+sdk.linux64_bundle_download=adt-bundle-linux-x86_64-20130917.zip
+sdk.linux64_bundle_bytes=475215747
+sdk.linux64_bundle_checksum=2f7523d4eba9a8302c3c4a3955785e18
 
-sdk.mac64_bundle_download=adt-bundle-mac-x86_64-20130717.zip
-sdk.mac64_bundle_bytes=411609229
-sdk.mac64_bundle_checksum=07c891212a49b5f8495ea9d8d47ba3fe
+sdk.mac64_bundle_download=adt-bundle-mac-x86_64-20130917.zip
+sdk.mac64_bundle_bytes=448581372
+sdk.mac64_bundle_checksum=4e2d599486ecc935d24eeef5eb641364
 
-sdk.win32_bundle_download=adt-bundle-windows-x86-20130717.zip
-sdk.win32_bundle_bytes=446783216
-sdk.win32_bundle_checksum=0dd91095999d3539ca1ec4033d83d935
+sdk.win32_bundle_download=adt-bundle-windows-x86-20130917.zip
+sdk.win32_bundle_bytes=481803289
+sdk.win32_bundle_checksum=5d6c79a47c8b47170cff3d231dcf7ad3
 
-sdk.win64_bundle_download=adt-bundle-windows-x86_64-20130717.zip
-sdk.win64_bundle_bytes=446911629
-sdk.win64_bundle_checksum=61ec74995b39166db7f079017a028cec
+sdk.win64_bundle_download=adt-bundle-windows-x86_64-20130917.zip
+sdk.win64_bundle_bytes=481934982
+sdk.win64_bundle_checksum=918f80aad61ec21509d86a2fbd87fd44
 
 
 
-sdk.linux_download=android-sdk_r22.0.4-linux.tgz
-sdk.linux_bytes=105640988
-sdk.linux_checksum=4a5db98a58c68c24e66f04f07ac77da5
+sdk.linux_download=android-sdk_r22.2.1-linux.tgz
+sdk.linux_bytes=100918342
+sdk.linux_checksum=05911d3052a1cbf678561104d35a1bc0
 
-sdk.mac_download=android-sdk_r22.0.4-macosx.zip
-sdk.mac_bytes=77225662
-sdk.mac_checksum=384752505f4f2ba3627bd6aad0697f11
+sdk.mac_download=android-sdk_r22.2.1-macosx.zip
+sdk.mac_bytes=74859877
+sdk.mac_checksum=727a51affa2af733eca1aa307c73c3bd
 
-sdk.win_download=android-sdk_r22.0.4-windows.zip
-sdk.win_bytes=113507679
-sdk.win_checksum=320b11d1ed85fd3f5e937697c333d895
+sdk.win_download=android-sdk_r22.2.1-windows.zip
+sdk.win_bytes=108797377
+sdk.win_checksum=bea5d28cfb6c073b32643dd3ed0bc1e0
 
-sdk.win_installer=installer_r22.0.4-windows.exe
-sdk.win_installer_bytes=93502726
-sdk.win_installer_checksum=96a8ae367d84ed219e1eb2cf473667d0
+sdk.win_installer=installer_r22.2.1-windows.exe
+sdk.win_installer_bytes=88795776
+sdk.win_installer_checksum=07e6e47de6c4549bea6986453119b37c
 
 
 

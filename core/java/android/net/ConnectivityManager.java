@@ -355,11 +355,17 @@ public class ConnectivityManager {
      */
     public static final int TYPE_WIFI_P2P    = 13;
 
-    /** {@hide} */
-    public static final int MAX_RADIO_TYPE   = TYPE_WIFI_P2P;
+    /**
+     * The network to use for initially attaching to the network
+     * {@hide}
+     */
+    public static final int TYPE_MOBILE_IA = 14;
 
     /** {@hide} */
-    public static final int MAX_NETWORK_TYPE = TYPE_WIFI_P2P;
+    public static final int MAX_RADIO_TYPE   = TYPE_MOBILE_IA;
+
+    /** {@hide} */
+    public static final int MAX_NETWORK_TYPE = TYPE_MOBILE_IA;
 
     /**
      * If you want to set the default network preference,you can directly
@@ -436,6 +442,8 @@ public class ConnectivityManager {
                 return "MOBILE_CBS";
             case TYPE_WIFI_P2P:
                 return "WIFI_P2P";
+            case TYPE_MOBILE_IA:
+                return "MOBILE_IA";
             default:
                 return Integer.toString(type);
         }
@@ -458,6 +466,39 @@ public class ConnectivityManager {
             case TYPE_MOBILE_FOTA:
             case TYPE_MOBILE_IMS:
             case TYPE_MOBILE_CBS:
+            case TYPE_MOBILE_IA:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Checks if the given network type is backed by a Wi-Fi radio.
+     *
+     * @hide
+     */
+    public static boolean isNetworkTypeWifi(int networkType) {
+        switch (networkType) {
+            case TYPE_WIFI:
+            case TYPE_WIFI_P2P:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Checks if the given network type should be exempt from VPN routing rules
+     *
+     * @hide
+     */
+    public static boolean isNetworkTypeExempt(int networkType) {
+        switch (networkType) {
+            case TYPE_MOBILE_MMS:
+            case TYPE_MOBILE_SUPL:
+            case TYPE_MOBILE_HIPRI:
+            case TYPE_MOBILE_IA:
                 return true;
             default:
                 return false;
@@ -1358,6 +1399,18 @@ public class ConnectivityManager {
     }
 
     /**
+     * Get the mobile provisioning url.
+     * {@hide}
+     */
+    public String getMobileProvisioningUrl() {
+        try {
+            return mService.getMobileProvisioningUrl();
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    /**
      * Get the mobile redirected provisioning url.
      * {@hide}
      */
@@ -1367,6 +1420,45 @@ public class ConnectivityManager {
         } catch (RemoteException e) {
         }
         return null;
+    }
+
+    /**
+     * get the information about a specific network link
+     * @hide
+     */
+    public LinkQualityInfo getLinkQualityInfo(int networkType) {
+        try {
+            LinkQualityInfo li = mService.getLinkQualityInfo(networkType);
+            return li;
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * get the information of currently active network link
+     * @hide
+     */
+    public LinkQualityInfo getActiveLinkQualityInfo() {
+        try {
+            LinkQualityInfo li = mService.getActiveLinkQualityInfo();
+            return li;
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * get the information of all network links
+     * @hide
+     */
+    public LinkQualityInfo[] getAllLinkQualityInfo() {
+        try {
+            LinkQualityInfo[] li = mService.getAllLinkQualityInfo();
+            return li;
+        } catch (RemoteException e) {
+            return null;
+        }
     }
 
     /**
@@ -1386,14 +1478,18 @@ public class ConnectivityManager {
     }
 
     /**
-     * Get the carrier provisioning url.
-     * {@hide}
+     * Set the value for enabling/disabling airplane mode
+     *
+     * @param enable whether to enable airplane mode or not
+     *
+     * <p>This method requires the call to hold the permission
+     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
+     * @hide
      */
-    public String getMobileProvisioningUrl() {
+    public void setAirplaneMode(boolean enable) {
         try {
-            return mService.getMobileProvisioningUrl();
+            mService.setAirplaneMode(enable);
         } catch (RemoteException e) {
         }
-        return null;
     }
 }

@@ -66,6 +66,8 @@ class PackageSettingBase extends GrantedPermissions {
     boolean permissionsFixed;
     boolean haveGids;
 
+    PackageKeySetData keySetData = new PackageKeySetData();
+
     private static final PackageUserState DEFAULT_USER_STATE = new PackageUserState();
 
     // Whether this package is currently stopped, thus can not be
@@ -122,6 +124,9 @@ class PackageSettingBase extends GrantedPermissions {
         origPackage = base.origPackage;
 
         installerPackageName = base.installerPackageName;
+
+        keySetData = new PackageKeySetData(base.keySetData);
+
     }
 
     void init(File codePath, File resourcePath, String nativeLibraryPathString,
@@ -176,7 +181,11 @@ class PackageSettingBase extends GrantedPermissions {
             userState.put(base.userState.keyAt(i), base.userState.valueAt(i));
         }
         installStatus = base.installStatus;
+<<<<<<< HEAD
         isThemeCompatibilityEnabled = base.isThemeCompatibilityEnabled;
+=======
+        keySetData = base.keySetData;
+>>>>>>> android-4.4_r1
     }
 
     private PackageUserState modifyUserState(int userId) {
@@ -261,14 +270,24 @@ class PackageSettingBase extends GrantedPermissions {
         modifyUserState(userId).notLaunched = stop;
     }
 
+    boolean getBlocked(int userId) {
+        return readUserState(userId).blocked;
+    }
+
+    void setBlocked(boolean blocked, int userId) {
+        modifyUserState(userId).blocked = blocked;
+    }
+
     void setUserState(int userId, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, String lastDisableAppCaller, HashSet<String> enabledComponents,
+            boolean notLaunched, boolean blocked,
+            String lastDisableAppCaller, HashSet<String> enabledComponents,
             HashSet<String> disabledComponents) {
         PackageUserState state = modifyUserState(userId);
         state.enabled = enabled;
         state.installed = installed;
         state.stopped = stopped;
         state.notLaunched = notLaunched;
+        state.blocked = blocked;
         state.lastDisableAppCaller = lastDisableAppCaller;
         state.enabledComponents = enabledComponents;
         state.disabledComponents = disabledComponents;

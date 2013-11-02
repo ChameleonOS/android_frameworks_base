@@ -73,12 +73,14 @@
 
 
 
+
+
 <html>
 <head>
 
 
-
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width" />
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 <title>LocationClient | Android Developers</title>
@@ -305,6 +307,7 @@ onkeyup="return search_changed(event, false, '/')" />
                         </li>
                         <li><a href="/google/index.html">Google Services</a>
                         </li>
+                        
                       </ul>
                     </li>
                     <li class="distribute last">
@@ -371,6 +374,7 @@ onkeyup="return search_changed(event, false, '/')" />
                 <li class="google"><a href="/google/index.html"
                   >Google Services</a>
                 </li>
+                
             </ul>
         </div>
         
@@ -503,23 +507,26 @@ onkeyup="return search_changed(event, false, '/')" />
         <span class="en">Google Cloud Messaging</span></a>
       </div>
       <ul>
+        <li><a href="/google/gcm/gcm.html">
+            <span class="en">Overview</span></a>
+        </li>
         <li><a href="/google/gcm/gs.html">
             <span class="en">Getting Started</span></a>
         </li>
-        <li><a href="/google/gcm/gcm.html">
-            <span class="en">Architectural Overview</span></a>
+        <li><a href="/google/gcm/client.html">
+            <span class="en">Implementing GCM Client</span></a>
         </li>
-         <li><a href="/google/gcm/ccs.html">
-              <span class="en">Cloud Connection Server</span></a>
+        <li class="nav-section"><div class="nav-section-header"><a href="/google/gcm/server.html">
+              <span class="en">Implementing GCM Server</span></a></div>
+              <ul>
+              <li><a href="/google/gcm/ccs.html">
+              <span class="en">CCS (XMPP)</span></a></li>
+              <li><a href="/google/gcm/http.html">
+              <span class="en">HTTP</span></a></li>
+              </ul>
         </li>
         <li><a href="/google/gcm/notifications.html">
               <span class="en">User Notifications</span></a>
-        </li>
-        <li><a href="/google/gcm/client.html">
-            <span class="en">GCM Client</span></a>
-        </li>
-        <li><a href="/google/gcm/server.html">
-            <span class="en">GCM Server</span></a>
         </li>
         <li><a href="/google/gcm/adv.html">
             <span class="en">Advanced Topics</span></a>
@@ -839,6 +846,14 @@ Summary:
         <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.html#KEY_LOCATION_CHANGED">KEY_LOCATION_CHANGED</a></td>
         <td class="jd-descrcol" width="100%">Key used for a Bundle extra holding a Location value when a location change is broadcast
  using a PendingIntent.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gms/location/LocationClient.html#KEY_MOCK_LOCATION">KEY_MOCK_LOCATION</a></td>
+        <td class="jd-descrcol" width="100%">Key used for the Bundle extra in Location object holding a boolean indicating whether
+ the location was set using <code><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation(Location)</a></code>.</td>
     </tr>
     
     
@@ -1272,6 +1287,42 @@ Summary:
         <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#requestLocationUpdates(com.google.android.gms.location.LocationRequest, com.google.android.gms.location.LocationListener, android.os.Looper)">requestLocationUpdates</a></span>(<a href="/reference/com/google/android/gms/location/LocationRequest.html">LocationRequest</a> request, <a href="/reference/com/google/android/gms/location/LocationListener.html">LocationListener</a> listener, Looper looper)</nobr>
         
         <div class="jd-descrdiv">Requests location updates with a callback on the specified Looper thread.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation</a></span>(Location mockLocation)</nobr>
+        
+        <div class="jd-descrdiv">Sets the mock location to be used for the location provider.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockMode(boolean)">setMockMode</a></span>(boolean isMockMode)</nobr>
+        
+        <div class="jd-descrdiv">Sets whether or not the location provider is in mock mode.</div>
   
   </td></tr>
 
@@ -1797,6 +1848,46 @@ From interface
         <span>
             
                 "com.google.android.location.LOCATION"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="KEY_MOCK_LOCATION"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        KEY_MOCK_LOCATION
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Key used for the Bundle extra in Location object holding a boolean indicating whether
+ the location was set using <code><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation(Location)</a></code>.  If the value is false this
+ extra is not set.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "mockLocation"
             
         </span>
         </div>
@@ -2920,6 +3011,125 @@ From interface
           <th>looper</td>
           <td>The Looper object whose message queue will be used to implement the callback
    mechanism, or null to make callbacks on the calling thread.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setMockLocation(android.location.Location)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setMockLocation</span>
+      <span class="normal">(Location mockLocation)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the mock location to be used for the location provider.  This location will be used
+ in place of any actual locations from the underlying providers (network or gps).
+
+ <p><code><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockMode(boolean)">setMockMode(boolean)</a></code> must be called and set to true prior to calling this method.
+ <p>Care should be taken in specifying the timestamps as many applications require them
+ to be monotonically increasing.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>mockLocation</td>
+          <td>The mock location.  Must have a minimum number of fields set to be
+                     considered a valild location, as per documentation in the
+                     <code><a href="/reference/android/location/Location.html">Location</a></code> class.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th>SecurityException</td>
+            <td>if the ACCESS_MOCK_LOCATION permission is not present or the
+                           <code><a href="/reference/android/provider/Settings.Secure.html#ALLOW_MOCK_LOCATION">Settings.Secure.ALLOW_MOCK_LOCATION</a></code> system setting is
+                           not enabled.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="setMockMode(boolean)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        void
+      </span>
+      <span class="sympad">setMockMode</span>
+      <span class="normal">(boolean isMockMode)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets whether or not the location provider is in mock mode.
+
+ <p>The underlying providers (network and gps) will be stopped (except by direct
+ <code><a href="/reference/android/location/LocationManager.html">LocationManager</a></code> access), and only locations specified in
+ <code><a href="/reference/com/google/android/gms/location/LocationClient.html#setMockLocation(android.location.Location)">setMockLocation(Location)</a></code> will be reported.  This will effect all location clients
+ connected using the <code><a href="/reference/com/google/android/gms/location/LocationClient.html">LocationClient</a></code>, including geofencer clients (i.e.
+ geofences can be triggered based on mock locations).
+
+ <p>The client must remain connected in order for mock mode to remain active.  If the client
+ dies the system will return to its normal state.
+
+ <p>Calls are not nested, and mock mode will be set directly regardless of previous calls.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>isMockMode</td>
+          <td>If true the location provider will be set to mock mode.  If false it
+                   will be returned to its normal state.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">  
+        <tr>
+            <th>SecurityException</td>
+            <td>if the ACCESS_MOCK_LOCATION permission is not present or the
+                           <code><a href="/reference/android/provider/Settings.Secure.html#ALLOW_MOCK_LOCATION">Settings.Secure.ALLOW_MOCK_LOCATION</a></code> system setting is
+                           not enabled.
 </td>
         </tr>
       </table>

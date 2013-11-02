@@ -22,11 +22,12 @@ import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.AppOpsManager;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.PendingIntent.CanceledException;
-import android.app.PendingIntent.OnFinished;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -88,6 +89,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +109,7 @@ import java.util.Stack;
  *
  * @hide
  */
-public class AudioService extends IAudioService.Stub implements OnFinished {
+public class AudioService extends IAudioService.Stub {
 
     private static final String TAG = "AudioService";
 
@@ -119,9 +121,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
 
-    private Context mContext;
-    private ContentResolver mContentResolver;
-    private boolean mVoiceCapable;
+    private final Context mContext;
+    private final ContentResolver mContentResolver;
+    private final AppOpsManager mAppOps;
+    private final boolean mVoiceCapable;
 
     /** The UI */
     private VolumePanel mVolumePanel;
@@ -141,39 +144,28 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private static final int MSG_PERSIST_MASTER_VOLUME = 2;
     private static final int MSG_PERSIST_RINGER_MODE = 3;
     private static final int MSG_MEDIA_SERVER_DIED = 4;
-    private static final int MSG_MEDIA_SERVER_STARTED = 5;
-    private static final int MSG_PLAY_SOUND_EFFECT = 6;
-    private static final int MSG_BTA2DP_DOCK_TIMEOUT = 7;
-    private static final int MSG_LOAD_SOUND_EFFECTS = 8;
-    private static final int MSG_SET_FORCE_USE = 9;
-    private static final int MSG_PERSIST_MEDIABUTTONRECEIVER = 10;
-    private static final int MSG_BT_HEADSET_CNCT_FAILED = 11;
-    private static final int MSG_RCDISPLAY_CLEAR = 12;
-    private static final int MSG_RCDISPLAY_UPDATE = 13;
-    private static final int MSG_SET_ALL_VOLUMES = 14;
-    private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 15;
-    private static final int MSG_REPORT_NEW_ROUTES = 16;
-    private static final int MSG_REEVALUATE_REMOTE = 17;
-    private static final int MSG_RCC_NEW_PLAYBACK_INFO = 18;
-    private static final int MSG_RCC_NEW_VOLUME_OBS = 19;
-    private static final int MSG_SET_FORCE_BT_A2DP_USE = 20;
+    private static final int MSG_PLAY_SOUND_EFFECT = 5;
+    private static final int MSG_BTA2DP_DOCK_TIMEOUT = 6;
+    private static final int MSG_LOAD_SOUND_EFFECTS = 7;
+    private static final int MSG_SET_FORCE_USE = 8;
+    private static final int MSG_BT_HEADSET_CNCT_FAILED = 9;
+    private static final int MSG_SET_ALL_VOLUMES = 10;
+    private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 11;
+    private static final int MSG_REPORT_NEW_ROUTES = 12;
+    private static final int MSG_SET_FORCE_BT_A2DP_USE = 13;
+    private static final int MSG_CHECK_MUSIC_ACTIVE = 14;
+    private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 15;
+    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 16;
+    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED = 17;
+    private static final int MSG_PERSIST_SAFE_VOLUME_STATE = 18;
+    private static final int MSG_BROADCAST_BT_CONNECTION_STATE = 19;
+    private static final int MSG_UNLOAD_SOUND_EFFECTS = 20;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
-    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 21;
-    private static final int MSG_SET_A2DP_CONNECTION_STATE = 22;
+    private static final int MSG_SET_WIRED_DEVICE_CONNECTION_STATE = 100;
+    private static final int MSG_SET_A2DP_CONNECTION_STATE = 101;
     // end of messages handled under wakelock
-    private static final int MSG_SET_RSX_CONNECTION_STATE = 23; // change remote submix connection
-    private static final int MSG_CHECK_MUSIC_ACTIVE = 24;
-    private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 25;
-    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 26;
-    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED = 27;
-    private static final int MSG_PERSIST_SAFE_VOLUME_STATE = 28;
-    private static final int MSG_PROMOTE_RCC = 29;
-    private static final int MSG_BROADCAST_BT_CONNECTION_STATE = 30;
-    private static final int MSG_UNLOAD_SOUND_EFFECTS = 31;
-    private static final int MSG_RCC_NEW_PLAYBACK_STATE = 32;
-    private static final int MSG_RCC_SEEK_REQUEST = 33;
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
     // Timeout for connection to bluetooth headset service
@@ -189,11 +181,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private boolean noDelayInATwoDP =
             Resources.getSystem().getBoolean(com.android.internal.R.bool.config_noDelayInATwoDP);
 
-    private int mMode;
+    private int mMode = AudioSystem.MODE_NORMAL;
     // protects mRingerMode
     private final Object mSettingsLock = new Object();
-
-    private boolean mMediaServerOk;
 
     private SoundPool mSoundPool;
     private final Object mSoundEffectsLock = new Object();
@@ -216,7 +206,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private final int[][] SOUND_EFFECT_FILES_MAP = new int[AudioManager.NUM_SOUND_EFFECTS][2];
 
    /** @hide Maximum volume index values for audio streams */
-    private final int[] MAX_STREAM_VOLUME = new int[] {
+    private static final int[] MAX_STREAM_VOLUME = new int[] {
         5,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         7,  // STREAM_RING
@@ -233,8 +223,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      * stream types that follow other stream behavior for volume settings
      * NOTE: do not create loops in aliases!
      * Some streams alias to different streams according to device category (phone or tablet) or
-     * use case (in call s off call...).See updateStreamVolumeAlias() for more details
-     *  STREAM_VOLUME_ALIAS contains the default aliases for a voice capable device (phone) and
+     * use case (in call vs off call...). See updateStreamVolumeAlias() for more details.
+     *  mStreamVolumeAlias contains the default aliases for a voice capable device (phone) and
      *  STREAM_VOLUME_ALIAS_NON_VOICE for a non voice capable device (tablet).*/
     private final int[] STREAM_VOLUME_ALIAS = new int[] {
         AudioSystem.STREAM_VOICE_CALL,      // STREAM_VOICE_CALL
@@ -262,6 +252,23 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     };
     private int[] mStreamVolumeAlias;
 
+    /**
+     * Map AudioSystem.STREAM_* constants to app ops.  This should be used
+     * after mapping through mStreamVolumeAlias.
+     */
+    private static final int[] STEAM_VOLUME_OPS = new int[] {
+        AppOpsManager.OP_AUDIO_VOICE_VOLUME,            // STREAM_VOICE_CALL
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_SYSTEM
+        AppOpsManager.OP_AUDIO_RING_VOLUME,             // STREAM_RING
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_MUSIC
+        AppOpsManager.OP_AUDIO_ALARM_VOLUME,            // STREAM_ALARM
+        AppOpsManager.OP_AUDIO_NOTIFICATION_VOLUME,     // STREAM_NOTIFICATION
+        AppOpsManager.OP_AUDIO_BLUETOOTH_VOLUME,        // STREAM_BLUETOOTH_SCO
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_SYSTEM_ENFORCED
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_DTMF
+        AppOpsManager.OP_AUDIO_MEDIA_VOLUME,            // STREAM_TTS
+    };
+
     private final boolean mUseFixedVolume;
 
     // stream names used by dumpStreamStates()
@@ -284,23 +291,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         public void onError(int error) {
             switch (error) {
             case AudioSystem.AUDIO_STATUS_SERVER_DIED:
-                if (mMediaServerOk) {
-                    sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SENDMSG_NOOP, 0, 0,
-                            null, 1500);
-                    mMediaServerOk = false;
-                }
-                break;
-            case AudioSystem.AUDIO_STATUS_OK:
-                if (!mMediaServerOk) {
-                    sendMsg(mAudioHandler, MSG_MEDIA_SERVER_STARTED, SENDMSG_NOOP, 0, 0,
-                            null, 0);
-                    mMediaServerOk = true;
-                }
+                sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED,
+                        SENDMSG_NOOP, 0, 0, null, 0);
                 break;
             default:
                 break;
             }
-       }
+        }
     };
 
     /**
@@ -312,7 +309,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private int mRingerMode;
 
     /** @see System#MODE_RINGER_STREAMS_AFFECTED */
-    private int mRingerModeAffectedStreams;
+    private int mRingerModeAffectedStreams = 0;
 
     // Streams currently muted by ringer mode
     private int mRingerModeMutedStreams;
@@ -332,9 +329,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
-
-    // Used to alter media button redirection when the phone is ringing.
-    private boolean mIsRinging = false;
 
     // Devices currently connected
     private final HashMap <Integer, String> mConnectedDevices = new HashMap <Integer, String>();
@@ -458,6 +452,16 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     // and used later when/if disableSafeMediaVolume() is called.
     private StreamVolumeCommand mPendingVolumeCommand;
 
+    private PowerManager.WakeLock mAudioEventWakeLock;
+
+    private final MediaFocusControl mMediaFocusControl;
+
+    // Reference to BluetoothA2dp to query for AbsoluteVolume.
+    private BluetoothA2dp mA2dp;
+    private final Object mA2dpAvrcpLock = new Object();
+    // If absolute volume is supported in AVRCP device
+    private boolean mAvrcpAbsVolSupported = false;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -467,11 +471,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mHandler = new Handler();
+        mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         mVoiceCapable = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_voice_capable);
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mMediaEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleMediaEvent");
+        mAudioEventWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "handleAudioEvent");
 
         Vibrator vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = vibrator == null ? false : vibrator.hasVibrator();
@@ -485,10 +490,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 com.android.internal.R.integer.config_soundEffectVolumeDb);
 
         mVolumePanel = new VolumePanel(context, this);
-        mMode = AudioSystem.MODE_NORMAL;
         mForcedUseForComm = AudioSystem.FORCE_NONE;
 
         createAudioSystemThread();
+
+        mMediaFocusControl = new MediaFocusControl(mAudioHandler.getLooper(),
+                mContext, /*VolumeController*/ mVolumePanel, this);
+
+        AudioSystem.setErrorCallback(mAudioSystemCallback);
 
         boolean cameraSoundForced = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_camera_sound_forced);
@@ -513,19 +522,19 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
 
+        // must be called before readPersistedSettings() which needs a valid mStreamVolumeAlias[]
+        // array initialized by updateStreamVolumeAlias()
+        updateStreamVolumeAlias(false /*updateVolumes*/);
         readPersistedSettings();
         mSettingsObserver = new SettingsObserver();
-        updateStreamVolumeAlias(false /*updateVolumes*/);
         createStreamStates();
 
-        mMediaServerOk = true;
+        readAndSetLowRamDevice();
 
         // Call setRingerModeInt() to apply correct mute
         // state on streams affected by ringer mode.
         mRingerModeMutedStreams = 0;
         setRingerModeInt(getRingerMode(), false);
-
-        AudioSystem.setErrorCallback(mAudioSystemCallback);
 
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
@@ -562,20 +571,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         context.registerReceiver(mReceiver, intentFilter);
-
-        // Register for package removal intent broadcasts for media button receiver persistence
-        IntentFilter pkgFilter = new IntentFilter();
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        pkgFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
-        pkgFilter.addDataScheme("package");
-        context.registerReceiver(mReceiver, pkgFilter);
-
-        // Register for phone state monitoring
-        TelephonyManager tmgr = (TelephonyManager)
-                context.getSystemService(Context.TELEPHONY_SERVICE);
-        tmgr.listen(mPhoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
 
         mUseMasterVolume = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_useMasterVolume);
@@ -666,6 +661,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
         if (isInCommunication()) {
             dtmfStreamAlias = AudioSystem.STREAM_VOICE_CALL;
+            mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_DTMF);
+        } else {
+            mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_DTMF);
         }
         mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
 
@@ -677,6 +675,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
         if (updateVolumes) {
             mStreamStates[AudioSystem.STREAM_DTMF].setAllIndexes(mStreamStates[dtmfStreamAlias]);
+            // apply stream mute states according to new value of mRingerModeAffectedStreams
+            setRingerModeInt(getRingerMode(), false);
             sendMsg(mAudioHandler,
                     MSG_SET_ALL_VOLUMES,
                     SENDMSG_QUEUE,
@@ -752,36 +752,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                             mHasVibrator ? AudioManager.VIBRATE_SETTING_ONLY_SILENT
                                                             : AudioManager.VIBRATE_SETTING_OFF);
 
-            // make sure settings for ringer mode are consistent with device type: non voice capable
-            // devices (tablets) include media stream in silent mode whereas phones don't.
-            mRingerModeAffectedStreams = Settings.System.getIntForUser(cr,
-                    Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                    ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
-                     (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
-                     UserHandle.USER_CURRENT);
-
-            // ringtone and system streams are always affected by ringer mode
-            mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_RING)|
-                                            (1 << AudioSystem.STREAM_SYSTEM);
-
-            if (mVoiceCapable) {
-                mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
-            } else {
-                mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
-            }
-            synchronized (mCameraSoundForced) {
-                if (mCameraSoundForced) {
-                    mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
-                } else {
-                    mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
-                }
-            }
-
-            Settings.System.putIntForUser(cr,
-                    Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                    mRingerModeAffectedStreams,
-                    UserHandle.USER_CURRENT);
-
+            updateRingerModeAffectedStreams();
             readDockAudioSettings(cr);
 
             mSafeVolumeEnabled = new Boolean(safeVolumeEnabled(cr));
@@ -816,7 +787,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         broadcastVibrateSetting(AudioManager.VIBRATE_TYPE_NOTIFICATION);
 
         // Restore the default media button receiver from the system settings
-        restoreMediaButtonReceiver();
+        mMediaFocusControl.restoreMediaButtonReceiver();
     }
 
     private int rescaleIndex(int index, int srcStream, int dstStream) {
@@ -826,25 +797,48 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     ///////////////////////////////////////////////////////////////////////////
     // IPC methods
     ///////////////////////////////////////////////////////////////////////////
+    /** @see AudioManager#isLocalOrRemoteMusicActive() */
+    public boolean isLocalOrRemoteMusicActive() {
+        if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+            // local / wired / BT playback active
+            if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): local");
+            return true;
+        }
+        if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
+            // remote "cast-like" playback active
+            if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): has PLAYBACK_TYPE_REMOTE");
+            return true;
+        }
+        if (AudioSystem.isStreamActiveRemotely(AudioSystem.STREAM_MUSIC, 0)) {
+            // remote submix playback active
+            if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): remote submix");
+            return true;
+        }
+        if (DEBUG_VOL) Log.d(TAG, "isLocalOrRemoteMusicActive(): no");
+        return false;
+    }
 
     /** @see AudioManager#adjustVolume(int, int) */
-    public void adjustVolume(int direction, int flags) {
-        adjustSuggestedStreamVolume(direction, AudioManager.USE_DEFAULT_STREAM_TYPE, flags);
+    public void adjustVolume(int direction, int flags, String callingPackage) {
+        adjustSuggestedStreamVolume(direction, AudioManager.USE_DEFAULT_STREAM_TYPE, flags,
+                callingPackage);
     }
 
     /** @see AudioManager#adjustLocalOrRemoteStreamVolume(int, int) with current assumption
      *  on streamType: fixed to STREAM_MUSIC */
-    public void adjustLocalOrRemoteStreamVolume(int streamType, int direction) {
+    public void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
+            String callingPackage) {
         if (DEBUG_VOL) Log.d(TAG, "adjustLocalOrRemoteStreamVolume(dir="+direction+")");
-        if (checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
-            adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, 0);
-        } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
-            adjustStreamVolume(AudioSystem.STREAM_MUSIC, direction, 0);
+        if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+            adjustStreamVolume(AudioSystem.STREAM_MUSIC, direction, 0, callingPackage);
+        } else if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
+            mMediaFocusControl.adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, 0);
         }
     }
 
     /** @see AudioManager#adjustVolume(int, int) */
-    public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
+    public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
+            String callingPackage) {
         if (DEBUG_VOL) Log.d(TAG, "adjustSuggestedStreamVolume() stream="+suggestedStreamType);
         int streamType;
         if (mVolumeControlStream != -1) {
@@ -865,14 +859,15 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             // don't play sounds for remote
             flags &= ~(AudioManager.FLAG_PLAY_SOUND|AudioManager.FLAG_FIXED_VOLUME);
             //if (DEBUG_VOL) Log.i(TAG, "Need to adjust remote volume: calling adjustRemoteVolume()");
-            adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, flags);
+            mMediaFocusControl.adjustRemoteVolume(AudioSystem.STREAM_MUSIC, direction, flags);
         } else {
-            adjustStreamVolume(streamType, direction, flags);
+            adjustStreamVolume(streamType, direction, flags, callingPackage);
         }
     }
 
     /** @see AudioManager#adjustStreamVolume(int, int, int) */
-    public void adjustStreamVolume(int streamType, int direction, int flags) {
+    public void adjustStreamVolume(int streamType, int direction, int flags,
+            String callingPackage) {
         if (mUseFixedVolume) {
             return;
         }
@@ -892,6 +887,18 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         int aliasIndex = streamState.getIndex(device);
         boolean adjustVolume = true;
         int step;
+
+        // skip a2dp absolute volume control request when the device
+        // is not an a2dp device
+        if ((device & AudioSystem.DEVICE_OUT_ALL_A2DP) == 0 &&
+            (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) != 0) {
+            return;
+        }
+
+        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return;
+        }
 
         // reset any pending volume command
         synchronized (mSafeMediaVolumeState) {
@@ -937,6 +944,18 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         int oldIndex = mStreamStates[streamType].getIndex(device);
 
         if (adjustVolume && (direction != AudioManager.ADJUST_SAME)) {
+
+            // Check if volume update should be send to AVRCP
+            if (streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                (device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
+                (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
+                synchronized (mA2dpAvrcpLock) {
+                    if (mA2dp != null && mAvrcpAbsVolSupported) {
+                        mA2dp.adjustAvrcpAbsoluteVolume(direction);
+                    }
+                }
+            }
+
             if ((direction == AudioManager.ADJUST_RAISE) &&
                     !checkSafeMediaVolume(streamTypeAlias, aliasIndex + step, device)) {
                 Log.e(TAG, "adjustStreamVolume() safe volume index = "+oldIndex);
@@ -958,7 +977,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     /** @see AudioManager#adjustMasterVolume(int, int) */
-    public void adjustMasterVolume(int steps, int flags) {
+    public void adjustMasterVolume(int steps, int flags, String callingPackage) {
         if (mUseFixedVolume) {
             return;
         }
@@ -973,7 +992,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         //Log.d(TAG, "adjustMasterVolume volume: " + volume + " steps: " + steps);
-        setMasterVolume(volume, flags);
+        setMasterVolume(volume, flags, callingPackage);
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of
@@ -1009,16 +1028,29 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     /** @see AudioManager#setStreamVolume(int, int, int) */
-    public void setStreamVolume(int streamType, int index, int flags) {
+    public void setStreamVolume(int streamType, int index, int flags, String callingPackage) {
         if (mUseFixedVolume) {
             return;
         }
 
         ensureValidStreamType(streamType);
-        VolumeStreamState streamState = mStreamStates[mStreamVolumeAlias[streamType]];
+        int streamTypeAlias = mStreamVolumeAlias[streamType];
+        VolumeStreamState streamState = mStreamStates[streamTypeAlias];
 
         final int device = getDeviceForStream(streamType);
         int oldIndex;
+
+        // skip a2dp absolute volume control request when the device
+        // is not an a2dp device
+        if ((device & AudioSystem.DEVICE_OUT_ALL_A2DP) == 0 &&
+            (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) != 0) {
+            return;
+        }
+
+        if (mAppOps.noteOp(STEAM_VOLUME_OPS[streamTypeAlias], Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+            return;
+        }
 
         synchronized (mSafeMediaVolumeState) {
             // reset any pending volume command
@@ -1026,10 +1058,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
             oldIndex = streamState.getIndex(device);
 
-            index = rescaleIndex(index * 10, streamType, mStreamVolumeAlias[streamType]);
+            index = rescaleIndex(index * 10, streamType, streamTypeAlias);
+
+            if (streamTypeAlias == AudioSystem.STREAM_MUSIC &&
+                (device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
+                (flags & AudioManager.FLAG_BLUETOOTH_ABS_VOLUME) == 0) {
+                synchronized (mA2dpAvrcpLock) {
+                    if (mA2dp != null && mAvrcpAbsVolSupported) {
+                        mA2dp.setAvrcpAbsoluteVolume(index);
+                    }
+                }
+            }
 
             flags &= ~AudioManager.FLAG_FIXED_VOLUME;
-            if ((mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
+            if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
                     ((device & mFixedVolumeDevices) != 0)) {
                 flags |= AudioManager.FLAG_FIXED_VOLUME;
 
@@ -1044,7 +1086,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 }
             }
 
-            if (!checkSafeMediaVolume(mStreamVolumeAlias[streamType], index, device)) {
+            if (!checkSafeMediaVolume(streamTypeAlias, index, device)) {
                 mVolumePanel.postDisplaySafeVolumeWarning(flags);
                 mPendingVolumeCommand = new StreamVolumeCommand(
                                                     streamType, index, flags, device);
@@ -1181,7 +1223,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // UI update and Broadcast Intent
     private void sendMasterVolumeUpdate(int flags, int oldVolume, int newVolume) {
-        masterVolumeChanged(flags);
+        mVolumePanel.postMasterVolumeChanged(flags);
 
         Intent intent = new Intent(AudioManager.MASTER_VOLUME_CHANGED_ACTION);
         intent.putExtra(AudioManager.EXTRA_PREV_MASTER_VOLUME_VALUE, oldVolume);
@@ -1191,7 +1233,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     // UI update and Broadcast Intent
     private void sendMasterMuteUpdate(boolean muted, int flags) {
-        masterMuteChanged(flags);
+        mVolumePanel.postMasterMuteChanged(flags);
         broadcastMasterMuteStatus(muted);
     }
 
@@ -1280,6 +1322,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return AudioSystem.getMasterMute();
     }
 
+    protected static int getMaxStreamVolume(int streamType) {
+        return MAX_STREAM_VOLUME[streamType];
+    }
+
     /** @see AudioManager#getStreamVolume(int) */
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
@@ -1302,8 +1348,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return getLastAudibleMasterVolume();
     }
 
-    public void setMasterVolume(int volume, int flags) {
+    public void setMasterVolume(int volume, int flags, String callingPackage) {
         if (mUseFixedVolume) {
+            return;
+        }
+
+        if (mAppOps.noteOp(AppOpsManager.OP_AUDIO_MASTER_VOLUME, Binder.getCallingUid(),
+                callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return;
         }
 
@@ -1913,8 +1964,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         checkAllAliasStreamVolumes();
 
         synchronized (mSafeMediaVolumeState) {
-            if (mSafeVolumeEnabled &&
-                    mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) {
+            if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) {
                 enforceSafeMediaVolume();
             }
         }
@@ -1925,7 +1975,16 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         if (!checkAudioSettingsPermission("setSpeakerphoneOn()")) {
             return;
         }
-        mForcedUseForComm = on ? AudioSystem.FORCE_SPEAKER : AudioSystem.FORCE_NONE;
+
+        if (on) {
+            if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
+                    sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
+                            AudioSystem.FOR_RECORD, AudioSystem.FORCE_NONE, null, 0);
+            }
+            mForcedUseForComm = AudioSystem.FORCE_SPEAKER;
+        } else if (mForcedUseForComm == AudioSystem.FORCE_SPEAKER){
+            mForcedUseForComm = AudioSystem.FORCE_NONE;
+        }
 
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
@@ -1941,7 +2000,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         if (!checkAudioSettingsPermission("setBluetoothScoOn()")) {
             return;
         }
-        mForcedUseForComm = on ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE;
+
+        if (on) {
+            mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
+        } else if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
+            mForcedUseForComm = AudioSystem.FORCE_NONE;
+        }
 
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
@@ -2293,16 +2357,16 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             List<BluetoothDevice> deviceList;
             switch(profile) {
             case BluetoothProfile.A2DP:
-                BluetoothA2dp a2dp = (BluetoothA2dp) proxy;
-                deviceList = a2dp.getConnectedDevices();
-                if (deviceList.size() > 0) {
-                    btDevice = deviceList.get(0);
-                    if (!noDelayInATwoDP) {
+                synchronized (mA2dpAvrcpLock) {
+                    mA2dp = (BluetoothA2dp) proxy;
+                    deviceList = mA2dp.getConnectedDevices();
+                    if (deviceList.size() > 0) {
+                        btDevice = deviceList.get(0);
                         synchronized (mConnectedDevices) {
-                            int state = a2dp.getConnectionState(btDevice);
+                            int state = mA2dp.getConnectionState(btDevice);
                             int delay = checkSendBecomingNoisyIntent(
-                                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                                                (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
+                                                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                                                    (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
                             queueMsgUnderWakeLock(mAudioHandler,
                                     MSG_SET_A2DP_CONNECTION_STATE,
                                     state,
@@ -2310,8 +2374,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                                     btDevice,
                                     delay);
                         }
-                    } else {
-                        onSetA2dpConnectionState(btDevice, a2dp.getConnectionState(btDevice));
                     }
                 }
                 break;
@@ -2373,10 +2435,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         public void onServiceDisconnected(int profile) {
             switch(profile) {
             case BluetoothProfile.A2DP:
-                synchronized (mConnectedDevices) {
-                    if (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)) {
-                        makeA2dpDeviceUnavailableNow(
-                                mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+                synchronized (mA2dpAvrcpLock) {
+                    mA2dp = null;
+                    synchronized (mConnectedDevices) {
+                        if (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)) {
+                            makeA2dpDeviceUnavailableNow(
+                                    mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+                        }
                     }
                 }
                 break;
@@ -2393,30 +2458,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     };
 
-    /** see AudioManager.setRemoteSubmixOn(boolean on) */
-    public void setRemoteSubmixOn(boolean on, int address) {
-        sendMsg(mAudioHandler, MSG_SET_RSX_CONNECTION_STATE,
-                SENDMSG_REPLACE /* replace with QUEUE when multiple addresses are supported */,
-                on ? 1 : 0 /*arg1*/,
-                address /*arg2*/,
-                null/*obj*/, 0/*delay*/);
-    }
-
-    private void onSetRsxConnectionState(int available, int address) {
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_REMOTE_SUBMIX,
-                available == 1 ?
-                        AudioSystem.DEVICE_STATE_AVAILABLE : AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                String.valueOf(address) /*device_address*/);
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_REMOTE_SUBMIX,
-                available == 1 ?
-                        AudioSystem.DEVICE_STATE_AVAILABLE : AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                String.valueOf(address) /*device_address*/);
-    }
-
     private void onCheckMusicActive() {
         synchronized (mSafeMediaVolumeState) {
-            if (mSafeVolumeEnabled &&
-                    mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_INACTIVE) {
+            if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_INACTIVE) {
                 int device = getDeviceForStream(AudioSystem.STREAM_MUSIC);
 
                 if ((device & mSafeMediaVolumeDevices) != 0) {
@@ -2561,6 +2605,50 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return (mRingerModeMutedStreams & (1 << streamType)) != 0;
     }
 
+    boolean updateRingerModeAffectedStreams() {
+        int ringerModeAffectedStreams;
+        // make sure settings for ringer mode are consistent with device type: non voice capable
+        // devices (tablets) include media stream in silent mode whereas phones don't.
+        ringerModeAffectedStreams = Settings.System.getIntForUser(mContentResolver,
+                Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
+                 (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
+                 UserHandle.USER_CURRENT);
+
+        // ringtone, notification and system streams are always affected by ringer mode
+        ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_RING)|
+                                        (1 << AudioSystem.STREAM_NOTIFICATION)|
+                                        (1 << AudioSystem.STREAM_SYSTEM);
+
+        if (mVoiceCapable) {
+            ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
+        } else {
+            ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
+        }
+        synchronized (mCameraSoundForced) {
+            if (mCameraSoundForced) {
+                ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+            } else {
+                ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
+            }
+        }
+        if (mStreamVolumeAlias[AudioSystem.STREAM_DTMF] == AudioSystem.STREAM_RING) {
+            ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_DTMF);
+        } else {
+            ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_DTMF);
+        }
+
+        if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
+            Settings.System.putIntForUser(mContentResolver,
+                    Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                    ringerModeAffectedStreams,
+                    UserHandle.USER_CURRENT);
+            mRingerModeAffectedStreams = ringerModeAffectedStreams;
+            return true;
+        }
+        return false;
+    }
+
     public boolean isStreamAffectedByMute(int streamType) {
         return (mMuteAffectedStreams & (1 << streamType)) != 0;
     }
@@ -2597,6 +2685,17 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return (isOffhook || getMode() == AudioManager.MODE_IN_COMMUNICATION);
     }
 
+    /**
+     * For code clarity for getActiveStreamType(int)
+     * @param delay_ms max time since last STREAM_MUSIC activity to consider
+     * @return true if STREAM_MUSIC is active in streams handled by AudioFlinger now or
+     *     in the last "delay_ms" ms.
+     */
+    private boolean isAfMusicActiveRecently(int delay_ms) {
+        return AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, delay_ms)
+                || AudioSystem.isStreamActiveRemotely(AudioSystem.STREAM_MUSIC, delay_ms);
+    }
+
     private int getActiveStreamType(int suggestedStreamType) {
         if (mVoiceCapable) {
             if (isInCommunication()) {
@@ -2609,23 +2708,22 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     return AudioSystem.STREAM_VOICE_CALL;
                 }
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                // Having the suggested stream be USE_DEFAULT_STREAM_TYPE is how remote control
-                // volume can have priority over STREAM_MUSIC
-                if (checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
-                    if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
-                    return STREAM_REMOTE_MUSIC;
-                } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC,
-                            DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
+                if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
                     if (DEBUG_VOL)
                         Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                     return AudioSystem.STREAM_MUSIC;
-                } else {
-                    if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
-                    return AudioSystem.STREAM_RING;
+                } else
+                    if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC))
+                    {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
+                        return STREAM_REMOTE_MUSIC;
+                    } else {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_RING b/c default");
+                        return AudioSystem.STREAM_RING;
                 }
-            } else if (AudioSystem.isStreamActive(AudioSystem.STREAM_MUSIC, 0)) {
+            } else if (isAfMusicActiveRecently(0)) {
                 if (DEBUG_VOL)
                     Log.v(TAG, "getActiveStreamType: Forcing STREAM_MUSIC stream active");
                 return AudioSystem.STREAM_MUSIC;
@@ -2651,14 +2749,17 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_NOTIFICATION");
                 return AudioSystem.STREAM_NOTIFICATION;
             } else if (suggestedStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-                if (checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC)) {
-                    // Having the suggested stream be USE_DEFAULT_STREAM_TYPE is how remote control
-                    // volume can have priority over STREAM_MUSIC
-                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
-                    return STREAM_REMOTE_MUSIC;
+                if (isAfMusicActiveRecently(DEFAULT_STREAM_TYPE_OVERRIDE_DELAY_MS)) {
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: forcing STREAM_MUSIC");
+                    return AudioSystem.STREAM_MUSIC;
+                } else
+                    if (mMediaFocusControl.checkUpdateRemoteStateIfActive(AudioSystem.STREAM_MUSIC))
+                    {
+                        if (DEBUG_VOL)
+                            Log.v(TAG, "getActiveStreamType: Forcing STREAM_REMOTE_MUSIC");
+                        return STREAM_REMOTE_MUSIC;
                 } else {
-                    if (DEBUG_VOL)
-                        Log.v(TAG, "getActiveStreamType: using STREAM_MUSIC as default");
+                    if (DEBUG_VOL) Log.v(TAG, "getActiveStreamType: using STREAM_MUSIC as default");
                     return AudioSystem.STREAM_MUSIC;
                 }
             } else {
@@ -2695,7 +2796,11 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
      */
     private void queueMsgUnderWakeLock(Handler handler, int msg,
             int arg1, int arg2, Object obj, int delay) {
-        mMediaEventWakeLock.acquire();
+        final long ident = Binder.clearCallingIdentity();
+        // Always acquire the wake lock as AudioService because it is released by the
+        // message handler.
+        mAudioEventWakeLock.acquire();
+        Binder.restoreCallingIdentity(ident);
         sendMsg(handler, msg, SENDMSG_QUEUE, arg1, arg2, obj, delay);
     }
 
@@ -2864,7 +2969,12 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             int index;
             if (isMuted()) {
                 index = 0;
-            } else {
+            } else if (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_MUSIC &&
+                       (device & AudioSystem.DEVICE_OUT_ALL_A2DP) != 0 &&
+                       mAvrcpAbsVolSupported) {
+                index = (mIndexMax + 5)/10;
+            }
+            else {
                 index = (getIndex(device) + 5)/10;
             }
             AudioSystem.setStreamVolumeIndex(mStreamType, index, device);
@@ -2950,13 +3060,25 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         public synchronized void setAllIndexes(VolumeStreamState srcStream) {
-            Set set = srcStream.mIndex.entrySet();
+            int srcStreamType = srcStream.getStreamType();
+            // apply default device volume from source stream to all devices first in case
+            // some devices are present in this stream state but not in source stream state
+            int index = srcStream.getIndex(AudioSystem.DEVICE_OUT_DEFAULT);
+            index = rescaleIndex(index, srcStreamType, mStreamType);
+            Set set = mIndex.entrySet();
             Iterator i = set.iterator();
             while (i.hasNext()) {
                 Map.Entry entry = (Map.Entry)i.next();
+                entry.setValue(index);
+            }
+            // Now apply actual volume for devices in source stream state
+            set = srcStream.mIndex.entrySet();
+            i = set.iterator();
+            while (i.hasNext()) {
+                Map.Entry entry = (Map.Entry)i.next();
                 int device = ((Integer)entry.getKey()).intValue();
-                int index = ((Integer)entry.getValue()).intValue();
-                index = rescaleIndex(index, srcStream.getStreamType(), mStreamType);
+                index = ((Integer)entry.getValue()).intValue();
+                index = rescaleIndex(index, srcStreamType, mStreamType);
 
                 setIndex(index, device);
             }
@@ -3396,13 +3518,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             }
         }
 
-        private void onHandlePersistMediaButtonReceiver(ComponentName receiver) {
-            Settings.System.putStringForUser(mContentResolver,
-                                             Settings.System.MEDIA_BUTTON_RECEIVER,
-                                             receiver == null ? "" : receiver.flattenToString(),
-                                             UserHandle.USER_CURRENT);
-        }
-
         private void cleanupPlayer(MediaPlayer mp) {
             if (mp != null) {
                 try {
@@ -3468,23 +3583,21 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     break;
 
                 case MSG_MEDIA_SERVER_DIED:
-                    if (!mMediaServerOk) {
+                    if (AudioSystem.checkAudioFlinger() != AudioSystem.AUDIO_STATUS_OK) {
                         Log.e(TAG, "Media server died.");
-                        // Force creation of new IAudioFlinger interface so that we are notified
-                        // when new media_server process is back to life.
-                        AudioSystem.setErrorCallback(mAudioSystemCallback);
                         sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SENDMSG_NOOP, 0, 0,
                                 null, 500);
+                        break;
                     }
-                    break;
-
-                case MSG_MEDIA_SERVER_STARTED:
                     Log.e(TAG, "Media server started.");
+
                     // indicate to audio HAL that we start the reconfiguration phase after a media
                     // server crash
-                    // Note that MSG_MEDIA_SERVER_STARTED message is only received when the media server
+                    // Note that we only execute this when the media server
                     // process restarts after a crash, not the first time it is started.
                     AudioSystem.setParameters("restarting=true");
+
+                    readAndSetLowRamDevice();
 
                     // Restore device connection states
                     synchronized (mConnectedDevices) {
@@ -3579,31 +3692,18 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     setForceUse(msg.arg1, msg.arg2);
                     break;
 
-                case MSG_PERSIST_MEDIABUTTONRECEIVER:
-                    onHandlePersistMediaButtonReceiver( (ComponentName) msg.obj );
-                    break;
-
-                case MSG_RCDISPLAY_CLEAR:
-                    onRcDisplayClear();
-                    break;
-
-                case MSG_RCDISPLAY_UPDATE:
-                    // msg.obj is guaranteed to be non null
-                    onRcDisplayUpdate( (RemoteControlStackEntry) msg.obj, msg.arg1);
-                    break;
-
                 case MSG_BT_HEADSET_CNCT_FAILED:
                     resetBluetoothSco();
                     break;
 
                 case MSG_SET_WIRED_DEVICE_CONNECTION_STATE:
                     onSetWiredDeviceConnectionState(msg.arg1, msg.arg2, (String)msg.obj);
-                    mMediaEventWakeLock.release();
+                    mAudioEventWakeLock.release();
                     break;
 
                 case MSG_SET_A2DP_CONNECTION_STATE:
                     onSetA2dpConnectionState((BluetoothDevice)msg.obj, msg.arg1);
-                    mMediaEventWakeLock.release();
+                    mAudioEventWakeLock.release();
                     break;
 
                 case MSG_REPORT_NEW_ROUTES: {
@@ -3626,30 +3726,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     break;
                 }
 
-                case MSG_REEVALUATE_REMOTE:
-                    onReevaluateRemote();
-                    break;
-
-                case MSG_RCC_NEW_PLAYBACK_INFO:
-                    onNewPlaybackInfoForRcc(msg.arg1 /* rccId */, msg.arg2 /* key */,
-                            ((Integer)msg.obj).intValue() /* value */);
-                    break;
-                case MSG_RCC_NEW_VOLUME_OBS:
-                    onRegisterVolumeObserverForRcc(msg.arg1 /* rccId */,
-                            (IRemoteVolumeObserver)msg.obj /* rvo */);
-                    break;
-                case MSG_RCC_NEW_PLAYBACK_STATE:
-                    onNewPlaybackStateForRcc(msg.arg1 /* rccId */, msg.arg2 /* state */,
-                            (RccPlaybackState)msg.obj /* newState */);
-                    break;
-                case MSG_RCC_SEEK_REQUEST:
-                    onSetRemoteControlClientPlaybackPosition(msg.arg1 /* generationId */,
-                            ((Long)msg.obj).longValue() /* timeMs */);
-
-                case MSG_SET_RSX_CONNECTION_STATE:
-                    onSetRsxConnectionState(msg.arg1/*available*/, msg.arg2/*address*/);
-                    break;
-
                 case MSG_CHECK_MUSIC_ACTIVE:
                     onCheckMusicActive();
                     break;
@@ -3664,10 +3740,6 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     break;
                 case MSG_PERSIST_SAFE_VOLUME_STATE:
                     onPersistSafeVolumeState(msg.arg1);
-                    break;
-
-                case MSG_PROMOTE_RCC:
-                    onPromoteRcc(msg.arg1);
                     break;
 
                 case MSG_BROADCAST_BT_CONNECTION_STATE:
@@ -3692,55 +3764,21 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            super.onChange(selfChange, uri);
+        public void onChange(boolean selfChange) {
+            super.onChange(selfChange);
             // FIXME This synchronized is not necessary if mSettingsLock only protects mRingerMode.
             //       However there appear to be some missing locks around mRingerModeMutedStreams
             //       and mRingerModeAffectedStreams, so will leave this synchronized for now.
             //       mRingerModeMutedStreams and mMuteAffectedStreams are safe (only accessed once).
             synchronized (mSettingsLock) {
-                if (uri.equals(Settings.System.getUriFor(Settings.System.MODE_RINGER_STREAMS_AFFECTED))) {
-                    int ringerModeAffectedStreams = Settings.System.getIntForUser(mContentResolver,
-                           Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                           ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
-                           (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)),
-                           UserHandle.USER_CURRENT);
-                    if (mVoiceCapable) {
-                        ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
-                    } else {
-                        ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
-                    }
-                    synchronized (mCameraSoundForced) {
-                        if (mCameraSoundForced) {
-                            ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
-                        } else {
-                            ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_SYSTEM_ENFORCED);
-                        }
-                    }
-                    if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
-                        /*
-                         * Ensure all stream types that should be affected by ringer mode
-                         * are in the proper state.
-                         */
-                        mRingerModeAffectedStreams = ringerModeAffectedStreams;
-                        setRingerModeInt(getRingerMode(), false);
-                    }
-
-                } else if (uri.equals(Settings.Global.getUriFor(Settings.Global.DOCK_AUDIO_MEDIA_ENABLED))) {
-                    readDockAudioSettings(mContentResolver);
-
-                } else if (uri.equals(Settings.System.getUriFor(Settings.System.VOLUME_LINK_NOTIFICATION))) {
-                    mLinkNotificationWithVolume = Settings.System.getInt(mContentResolver,
-                            Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
-                    if (mLinkNotificationWithVolume) {
-                        mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
-                    } else {
-                        mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
-                    }
-
-                } else if (uri.equals(Settings.System.getUriFor(Settings.System.SAFE_HEADSET_VOLUME))) {
-                    mSafeVolumeEnabled = safeVolumeEnabled(mContentResolver);
+                if (updateRingerModeAffectedStreams()) {
+                    /*
+                     * Ensure all stream types that should be affected by ringer mode
+                     * are in the proper state.
+                     */
+                    setRingerModeInt(getRingerMode(), false);
                 }
+                readDockAudioSettings(mContentResolver);
             }
         }
     }
@@ -3749,6 +3787,9 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private void makeA2dpDeviceAvailable(String address) {
         // enable A2DP before notifying A2DP connection to avoid unecessary processing in
         // audio policy manager
+        VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
+        sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
+                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0, streamState, 0);
         setBluetoothA2dpOnInt(true);
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_AVAILABLE,
@@ -3767,6 +3808,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     private void makeA2dpDeviceUnavailableNow(String address) {
         if (noDelayInATwoDP) {
             onSendBecomingNoisyIntent();
+        }
+
+        synchronized (mA2dpAvrcpLock) {
+            mAvrcpAbsVolSupported = false;
         }
         AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                 AudioSystem.DEVICE_STATE_UNAVAILABLE,
@@ -3799,6 +3844,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private void onSetA2dpConnectionState(BluetoothDevice btDevice, int state)
     {
+        if (DEBUG_VOL) Log.d(TAG, "onSetA2dpConnectionState btDevice="+btDevice+" state="+state);
         if (btDevice == null) {
             return;
         }
@@ -3806,6 +3852,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             address = "";
         }
+
         synchronized (mConnectedDevices) {
             boolean isConnected =
                 (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) &&
@@ -3853,6 +3900,16 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     }
                 }
             }
+        }
+    }
+
+    public void avrcpSupportsAbsoluteVolume(String address, boolean support) {
+        // address is not used for now, but may be used when multiple a2dp devices are supported
+        synchronized (mA2dpAvrcpLock) {
+            mAvrcpAbsVolSupported = support;
+            VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
+            sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
+                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0, streamState, 0);
         }
     }
 
@@ -4177,28 +4234,13 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         0,
                         null,
                         SAFE_VOLUME_CONFIGURE_TIMEOUT_MS);
-            } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
-                    || action.equals(Intent.ACTION_PACKAGE_DATA_CLEARED)) {
-                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                    // a package is being removed, not replaced
-                    String packageName = intent.getData().getSchemeSpecificPart();
-                    if (packageName != null) {
-                        cleanupMediaButtonReceiverForPackage(packageName, true);
-                    }
-                }
-            } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)
-                    || action.equals(Intent.ACTION_PACKAGE_CHANGED)) {
-                String packageName = intent.getData().getSchemeSpecificPart();
-                if (packageName != null) {
-                    cleanupMediaButtonReceiverForPackage(packageName, false);
-                }
             } else if (action.equals(Intent.ACTION_SCREEN_ON)) {
                 AudioSystem.setParameters("screen_state=on");
             } else if (action.equals(Intent.ACTION_SCREEN_OFF)) {
                 AudioSystem.setParameters("screen_state=off");
             } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
                 handleConfigurationChanged(context);
-            } else if (action.equals(Intent.ACTION_USER_BACKGROUND)) {
+            } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 // attempt to stop music playback for background user
                 sendMsg(mAudioHandler,
                         MSG_BROADCAST_AUDIO_BECOMING_NOISY,
@@ -4207,9 +4249,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                         0,
                         null,
                         0);
-            } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 // the current audio focus owner is no longer valid
-                discardAudioFocusOwner();
+                mMediaFocusControl.discardAudioFocusOwner();
 
                 // load volume settings for new user
                 readAudioSettings(true /*userSwitch*/);
@@ -4306,60 +4347,32 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     }
 
     //==========================================================================================
-    // AudioFocus
+    // RemoteControlDisplay / RemoteControlClient / Remote info
     //==========================================================================================
+    public boolean registerRemoteController(IRemoteControlDisplay rcd, int w, int h,
+            ComponentName listenerComp) {
+        return mMediaFocusControl.registerRemoteController(rcd, w, h, listenerComp);
+    }
 
-    /* constant to identify focus stack entry that is used to hold the focus while the phone
-     * is ringing or during a call. Used by com.android.internal.telephony.CallManager when
-     * entering and exiting calls.
-     */
-    public final static String IN_VOICE_COMM_FOCUS_ID = "AudioFocus_For_Phone_Ring_And_Calls";
+    public boolean registerRemoteControlDisplay(IRemoteControlDisplay rcd, int w, int h) {
+        return mMediaFocusControl.registerRemoteControlDisplay(rcd, w, h);
+    }
 
-    private final static Object mAudioFocusLock = new Object();
+    public void unregisterRemoteControlDisplay(IRemoteControlDisplay rcd) {
+        mMediaFocusControl.unregisterRemoteControlDisplay(rcd);
+    }
 
-    private final static Object mRingingLock = new Object();
+    public void remoteControlDisplayUsesBitmapSize(IRemoteControlDisplay rcd, int w, int h) {
+        mMediaFocusControl.remoteControlDisplayUsesBitmapSize(rcd, w, h);
+    }
 
-    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
-        @Override
-        public void onCallStateChanged(int state, String incomingNumber) {
-            if (state == TelephonyManager.CALL_STATE_RINGING) {
-                //Log.v(TAG, " CALL_STATE_RINGING");
-                synchronized(mRingingLock) {
-                    mIsRinging = true;
-                }
-            } else if ((state == TelephonyManager.CALL_STATE_OFFHOOK)
-                    || (state == TelephonyManager.CALL_STATE_IDLE)) {
-                synchronized(mRingingLock) {
-                    mIsRinging = false;
-                }
-            }
-        }
-    };
+    public void remoteControlDisplayWantsPlaybackPositionSync(IRemoteControlDisplay rcd,
+            boolean wantsSync) {
+        mMediaFocusControl.remoteControlDisplayWantsPlaybackPositionSync(rcd, wantsSync);
+    }
 
-    /**
-     * Discard the current audio focus owner.
-     * Notify top of audio focus stack that it lost focus (regardless of possibility to reassign
-     * focus), remove it from the stack, and clear the remote control display.
-     */
-    private void discardAudioFocusOwner() {
-        synchronized(mAudioFocusLock) {
-            if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
-                // notify the current focus owner it lost focus after removing it from stack
-                FocusStackEntry focusOwner = mFocusStack.pop();
-                try {
-                    focusOwner.mFocusDispatcher.dispatchAudioFocusChange(
-                            AudioManager.AUDIOFOCUS_LOSS, focusOwner.mClientId);
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Failure to signal loss of audio focus due to "+ e);
-                    e.printStackTrace();
-                }
-                focusOwner.unlinkToDeath();
-                // clear RCD
-                synchronized(mRCStack) {
-                    clearRemoteControlDisplay_syncAfRcs();
-                }
-            }
-        }
+    public void registerMediaButtonEventReceiverForCalls(ComponentName c) {
+        mMediaFocusControl.registerMediaButtonEventReceiverForCalls(c);
     }
 
     private void notifyTopOfAudioFocusStack() {
@@ -4378,143 +4391,46 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
-    private static class FocusStackEntry {
-        public int mStreamType = -1;// no stream type
-        public IAudioFocusDispatcher mFocusDispatcher = null;
-        public IBinder mSourceRef = null;
-        public String mClientId;
-        public int mFocusChangeType;
-        public AudioFocusDeathHandler mHandler;
-        public String mPackageName;
-        public int mCallingUid;
-
-        public FocusStackEntry() {
-        }
-
-        public FocusStackEntry(int streamType, int duration,
-                IAudioFocusDispatcher afl, IBinder source, String id, AudioFocusDeathHandler hdlr,
-                String pn, int uid) {
-            mStreamType = streamType;
-            mFocusDispatcher = afl;
-            mSourceRef = source;
-            mClientId = id;
-            mFocusChangeType = duration;
-            mHandler = hdlr;
-            mPackageName = pn;
-            mCallingUid = uid;
-        }
-
-        public void unlinkToDeath() {
-            try {
-                if (mSourceRef != null && mHandler != null) {
-                    mSourceRef.unlinkToDeath(mHandler, 0);
-                    mHandler = null;
-                }
-            } catch (java.util.NoSuchElementException e) {
-                Log.e(TAG, "Encountered " + e + " in FocusStackEntry.unlinkToDeath()");
-            }
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            unlinkToDeath(); // unlink exception handled inside method
-            super.finalize();
-        }
+    public void unregisterMediaButtonEventReceiverForCalls() {
+        mMediaFocusControl.unregisterMediaButtonEventReceiverForCalls();
     }
 
-    private final Stack<FocusStackEntry> mFocusStack = new Stack<FocusStackEntry>();
-
-    /**
-     * Helper function:
-     * Display in the log the current entries in the audio focus stack
-     */
-    private void dumpFocusStack(PrintWriter pw) {
-        pw.println("\nAudio Focus stack entries (last is top of stack):");
-        synchronized(mAudioFocusLock) {
-            Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
-            while(stackIterator.hasNext()) {
-                FocusStackEntry fse = stackIterator.next();
-                pw.println("  source:" + fse.mSourceRef
-                        + " -- pack: " + fse.mPackageName
-                        + " -- client: " + fse.mClientId
-                        + " -- duration: " + fse.mFocusChangeType
-                        + " -- uid: " + fse.mCallingUid
-                        + " -- stream: " + fse.mStreamType);
-            }
-        }
+    public void registerMediaButtonIntent(PendingIntent pi, ComponentName c, IBinder token) {
+        mMediaFocusControl.registerMediaButtonIntent(pi, c, token);
     }
 
-    /**
-     * Helper function:
-     * Called synchronized on mAudioFocusLock
-     * Remove a focus listener from the focus stack.
-     * @param clientToRemove the focus listener
-     * @param signal if true and the listener was at the top of the focus stack, i.e. it was holding
-     *   focus, notify the next item in the stack it gained focus.
-     */
-    private void removeFocusStackEntry(String clientToRemove, boolean signal) {
-        // is the current top of the focus stack abandoning focus? (because of request, not death)
-        if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientToRemove))
-        {
-            //Log.i(TAG, "   removeFocusStackEntry() removing top of stack");
-            FocusStackEntry fse = mFocusStack.pop();
-            fse.unlinkToDeath();
-            if (signal) {
-                // notify the new top of the stack it gained focus
-                notifyTopOfAudioFocusStack();
-                // there's a new top of the stack, let the remote control know
-                synchronized(mRCStack) {
-                    checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-                }
-            }
-        } else {
-            // focus is abandoned by a client that's not at the top of the stack,
-            // no need to update focus.
-            // (using an iterator on the stack so we can safely remove an entry after having
-            //  evaluated it, traversal order doesn't matter here)
-            Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
-            while(stackIterator.hasNext()) {
-                FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
-                if(fse.mClientId.equals(clientToRemove)) {
-                    Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
-                            + fse.mClientId);
-                    stackIterator.remove();
-                    fse.unlinkToDeath();
-                }
-            }
-        }
+    public void unregisterMediaButtonIntent(PendingIntent pi) {
+        mMediaFocusControl.unregisterMediaButtonIntent(pi);
     }
 
-    /**
-     * Helper function:
-     * Called synchronized on mAudioFocusLock
-     * Remove focus listeners from the focus stack for a particular client when it has died.
-     */
-    private void removeFocusStackEntryForClient(IBinder cb) {
-        // is the owner of the audio focus part of the client to remove?
-        boolean isTopOfStackForClientToRemove = !mFocusStack.isEmpty() &&
-                mFocusStack.peek().mSourceRef.equals(cb);
-        // (using an iterator on the stack so we can safely remove an entry after having
-        //  evaluated it, traversal order doesn't matter here)
-        Iterator<FocusStackEntry> stackIterator = mFocusStack.iterator();
-        while(stackIterator.hasNext()) {
-            FocusStackEntry fse = (FocusStackEntry)stackIterator.next();
-            if(fse.mSourceRef.equals(cb)) {
-                Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
-                        + fse.mClientId);
-                stackIterator.remove();
-                // the client just died, no need to unlink to its death
-            }
-        }
-        if (isTopOfStackForClientToRemove) {
-            // we removed an entry at the top of the stack:
-            //  notify the new top of the stack it gained focus.
-            notifyTopOfAudioFocusStack();
-            // there's a new top of the stack, let the remote control know
-            synchronized(mRCStack) {
-                checkUpdateRemoteControlDisplay_syncAfRcs(RC_INFO_ALL);
-            }
-        }
+    public int registerRemoteControlClient(PendingIntent mediaIntent,
+            IRemoteControlClient rcClient, String callingPckg) {
+        return mMediaFocusControl.registerRemoteControlClient(mediaIntent, rcClient, callingPckg);
+    }
+
+    public void unregisterRemoteControlClient(PendingIntent mediaIntent,
+            IRemoteControlClient rcClient) {
+        mMediaFocusControl.unregisterRemoteControlClient(mediaIntent, rcClient);
+    }
+
+    public void setRemoteControlClientPlaybackPosition(int generationId, long timeMs) {
+        mMediaFocusControl.setRemoteControlClientPlaybackPosition(generationId, timeMs);
+    }
+
+    public void updateRemoteControlClientMetadata(int generationId, int key, Rating value) {
+        mMediaFocusControl.updateRemoteControlClientMetadata(generationId, key, value);
+    }
+
+    public void registerRemoteVolumeObserverForRcc(int rccId, IRemoteVolumeObserver rvo) {
+        mMediaFocusControl.registerRemoteVolumeObserverForRcc(rccId, rvo);
+    }
+
+    public int getRemoteStreamVolume() {
+        return mMediaFocusControl.getRemoteStreamVolume();
+    }
+
+    public int getRemoteStreamMaxVolume() {
+        return mMediaFocusControl.getRemoteStreamMaxVolume();
     }
 
     /**
@@ -4533,27 +4449,24 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         return true;
     }
 
-    /**
-     * Inner class to monitor audio focus client deaths, and remove them from the audio focus
-     * stack if necessary.
-     */
-    private class AudioFocusDeathHandler implements IBinder.DeathRecipient {
-        private IBinder mCb; // To be notified of client's death
+    public void setRemoteStreamVolume(int index) {
+        mMediaFocusControl.setRemoteStreamVolume(index);
+    }
 
-        AudioFocusDeathHandler(IBinder cb) {
-            mCb = cb;
-        }
+    public void setPlaybackStateForRcc(int rccId, int state, long timeMs, float speed) {
+        mMediaFocusControl.setPlaybackStateForRcc(rccId, state, timeMs, speed);
+    }
 
-        public void binderDied() {
-            synchronized(mAudioFocusLock) {
-                Log.w(TAG, "  AudioFocus   audio focus client died");
-                removeFocusStackEntryForClient(mCb);
-            }
-        }
+    public void setPlaybackInfoForRcc(int rccId, int what, int value) {
+        mMediaFocusControl.setPlaybackInfoForRcc(rccId, what, value);
+    }
 
-        public IBinder getBinder() {
-            return mCb;
-        }
+    public void dispatchMediaKeyEvent(KeyEvent keyEvent) {
+        mMediaFocusControl.dispatchMediaKeyEvent(keyEvent);
+    }
+
+    public void dispatchMediaKeyEventUnderWakelock(KeyEvent keyEvent) {
+        mMediaFocusControl.dispatchMediaKeyEventUnderWakelock(keyEvent);
     }
 
 
@@ -6431,50 +6344,21 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         }
     }
 
-    public int getRemoteStreamVolume() {
-        synchronized (mMainRemote) {
-            if (mMainRemote.mRccId == RemoteControlClient.RCSE_ID_UNREGISTERED) {
-                return 0;
-            }
-            return mMainRemote.mVolume;
-        }
+    //==========================================================================================
+    // Audio Focus
+    //==========================================================================================
+    public int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName) {
+        return mMediaFocusControl.requestAudioFocus(mainStreamType, durationHint, cb, fd,
+                clientId, callingPackageName);
     }
 
-    public void setRemoteStreamVolume(int vol) {
-        if (DEBUG_VOL) { Log.d(TAG, "setRemoteStreamVolume(vol="+vol+")"); }
-        int rccId = RemoteControlClient.RCSE_ID_UNREGISTERED;
-        synchronized (mMainRemote) {
-            if (mMainRemote.mRccId == RemoteControlClient.RCSE_ID_UNREGISTERED) {
-                return;
-            }
-            rccId = mMainRemote.mRccId;
-        }
-        IRemoteVolumeObserver rvo = null;
-        synchronized (mRCStack) {
-            // The stack traversal order doesn't matter because there is only one stack entry
-            //  with this RCC ID, but the matching ID is more likely at the top of the stack, so
-            //  start iterating from the top.
-            try {
-                for (int index = mRCStack.size()-1; index >= 0; index--) {
-                    final RemoteControlStackEntry rcse = mRCStack.elementAt(index);
-                    //FIXME OPTIMIZE store this info in mMainRemote so we don't have to iterate?
-                    if (rcse.mRccId == rccId) {
-                        rvo = rcse.mRemoteVolumeObs;
-                        break;
-                    }
-                }
-            } catch (ArrayIndexOutOfBoundsException e) {
-                // not expected to happen, indicates improper concurrent modification
-                Log.e(TAG, "Wrong index accessing media button stack, lock error? ", e);
-            }
-        }
-        if (rvo != null) {
-            try {
-                rvo.dispatchRemoteVolumeUpdate(0, vol);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Error dispatching absolute volume update", e);
-            }
-        }
+    public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId) {
+        return mMediaFocusControl.abandonAudioFocus(fd, clientId);
+    }
+
+    public void unregisterAudioFocusClient(String clientId) {
+        mMediaFocusControl.unregisterAudioFocusClient(clientId);
     }
 
     /**
@@ -6508,6 +6392,10 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                 remoteSliderVisibility(hasRemotePlayback);
             }
         }
+    }
+
+    public int getCurrentAudioFocus() {
+        return mMediaFocusControl.getCurrentAudioFocus();
     }
 
     //==========================================================================================
@@ -6706,8 +6594,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private void setSafeMediaVolumeEnabled(boolean on) {
         synchronized (mSafeMediaVolumeState) {
-            if (mSafeVolumeEnabled &&
-                    (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_NOT_CONFIGURED) &&
+            if ((mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_NOT_CONFIGURED) &&
                     (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_DISABLED)) {
                 if (on && (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_INACTIVE)) {
                     mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
@@ -6754,8 +6641,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
 
     private boolean checkSafeMediaVolume(int streamType, int index, int device) {
         synchronized (mSafeMediaVolumeState) {
-            if (mSafeVolumeEnabled &&
-                    (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) &&
+            if ((mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) &&
                     (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
                     ((device & mSafeMediaVolumeDevices) != 0) &&
                     (index > mSafeMediaVolumeIndex)) {
@@ -6815,14 +6701,20 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
 
-        dumpFocusStack(pw);
-        dumpRCStack(pw);
-        dumpRCCStack(pw);
-        dumpRCDList(pw);
+        mMediaFocusControl.dump(pw);
         dumpStreamStates(pw);
         dumpRingerMode(pw);
         pw.println("\nAudio routes:");
         pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mMainType));
         pw.print("  mBluetoothName="); pw.println(mCurAudioRoutes.mBluetoothName);
+    }
+
+    // Inform AudioFlinger of our device's low RAM attribute
+    private static void readAndSetLowRamDevice()
+    {
+        int status = AudioSystem.setLowRamDevice(ActivityManager.isLowRamDeviceStatic());
+        if (status != 0) {
+            Log.w(TAG, "AudioFlinger informed of device's low RAM attribute; status " + status);
+        }
     }
 }

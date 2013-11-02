@@ -54,4 +54,5 @@ interface IStatusBarService
     void toggleRecentApps();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
+    void setWindowState(int window, int state);
 }

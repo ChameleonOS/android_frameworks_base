@@ -39,27 +39,28 @@
 
       <li class="nav-section">
         <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/basics/activity-lifecycle/index.html"
+          <a href="<?cs var:toroot ?>training/basics/actionbar/index.html"
              description=
-             "How Android activities live and die and how to create
-             a seamless user experience by implementing lifecycle callback methods."
-            >Managing the Activity Lifecycle</a>
+             "The action bar is one of the most important design elements you can implement for your
+app's activities. Although first introduced with API level 11, you can use the Support Library to
+include the action bar on devices running Android 2.1 or higher."
+            >Adding the Action Bar</a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/starting.html">
-            Starting an Activity
+          <li><a href="<?cs var:toroot ?>training/basics/actionbar/setting-up.html">
+            Setting Up the Action Bar
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/pausing.html">
-            Pausing and Resuming an Activity
+          <li><a href="<?cs var:toroot ?>training/basics/actionbar/adding-buttons.html">
+            Adding Action Buttons
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/stopping.html">
-            Stopping and Restarting an Activity
+          <li><a href="<?cs var:toroot ?>training/basics/actionbar/styling.html">
+            Styling the Action Bar
           </a>
           </li>
-          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/recreating.html">
-            Recreating an Activity
+          <li><a href="<?cs var:toroot ?>training/basics/actionbar/overlaying.html">
+            Overlaying the Action Bar
           </a>
           </li>
         </ul>
@@ -91,6 +92,34 @@
 
       <li class="nav-section">
         <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/basics/activity-lifecycle/index.html"
+             description=
+             "How Android activities live and die and how to create
+             a seamless user experience by implementing lifecycle callback methods."
+            >Managing the Activity Lifecycle</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/starting.html">
+            Starting an Activity
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/pausing.html">
+            Pausing and Resuming an Activity
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/stopping.html">
+            Stopping and Restarting an Activity
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/recreating.html">
+            Recreating an Activity
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/fragments/index.html"
              description=
              "How to build a user interface for your app that is flexible enough
@@ -100,10 +129,6 @@
             >Building a Dynamic UI with Fragments</a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/basics/fragments/support-lib.html">
-            Using the Support Library
-          </a>
-          </li>
           <li><a href="<?cs var:toroot ?>training/basics/fragments/creating.html">
             Creating a Fragment
           </a>
@@ -167,33 +192,91 @@
         </ul>
       </li>
 
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/sharing/index.html"
-             description=
-             "How to take your app interaction to the next level by sharing
-             information with other apps, receive information back, and provide a simple and
-             scalable way to perform Share actions with user content."
-            >Sharing Content</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/sharing/send.html">
-            Sending Content to Other Apps
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/sharing/receive.html">
-            Receiving Content from Other Apps
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/sharing/shareaction.html">
-            Adding an Easy Share Action
-          </a>
-          </li>
-        </ul>
-      </li>
     </ul>
   </li><!-- end getting started -->
-
+    <li class="nav-section">
+        <div class="nav-section-header">
+            <a href="<?cs var:toroot ?>training/building-content-sharing.html">
+            <span class="small">Building Apps with</span><br/>Content Sharing
+            </a>
+        </div>
+        <ul>
+            <li class="nav-section">
+                <div class="nav-section-header">
+                    <a href="<?cs var:toroot ?>training/sharing/index.html"
+                    description=
+                    "How to take your app interaction to the next level by sharing
+                    information with other apps, receive information back, and provide a simple and
+                    scalable way to perform Share actions with user content."
+                    >Sharing Simple Data</a>
+                </div>
+                <ul>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/sharing/send.html">
+                        Sending Simple Data to Other Apps
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/sharing/receive.html">
+                        Receiving Simple Data from Other Apps
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/sharing/shareaction.html">
+                        Adding an Easy Share Action
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-section">
+                <div class="nav-section-header">
+                    <a href="<?cs var:toroot?>training/secure-file-sharing/index.html"
+                    description=
+                    "How to provide secure access to a file associated with your app using a content
+                    URI and temporary access permissions."
+                    >Sharing Files</a>
+                </div>
+                <ul>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/secure-file-sharing/setup-sharing.html">
+                        Setting Up File Sharing
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/secure-file-sharing/share-file.html">
+                        Sharing a File
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/secure-file-sharing/request-file.html">
+                        Requesting a Shared File
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/secure-file-sharing/retrieve-info.html">
+                        Retrieving File Information
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-section">
+                <div class="nav-section-header">
+                    <a href="<?cs var:toroot ?>training/beam-files/index.html"
+                    description=
+                    "How to transfer files between devices using the NFC Android Beam feature."
+                    >Sharing Files with NFC</a>
+                </div>
+                <ul>
+                    <li>
+                        <a href="<?cs var:toroot ?>training/beam-files/send-files.html"
+                        >Sending Files to Another Device</a>
+                    </li>
+                    <li><a href="<?cs var:toroot ?>training/beam-files/receive-files.html"
+                    >Receiving Files from Another Device</a></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
 
 
 
@@ -380,7 +463,7 @@
           <a href="<?cs var:toroot ?>training/connect-devices-wirelessly/index.html"
              description=
              "How to find and connect to local devices using Network Service
-             Discovery and Wi-Fi Direct in order to create peer-to-peer connections."
+             Discovery and how to create peer-to-peer connections with Wi-Fi."
              >Connecting Devices Wirelessly</a>
         </div>
         <ul>
@@ -389,16 +472,15 @@
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/connect-devices-wirelessly/wifi-direct.html">
-            Connecting with Wi-Fi Direct
+            Creating P2P Connections with Wi-Fi
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/connect-devices-wirelessly/nsd-wifi-direct.html">
-            Using Wi-Fi Direct for Service Discovery
+            Using Wi-Fi P2P for Service Discovery
           </a>
           </li>
         </ul>
       </li>
-
        <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/network-ops/index.html"
@@ -473,7 +555,7 @@
            "How to design a robust conflict resolution strategy for apps that save data to the cloud."
            >Resolving Cloud Save Conflicts
           </a>
-          </li>
+        </li>
       </li>
       <li class="nav-section">
         <div class="nav-section-header">
@@ -551,29 +633,6 @@
           </li>
         </ul>
       </li>
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/id-auth/index.html"
-             description=
-             "How to remember the user by account, authenticate the user, acquire user permission
-             for the user's online data, and create custom accounts on the device."
-            >Remembering Users</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/id-auth/identify.html">
-            Remembering Your User
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/id-auth/authenticate.html">
-            Authenticating to OAuth2 Services
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/id-auth/custom_auth.html">
-            Creating a Custom Account Type
-          </a>
-          </li>
-        </ul>
-      </li>
 
       <li class="nav-section">
         <div class="nav-section-header">
@@ -604,6 +663,10 @@
           </li>
           <li><a href="<?cs var:toroot ?>training/location/activity-recognition.html">
           Recognizing the User's Current Activity
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/location/location-testing.html">
+          Testing Using Mock Locations
           </a>
           </li>
         </ul>
@@ -964,48 +1027,12 @@
 
   <li class="nav-section">
     <div class="nav-section-header">
-      <a href="<?cs var:toroot ?>training/best-performance.html">
+      <a href="<?cs var:toroot ?>training/best-background.html">
       <span class="small">Best Practices for</span><br/>
-              Performance
+              Background Jobs
       </a>
     </div>
     <ul>
-
-      <li>
-        <a href="<?cs var:toroot ?>training/articles/perf-tips.html"
-           description=
-           "How to optimize your app's performance in various ways to improve its
-           responsiveness and battery efficiency."
-          >Performance Tips</a>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/improving-layouts/index.html"
-             description=
-             "How to identify problems in your app's layout performance and improve the UI
-             responsiveness."
-            >Improving Layout Performance</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/improving-layouts/optimizing-layout.html">
-            Optimizing Layout Hierarchies
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/improving-layouts/reusing-layouts.html">
-            Re-using Layouts with &lt;include/&gt;
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/improving-layouts/loading-ondemand.html">
-            Loading Views On Demand
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/improving-layouts/smooth-scrolling.html">
-            Making ListView Scrolling Smooth
-          </a>
-          </li>
-        </ul>
-      </li>
 
       <li class="nav-section">
         <div class="nav-section-header">
@@ -1044,6 +1071,78 @@
           </li>
           <li><a href="<?cs var:toroot ?>training/load-data-background/handle-results.html">
             Handling the Results</a>
+          </li>
+        </ul>
+      </li>
+
+       <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/scheduling/index.html"
+             description="How to use repeating alarms and wake locks
+             to run background jobs."
+            >Managing Device Awake State</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/scheduling/wakelock.html">
+            Keeping the Device Awake</a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/scheduling/alarms.html">
+            Scheduling Repeating Alarms</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li> <!-- end of Background Jobs -->
+
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/best-performance.html">
+      <span class="small">Best Practices for</span><br/>
+              Performance
+      </a>
+    </div>
+    <ul>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/memory.html"
+           description=
+           "How to keep your app's memory footprint small in order to improve performance
+           on a variety of mobile devices."
+          >Managing Your App's Memory</a>
+      </li>
+
+      <li>
+        <a href="<?cs var:toroot ?>training/articles/perf-tips.html"
+           description=
+           "How to optimize your app's performance in various ways to improve its
+           responsiveness and battery efficiency."
+          >Performance Tips</a>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/improving-layouts/index.html"
+             description=
+             "How to identify problems in your app's layout performance and improve the UI
+             responsiveness."
+            >Improving Layout Performance</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/improving-layouts/optimizing-layout.html">
+            Optimizing Layout Hierarchies
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/improving-layouts/reusing-layouts.html">
+            Re-using Layouts with &lt;include/&gt;
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/improving-layouts/loading-ondemand.html">
+            Loading Views On Demand
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/improving-layouts/smooth-scrolling.html">
+            Making ListView Scrolling Smooth
+          </a>
           </li>
         </ul>
       </li>
@@ -1147,7 +1246,6 @@
       </a>
     </div>
     <ul>
-
       <li>
         <a href="<?cs var:toroot ?>training/articles/security-tips.html"
            description=
@@ -1180,6 +1278,45 @@
   </li>
   <!-- End security and user info -->
 
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/testing.html">
+      <span class="small">Best Practices for</span><br/>
+              Testing
+      </a>
+    </div>
+    <ul>
+      <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/activity-testing/index.html"
+         description="How to test Activities in your Android applications.">
+            Testing Your Activity
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/preparing-activity-testing.html">
+            <span class="en">Setting Up Your Test Environment</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-basic-testing.html">
+            <span class="en">Creating and Running a Test Case</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-ui-testing.html">
+            <span class="en">Testing UI Components</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-unit-testing.html">
+            <span class="en">Creating Unit Tests</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-functional-testing.html">
+            <span class="en">Creating Functional Tests</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <!-- End best Testing -->
 
   <li class="nav-section">
     <div class="nav-section-header">

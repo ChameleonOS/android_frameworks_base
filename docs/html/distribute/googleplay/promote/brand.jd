@@ -1,13 +1,6 @@
 page.title=Brand Guidelines
 @jd:body
-<div id="butterbar-wrapper" >
-  <div id="butterbar" >
-    <div id="butterbar-message">
-<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
-      Take the Android Developer Survey</a>
-    </div>
-  </div>
-</div>
+
 
 
 <p>We encourage you to use the Android and Google Play brands with your Android app
@@ -28,8 +21,8 @@ provided that you follow the guidelines described below.</p>
     <ul>
     <li>Android&trade; should have a trademark symbol the first time it appears in a creative.</li>
     <li>Android should always be capitalized and is never plural or possessive.</li>
-    <li>"Android" by itself cannot be used in the name of an application name or accessory product.
-Instead use "for Android."
+    <li>"Android" cannot be used in names of applications or accessory products,
+    including phones, tablets, TVs, speakers, headphones, watches, and other devices. Instead use "for Android".
       <ul>
         <li><span style="color:red">Incorrect</span>: "Android MediaPlayer"</li>
         <li><span style="color:green">Correct</span>: "MediaPlayer for Android"</li>

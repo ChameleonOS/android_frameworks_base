@@ -72,7 +72,7 @@ import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
 import libcore.io.Streams;
-import libcore.io.StructStatFs;
+import libcore.io.StructStatVfs;
 
 /*
  * This service copies a downloaded apk to a file passed in as
@@ -147,6 +147,8 @@ public class DefaultContainerService extends IntentService {
                 Slog.e(TAG, "Could not copy URI " + packageURI.toString() + " Security: "
                                 + e.getMessage());
                 return PackageManager.INSTALL_FAILED_INVALID_APK;
+            } finally {
+                IoUtils.closeQuietly(autoOut);
             }
         }
 
@@ -279,7 +281,7 @@ public class DefaultContainerService extends IntentService {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
             try {
-                final StructStatFs stat = Libcore.os.statfs(path);
+                final StructStatVfs stat = Libcore.os.statvfs(path);
                 final long totalSize = stat.f_blocks * stat.f_bsize;
                 final long availSize = stat.f_bavail * stat.f_bsize;
                 return new long[] { totalSize, availSize };
@@ -339,14 +341,20 @@ public class DefaultContainerService extends IntentService {
             try {
                 while ((item = pm.nextPackageToClean(item)) != null) {
                     final UserEnvironment userEnv = new UserEnvironment(item.userId);
-                    eraseFiles(userEnv.getExternalStorageAppDataDirectory(item.packageName));
-                    eraseFiles(userEnv.getExternalStorageAppMediaDirectory(item.packageName));
+                    eraseFiles(userEnv.buildExternalStorageAppDataDirs(item.packageName));
+                    eraseFiles(userEnv.buildExternalStorageAppMediaDirs(item.packageName));
                     if (item.andCode) {
-                        eraseFiles(userEnv.getExternalStorageAppObbDirectory(item.packageName));
+                        eraseFiles(userEnv.buildExternalStorageAppObbDirs(item.packageName));
                     }
                 }
             } catch (RemoteException e) {
             }
+        }
+    }
+
+    void eraseFiles(File[] paths) {
+        for (File path : paths) {
+            eraseFiles(path);
         }
     }
 

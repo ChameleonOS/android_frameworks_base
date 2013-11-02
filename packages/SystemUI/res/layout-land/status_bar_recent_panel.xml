@@ -49,7 +49,8 @@
                 android:layout_height="match_parent"
                 android:layoutDirection="ltr"
                 android:layout_gravity="left"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:fitsSystemWindows="true">
             </LinearLayout>
 
         </com.android.systemui.recent.RecentsHorizontalScrollView>

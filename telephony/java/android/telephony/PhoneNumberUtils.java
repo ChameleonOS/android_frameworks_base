@@ -152,6 +152,11 @@ public class PhoneNumberUtils
         String number = null;
 
         Uri uri = intent.getData();
+
+        if (uri == null) {
+            return null;
+        }
+
         String scheme = uri.getScheme();
 
         if (scheme.equals("tel") || scheme.equals("sip")) {
@@ -1800,7 +1805,7 @@ public class PhoneNumberUtils
         String countryIso;
         CountryDetector detector = (CountryDetector) context.getSystemService(
                 Context.COUNTRY_DETECTOR);
-        if (detector != null) {
+        if (detector != null && detector.detectCountry() != null) {
             countryIso = detector.detectCountry().getCountryIso();
         } else {
             Locale locale = context.getResources().getConfiguration().locale;

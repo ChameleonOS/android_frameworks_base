@@ -88,7 +88,7 @@ public final class ServerOperation implements Operation, BaseStream {
 
     private boolean mHasBody;
 
-    private boolean mEndofBody = true;
+    private boolean mSendBodyHeader = true;
 
     /**
      * Creates new ServerOperation
@@ -366,31 +366,33 @@ public final class ServerOperation implements Operation, BaseStream {
                  * (End of Body) otherwise, we need to send 0x48 (Body)
                  */
                 if ((finalBitSet) || (mPrivateOutput.isClosed())) {
-                    if (mEndofBody) {
-                        out.write((byte)0x49);
+                    if(mSendBodyHeader == true) {
+                        out.write(0x49);
                         bodyLength += 3;
                         out.write((byte)(bodyLength >> 8));
                         out.write((byte)bodyLength);
                         out.write(body);
                     }
                 } else {
+                    if(mSendBodyHeader == true) {
                     out.write(0x48);
                     bodyLength += 3;
                     out.write((byte)(bodyLength >> 8));
                     out.write((byte)bodyLength);
                     out.write(body);
+                    }
                 }
 
             }
         }
 
         if ((finalBitSet) && (type == ResponseCodes.OBEX_HTTP_OK) && (orginalBodyLength <= 0)) {
-            if (mEndofBody) {
-               out.write(0x49);
-               orginalBodyLength = 3;
-               out.write((byte)(orginalBodyLength >> 8));
-               out.write((byte)orginalBodyLength);
-           }
+            if(mSendBodyHeader == true) {
+                out.write(0x49);
+                orginalBodyLength = 3;
+                out.write((byte)(orginalBodyLength >> 8));
+                out.write((byte)orginalBodyLength);
+            }
         }
 
         mResponseSize = 3;
@@ -721,8 +723,7 @@ public final class ServerOperation implements Operation, BaseStream {
 
     }
 
-    public void noEndofBody() {
-        mEndofBody = false;
+    public void noBodyHeader(){
+        mSendBodyHeader = false;
     }
-
 }

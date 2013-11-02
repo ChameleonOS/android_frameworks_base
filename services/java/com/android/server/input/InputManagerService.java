@@ -289,7 +289,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // TODO(BT) Pass in paramter for bluetooth system
-    public void systemReady() {
+    public void systemRunning() {
         if (DEBUG) {
             Slog.d(TAG, "System ready.");
         }
@@ -1341,8 +1341,9 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     private long notifyANR(InputApplicationHandle inputApplicationHandle,
-            InputWindowHandle inputWindowHandle) {
-        return mWindowManagerCallbacks.notifyANR(inputApplicationHandle, inputWindowHandle);
+            InputWindowHandle inputWindowHandle, String reason) {
+        return mWindowManagerCallbacks.notifyANR(
+                inputApplicationHandle, inputWindowHandle, reason);
     }
 
     // Native callback.
@@ -1526,7 +1527,7 @@ public class InputManagerService extends IInputManager.Stub
         public void notifyInputChannelBroken(InputWindowHandle inputWindowHandle);
 
         public long notifyANR(InputApplicationHandle inputApplicationHandle,
-                InputWindowHandle inputWindowHandle);
+                InputWindowHandle inputWindowHandle, String reason);
 
         public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn);
 

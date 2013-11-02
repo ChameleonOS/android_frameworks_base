@@ -146,9 +146,6 @@
           <li><a href="<?cs var:toroot ?>guide/topics/ui/layout/grid.html">
               <span class="en">Grid Layout</span>
             </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/ui/layout/tabs.html">
-              <span class="en">Tab Layout</span>
-            </a></li>
        -->
           <li><a href="<?cs var:toroot ?>guide/topics/ui/layout/listview.html">
               <span class="en">List View</span>
@@ -411,7 +408,7 @@
         </ul>
       </li>
       <li><a href="<?cs var:toroot?>guide/topics/connectivity/wifip2p.html">
-            <span class="en">Wi-Fi Direct</span></a>
+            <span class="en">Wi-Fi P2P</span></a>
           </li>
       <li class="nav-section">
           <div class="nav-section-header"><a href="<?cs var:toroot?>guide/topics/connectivity/usb/index.html">
