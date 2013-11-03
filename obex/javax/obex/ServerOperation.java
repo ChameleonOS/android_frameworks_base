@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011, Motorola, Inc.
+ * Copyright (c) 2008-2009, Motorola, Inc.
  *
  * All rights reserved.
  *

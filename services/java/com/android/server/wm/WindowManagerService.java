@@ -27,9 +27,6 @@ import android.util.TimeUtils;
 import android.view.IWindowId;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.app.ThemeUtils;
-
-import com.android.internal.os.IDeviceHandler;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
 import com.android.internal.util.FastPrintWriter;
@@ -55,7 +52,6 @@ import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
 import android.animation.ValueAnimator;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -63,7 +59,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -322,7 +317,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mLimitedAlphaCompositing;
 
-    final WindowManagerPolicy mPolicy;
+    final WindowManagerPolicy mPolicy = PolicyManager.makeNewWindowManager();
 
     final IActivityManager mActivityManager;
 
@@ -548,8 +543,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final DisplayManagerService mDisplayManagerService;
     final DisplayManager mDisplayManager;
 
-    private boolean mForceDisableHardwareKeyboard = false;
-
     // Who is holding the screen on.
     Session mHoldingScreenOn;
     PowerManager.WakeLock mHoldingScreenWakeLock;
@@ -698,12 +691,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public static WindowManagerService main(final Context context,
             final PowerManagerService pm, final DisplayManagerService dm,
-<<<<<<< HEAD
-            final InputManagerService im, final IDeviceHandler device,
-            final Handler uiHandler, final Handler wmHandler,
-=======
             final InputManagerService im, final Handler wmHandler,
->>>>>>> android-4.4_r1
             final boolean haveInputMethods, final boolean showBootMsgs,
             final boolean onlyCore) {
         final WindowManagerService[] holder = new WindowManagerService[1];
@@ -711,11 +699,7 @@ public class WindowManagerService extends IWindowManager.Stub
             @Override
             public void run() {
                 holder[0] = new WindowManagerService(context, pm, dm, im,
-<<<<<<< HEAD
-                        device, uiHandler, haveInputMethods, showBootMsgs, onlyCore);
-=======
                         haveInputMethods, showBootMsgs, onlyCore);
->>>>>>> android-4.4_r1
             }
         }, 0);
         return holder[0];
@@ -737,10 +721,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private WindowManagerService(Context context, PowerManagerService pm,
             DisplayManagerService displayManager, InputManagerService inputManager,
-<<<<<<< HEAD
-            IDeviceHandler device, Handler uiHandler,
-=======
->>>>>>> android-4.4_r1
             boolean haveInputMethods, boolean showBootMsgs, boolean onlyCore) {
         mContext = context;
         mHaveInputMethods = haveInputMethods;
@@ -751,7 +731,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerService = displayManager;
         mHeadless = displayManager.isHeadless();
-        mPolicy = PolicyManager.makeNewWindowManager(device);
         mDisplaySettings = new DisplaySettings(context);
         mDisplaySettings.readSettingsLocked();
 
@@ -806,14 +785,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mAnimator = new WindowAnimator(this);
 
-<<<<<<< HEAD
-        mForceDisableHardwareKeyboard = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_forceDisableHardwareKeyboard);
-
-        initPolicy(uiHandler);
-=======
         initPolicy(UiThread.getHandler());
->>>>>>> android-4.4_r1
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
@@ -826,9 +798,6 @@ public class WindowManagerService extends IWindowManager.Stub
         } finally {
             SurfaceControl.closeTransaction();
         }
-        
-        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
-        settingsObserver.observe();
     }
 
     public InputMonitor getInputMonitor() {
@@ -5222,16 +5191,15 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputManager.setInputFilter(filter);
     }
 
-<<<<<<< HEAD
     // Called by window manager policy.  Not exposed externally.
     @Override
     public void reboot() {
         ShutdownThread.reboot(mContext, null, true);
-=======
+    }
+
     @Override
     public void setTouchExplorationEnabled(boolean enabled) {
         mPolicy.setTouchExplorationEnabled(enabled);
->>>>>>> android-4.4_r1
     }
 
     public void setCurrentUser(final int newUserId) {
@@ -5692,8 +5660,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 // The screenshot API does not apply the current screen rotation.
                 rot = getDefaultDisplayContentLocked().getDisplay().getRotation();
-                // Allow for abnormal hardware orientation
-                rot = (rot + (android.os.SystemProperties.getInt("ro.sf.hwrotation",0) / 90 )) % 4;
                 int fw = frame.width();
                 int fh = frame.height();
 
@@ -6651,85 +6617,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return sw;
     }
 
-    private static class ApplicationDisplayMetrics {
-        boolean rotated;
-        int dh;
-        int dw;
-        int appWidth;
-        int appHeight;
-    }
-
-    private ApplicationDisplayMetrics calculateDisplayMetrics(DisplayContent displayContent) {
-        ApplicationDisplayMetrics dm = new ApplicationDisplayMetrics();
-
-        dm.rotated = (mRotation == Surface.ROTATION_90 || mRotation == Surface.ROTATION_270);
-        final int realdw = dm.rotated ?
-                displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
-        final int realdh = dm.rotated ?
-                displayContent.mBaseDisplayWidth : displayContent.mBaseDisplayHeight;
-
-        dm.dw = realdw;
-        dm.dh = realdh;
-
-        if (mAltOrientation) {
-            if (realdw > realdh) {
-                // Turn landscape into portrait.
-                int maxw = (int)(realdh/1.3f);
-                if (maxw < realdw) {
-                    dm.dw = maxw;
-                }
-            } else {
-                // Turn portrait into landscape.
-                int maxh = (int)(realdw/1.3f);
-                if (maxh < realdh) {
-                    dm.dh = maxh;
-                }
-            }
-        }
-
-        return dm;
-    }
-
-    private ApplicationDisplayMetrics updateApplicationDisplayMetricsLocked(
-            DisplayContent displayContent) {
-        if (!mDisplayReady) {
-            return null;
-        }
-
-        final ApplicationDisplayMetrics m = calculateDisplayMetrics(displayContent);
-        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-
-        m.appWidth = mPolicy.getNonDecorDisplayWidth(m.dw, m.dh, mRotation);
-        m.appHeight = mPolicy.getNonDecorDisplayHeight(m.dw, m.dh, mRotation);
-
-        synchronized(displayContent.mDisplaySizeLock) {
-            displayInfo.rotation = mRotation;
-            displayInfo.logicalWidth = m.dw;
-            displayInfo.logicalHeight = m.dh;
-            displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
-<<<<<<< HEAD
-            displayInfo.appWidth = m.appWidth;
-            displayInfo.appHeight = m.appHeight;
-            displayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
-            displayInfo.getAppMetrics(mDisplayMetrics, null);
-=======
-            displayInfo.appWidth = appWidth;
-            displayInfo.appHeight = appHeight;
-            displayInfo.getLogicalMetrics(mRealDisplayMetrics,
-                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
-            displayInfo.getAppMetrics(mDisplayMetrics);
->>>>>>> android-4.4_r1
-            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
-                    displayContent.getDisplayId(), displayInfo);
-        }
-
-        if (false) {
-            Slog.i(TAG, "Set app display size: " + m.appWidth + " x " + m.appHeight);
-        }
-
-        return m;
-    }
-
     boolean computeScreenConfigurationLocked(Configuration config) {
         if (!mDisplayReady) {
             return false;
@@ -6738,19 +6625,58 @@ public class WindowManagerService extends IWindowManager.Stub
         // TODO(multidisplay): For now, apply Configuration to main screen only.
         final DisplayContent displayContent = getDefaultDisplayContentLocked();
 
-        // Update application display metrics.
-        final ApplicationDisplayMetrics appDm = updateApplicationDisplayMetricsLocked(
-                displayContent);
-        final boolean rotated = appDm.rotated;
-        final int dw = appDm.dw;
-        final int dh = appDm.dh;
+        // Use the effective "visual" dimensions based on current rotation
+        final boolean rotated = (mRotation == Surface.ROTATION_90
+                || mRotation == Surface.ROTATION_270);
+        final int realdw = rotated ?
+                displayContent.mBaseDisplayHeight : displayContent.mBaseDisplayWidth;
+        final int realdh = rotated ?
+                displayContent.mBaseDisplayWidth : displayContent.mBaseDisplayHeight;
+        int dw = realdw;
+        int dh = realdh;
+
+        if (mAltOrientation) {
+            if (realdw > realdh) {
+                // Turn landscape into portrait.
+                int maxw = (int)(realdh/1.3f);
+                if (maxw < realdw) {
+                    dw = maxw;
+                }
+            } else {
+                // Turn portrait into landscape.
+                int maxh = (int)(realdw/1.3f);
+                if (maxh < realdh) {
+                    dh = maxh;
+                }
+            }
+        }
 
         if (config != null) {
             config.orientation = (dw <= dh) ? Configuration.ORIENTATION_PORTRAIT :
                     Configuration.ORIENTATION_LANDSCAPE;
         }
 
+        // Update application display metrics.
+        final int appWidth = mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation);
+        final int appHeight = mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation);
         final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        synchronized(displayContent.mDisplaySizeLock) {
+            displayInfo.rotation = mRotation;
+            displayInfo.logicalWidth = dw;
+            displayInfo.logicalHeight = dh;
+            displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
+            displayInfo.appWidth = appWidth;
+            displayInfo.appHeight = appHeight;
+            displayInfo.getLogicalMetrics(mRealDisplayMetrics,
+                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+            displayInfo.getAppMetrics(mDisplayMetrics);
+            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
+                    displayContent.getDisplayId(), displayInfo);
+        }
+        if (false) {
+            Slog.i(TAG, "Set app display size: " + appWidth + " x " + appHeight);
+        }
+
         final DisplayMetrics dm = mDisplayMetrics;
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
                 mCompatDisplayMetrics);
@@ -6811,10 +6737,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // Determine whether a hard keyboard is available and enabled.
-            boolean hardKeyboardAvailable = false;
-            if (!mForceDisableHardwareKeyboard) {
-                hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
-            }
+            boolean hardKeyboardAvailable = config.keyboard != Configuration.KEYBOARD_NOKEYS;
             if (hardKeyboardAvailable != mHardKeyboardAvailable) {
                 mHardKeyboardAvailable = hardKeyboardAvailable;
                 mHardKeyboardEnabled = hardKeyboardAvailable;
@@ -7086,12 +7009,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     displayContent.mInitialDisplayWidth = displayInfo.logicalWidth;
                     displayContent.mInitialDisplayHeight = displayInfo.logicalHeight;
-                    if (displayInfo.rotation == Surface.ROTATION_90
-                            || displayInfo.rotation == Surface.ROTATION_270) {
-                        int tmp = displayContent.mInitialDisplayWidth;
-                        displayContent.mInitialDisplayWidth = displayContent.mInitialDisplayHeight;
-                        displayContent.mInitialDisplayHeight = tmp;
-                    }
                     displayContent.mInitialDisplayDensity = displayInfo.logicalDensityDpi;
                     displayContent.mBaseDisplayWidth = displayContent.mInitialDisplayWidth;
                     displayContent.mBaseDisplayHeight = displayContent.mInitialDisplayHeight;
@@ -9628,7 +9545,6 @@ public class WindowManagerService extends IWindowManager.Stub
     void scheduleAnimationLocked() {
         if (!mAnimationScheduled) {
             mAnimationScheduled = true;
-            mPolicy.windowAnimationStarted();
             mChoreographer.postCallback(
                     Choreographer.CALLBACK_ANIMATION, mAnimator.mAnimationRunnable, null);
         }
@@ -10250,10 +10166,6 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public boolean hasMenuKeyEnabled() {
-        return mPolicy.hasMenuKeyEnabled();
-    }
-
     public void lockNow(Bundle options) {
         mPolicy.lockNow(options);
     }
@@ -10263,115 +10175,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return mSafeMode;
     }
 
-<<<<<<< HEAD
-    @Override
-    public void showAssistant() {
-        // TODO: What permission?
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER)
-                != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mPolicy.showAssistant();
-    }
-
-    /**
-     * Used to force the status bar to be shown when it is hidden by full screen applications.
-     * Should only be used by the system UI so we check for the required permission.
-     */
-    public void showStatusBar() {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-                != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mPolicy.showStatusBar();
-    }
-
-    /**
-     * Used to force the status bar to be hidden when an application is full screen.
-     * Should only be used by the system UI so we check for the required permission.
-     */
-    public void hideStatusBar() {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-                != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mPolicy.hideStatusBar();
-    }
-
-    /**
-     * Returns true when the status bar is, or should be, hidden because of a full screen application.
-     */
-    public boolean shouldHideStatusBar() {
-        return mPolicy.shouldHideStatusBar();
-    }
-
-    /**
-     * Used to force the navigation bar to be shown when it is hidden by expanded desktop.
-     * Should only be used by the system UI so we check for the required permission.
-     */
-    public void showNavbar() {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-                != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mPolicy.showNavbar();
-    }
-
-    /**
-     * Used to force the navigation bar to be hidden when expanded desktop is enabled.
-     * Should only be used by the system UI so we check for the required permission.
-     */
-    public void hideNavbar() {
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW)
-                != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        mPolicy.hideNavbar();
-    }
-
-    /**
-     * Returns true when the navigation bar is, or should be, hidden because of expanded desktop.
-     */
-    public boolean shouldHideNavbar() {
-        return mPolicy.shouldHideNavbar();
-    }
-
-    public void updateDisplayMetrics() {
-        long origId = Binder.clearCallingIdentity();
-        boolean changed = false;
-
-        synchronized (mWindowMap) {
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            final DisplayInfo displayInfo =
-                    displayContent != null ? displayContent.getDisplayInfo() : null;
-            final int oldWidth = displayInfo != null ? displayInfo.appWidth : -1;
-            final int oldHeight = displayInfo != null ? displayInfo.appHeight : -1;
-            final ApplicationDisplayMetrics metrics =
-                    updateApplicationDisplayMetricsLocked(displayContent);
-
-            if (metrics != null && oldWidth >= 0 && oldHeight >= 0) {
-                changed = oldWidth != metrics.appWidth || oldHeight != metrics.appHeight;
-            }
-        }
-
-        if (changed) {
-            final int[] anim = new int[2];
-            if (mAnimator.isDimmingLocked(Display.DEFAULT_DISPLAY)) {
-                anim[0] = anim[1] = 0;
-            } else {
-                mPolicy.selectDisplayMetricsUpdateAnimationLw(anim);
-            }
-
-            mWaitingForConfig = true;
-            startFreezingDisplayLocked(false, anim[0], anim[1]);
-            mH.sendEmptyMessage(H.SEND_NEW_CONFIGURATION);
-        }
-
-        Binder.restoreCallingIdentity(origId);
-    }
-
-=======
->>>>>>> android-4.4_r1
     void dumpPolicyLocked(PrintWriter pw, String[] args, boolean dumpAll) {
         pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
         mPolicy.dump("    ", pw, args);
@@ -11039,28 +10842,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-<<<<<<< HEAD
-    class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.UI_DISPLAY_STATE),
-                    false,
-                    this);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            displayReady();
-        }
-=======
     @Override
     public Object getWindowManagerLock() {
         return mWindowMap;
->>>>>>> android-4.4_r1
     }
 }

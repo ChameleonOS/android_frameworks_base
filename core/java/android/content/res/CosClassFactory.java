@@ -17,6 +17,7 @@
 package android.content.res;
 
 import android.content.res.CompatibilityInfo;
+import android.os.IBinder;
 import android.util.DisplayMetrics;
 
 // Referenced classes of package android.content.res:
@@ -37,8 +38,9 @@ public class CosClassFactory {
         return new CosResources(assets, metrics, config);
     }
 
-    public static Resources newResources(AssetManager assets, DisplayMetrics metrics, Configuration config, CompatibilityInfo compInfo) {
-        return new CosResources(assets, metrics, config, compInfo);
+    public static Resources newResources(AssetManager assets, DisplayMetrics metrics, Configuration config,
+            CompatibilityInfo compInfo, IBinder token) {
+        return new CosResources(assets, metrics, config, compInfo, token);
     }
 
     static TypedArray newTypedArray(Resources resources, int data[], int indices[], int len) {

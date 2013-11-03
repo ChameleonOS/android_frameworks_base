@@ -3280,15 +3280,8 @@ public class PackageParser {
     private static final String ANDROID_RESOURCES
             = "http://schemas.android.com/apk/res/android";
 
-<<<<<<< HEAD
-    @CosHook(CosHook.CosHookType.CHANGE_CODE)
-    private boolean parseIntent(Resources res,
-            XmlPullParser parser, AttributeSet attrs, int flags,
-            IntentInfo outInfo, String[] outError, boolean isActivity)
-=======
     private boolean parseIntent(Resources res, XmlPullParser parser, AttributeSet attrs,
             boolean allowGlobs, IntentInfo outInfo, String[] outError)
->>>>>>> android-4.4_r1
             throws XmlPullParserException, IOException {
 
         TypedArray sa = res.obtainAttributes(attrs,

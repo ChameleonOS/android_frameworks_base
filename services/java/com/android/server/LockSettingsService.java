@@ -332,15 +332,6 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setLockPattern(byte[] hash, int userId) throws RemoteException {
-        checkWritePermission(userId);
-
-        boolean defaultSize = isDefaultSize(userId);
-        writeFile(getLockPatternFilename(userId,  defaultSize), hash);
-        writeFile(getLockPatternFilename(userId, !defaultSize), null);
-    }
-
-    @Override
     public void setLockPattern(String pattern, int userId) throws RemoteException {
         checkWritePermission(userId);
 
@@ -348,7 +339,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         final byte[] hash = LockPatternUtils.patternToHash(
                 LockPatternUtils.stringToPattern(pattern));
-        writeFile(getLockPatternFilename(userId), hash);
+        boolean defaultSize = isDefaultSize(userId);
+        writeFile(getLockPatternFilename(userId,  defaultSize), hash);
+        writeFile(getLockPatternFilename(userId, !defaultSize), null);
     }
 
     @Override
@@ -426,13 +419,6 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         return false;
-    }
-
-    @Override
-    public void setLockPassword(byte[] hash, int userId) throws RemoteException {
-        checkWritePermission(userId);
-
-        writeFile(getLockPasswordFilename(userId), hash);
     }
 
     @Override

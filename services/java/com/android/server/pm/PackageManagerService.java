@@ -1855,16 +1855,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final PackageSetting ps = (PackageSetting)p.mExtras;
                 final SharedUserSetting suid = ps.sharedUser;
                 int[] gids = suid != null ? suid.gids : ps.gids;
-                // include GIDs for any unenforced permissions
-                if (!isPermissionEnforcedLocked(READ_EXTERNAL_STORAGE, enforcedDefault)) {
-                    final BasePermission basePerm = mSettings.mPermissions.get(
-                            READ_EXTERNAL_STORAGE);
-                    gids = appendInts(gids, basePerm.gids);
-                }
-
                 return mIsPermManagementEnabled ? (suid != null ? 
                         removeInts(gids, suid.revokedGids) : removeInts(gids, ps.revokedGids)) : gids;
-                return ps.getGids();
             }
         }
         // stupid thing to indicate an error.

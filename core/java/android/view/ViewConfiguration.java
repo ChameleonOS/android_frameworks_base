@@ -17,7 +17,6 @@
 package android.view;
 
 import android.app.AppGlobals;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -228,7 +227,8 @@ public class ViewConfiguration {
     private final int mOverflingDistance;
     private final boolean mFadingMarqueeEnabled;
 
-    private Context mContext;
+    private boolean sHasPermanentMenuKey;
+    private boolean sHasPermanentMenuKeySet;
 
     static final SparseArray<ViewConfiguration> sConfigurations =
             new SparseArray<ViewConfiguration>(2);
@@ -277,8 +277,6 @@ public class ViewConfiguration {
             sizeAndDensity = density;
         }
 
-        mContext = context;
-
         mEdgeSlop = (int) (sizeAndDensity * EDGE_SLOP + 0.5f);
         mFadingEdgeLength = (int) (sizeAndDensity * FADING_EDGE_LENGTH + 0.5f);
         mMinimumFlingVelocity = (int) (density * MINIMUM_FLING_VELOCITY + 0.5f);
@@ -296,6 +294,16 @@ public class ViewConfiguration {
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
+
+        if (!sHasPermanentMenuKeySet) {
+            IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+            try {
+                sHasPermanentMenuKey = !wm.hasNavigationBar();
+                sHasPermanentMenuKeySet = true;
+            } catch (RemoteException ex) {
+                sHasPermanentMenuKey = false;
+            }
+        }
 
         mFadingMarqueeEnabled = res.getBoolean(
                 com.android.internal.R.bool.config_ui_enableFadingMarquee);
@@ -688,30 +696,7 @@ public class ViewConfiguration {
      * @return true if a permanent menu key is present, false otherwise.
      */
     public boolean hasPermanentMenuKey() {
-        IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-        // Report no menu key if device has soft buttons
-        try {
-            if (wm.hasSystemNavBar() || wm.hasNavigationBar()) {
-                return false;
-            }
-        } catch (RemoteException ex) {
-            // do nothing, continue trying to guess
-        }
-
-        // Report no menu key if overflow button is forced to enabled
-        ContentResolver res = mContext.getContentResolver();
-        boolean forceOverflowButton = Settings.System.getInt(res,
-                Settings.System.UI_FORCE_OVERFLOW_BUTTON, 0) == 1;
-        if (forceOverflowButton) {
-            return false;
-        }
-
-        // Report menu key presence based on hardware key rebinding
-        try {
-            return wm.hasMenuKeyEnabled();
-        } catch (RemoteException ex) {
-            return true;
-        }
+        return sHasPermanentMenuKey;
     }
 
     /**

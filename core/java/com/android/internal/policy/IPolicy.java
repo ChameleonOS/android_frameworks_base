@@ -22,8 +22,6 @@ import android.view.LayoutInflater;
 import android.view.Window;
 import android.view.WindowManagerPolicy;
 
-import com.android.internal.os.IDeviceHandler;
-
 /**
  * {@hide}
  */
@@ -35,7 +33,7 @@ public interface IPolicy {
 
     public LayoutInflater makeNewLayoutInflater(Context context);
 
-    public WindowManagerPolicy makeNewWindowManager(IDeviceHandler device);
+    public WindowManagerPolicy makeNewWindowManager();
 
     public FallbackEventHandler makeNewFallbackEventHandler(Context context);
 }

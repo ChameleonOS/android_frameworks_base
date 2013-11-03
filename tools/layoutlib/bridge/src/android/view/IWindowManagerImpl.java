@@ -458,16 +458,6 @@ public class IWindowManagerImpl implements IWindowManager {
     }
 
     @Override
-    public void showAssistant() {
-
-    }
-
-    @Override
-    public void updateDisplayMetrics() {
-
-    }
-
-    @Override
     public IBinder getFocusedWindowToken() {
         // TODO Auto-generated method stub
         return null;
@@ -508,47 +498,4 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public void setTouchExplorationEnabled(boolean enabled) {
     }
-
-    @Override
-    public void showStatusBar()
-            throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void hideStatusBar()
-            throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public boolean shouldHideStatusBar()
-            throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public void showNavbar()
-            throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public void hideNavbar()
-            throws RemoteException {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public boolean shouldHideNavbar()
-            throws RemoteException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean hasMenuKeyEnabled() {
-        return true;
-    }
-
 }

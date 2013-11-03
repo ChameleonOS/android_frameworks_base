@@ -1098,7 +1098,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (mShowDialogs && !mSleeping && !mShuttingDown) {
                         boolean hasRevoked = false;
                         if (isRevokeEnabled()) {
-                            for (String s: proc.pkgList) {
+                            for (String s: proc.pkgList.keySet()) {
                                 try {
                                     String[] perms = AppGlobals.getPackageManager().getRevokedPermissions(s);
                                     if (perms != null && perms.length > 0) {
@@ -9990,7 +9990,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
                 appErrorIntent = createAppErrorIntentLocked(r, timeMillis, crashInfo);
             } else if (res == AppErrorDialog.FORCE_QUIT_AND_RESET_PERMS) {
-                for (String pkg: r.pkgList) {
+                for (String pkg: r.pkgList.keySet()) {
                     long oldId = Binder.clearCallingIdentity();
                     try {
                         AppGlobals.getPackageManager().setRevokedPermissions(pkg, new String[0]);
@@ -16468,7 +16468,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             String s;
             ActivityRecord r;
             s = null;
-            r = service.mMainStack.isInStackLocked(token);
+            r = service.mStackSupervisor.isInAnyStackLocked(token);
             if(r == null)
                 return null;
             

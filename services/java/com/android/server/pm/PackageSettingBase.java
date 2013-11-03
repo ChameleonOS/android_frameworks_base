@@ -181,11 +181,8 @@ class PackageSettingBase extends GrantedPermissions {
             userState.put(base.userState.keyAt(i), base.userState.valueAt(i));
         }
         installStatus = base.installStatus;
-<<<<<<< HEAD
         isThemeCompatibilityEnabled = base.isThemeCompatibilityEnabled;
-=======
         keySetData = base.keySetData;
->>>>>>> android-4.4_r1
     }
 
     private PackageUserState modifyUserState(int userId) {

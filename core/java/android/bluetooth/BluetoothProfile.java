@@ -103,6 +103,7 @@ public interface BluetoothProfile {
      */
     public static final int SAP = 20;
 
+    /**
      * MAP Profile
      * @hide
      */

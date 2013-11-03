@@ -618,7 +618,6 @@ public class LockPatternUtils {
         try {
             getLockSettings().setLockGesture(gesture, getCurrentOrCallingUserId());
             DevicePolicyManager dpm = getDevicePolicyManager();
-            KeyStore keyStore = KeyStore.getInstance();
             if (gesture != null) {
                 setBoolean(GESTURE_EVER_CHOSEN_KEY, true);
                 if (!isFallback) {
@@ -635,9 +634,6 @@ public class LockPatternUtils {
                             0, 0, 0, 0, 0, 0, 0, getCurrentOrCallingUserId());
                 }
             } else {
-                if (keyStore.isEmpty()) {
-                    keyStore.reset();
-                }
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0,
                         0, 0, 0, 0, 0, getCurrentOrCallingUserId());
             }
@@ -1081,12 +1077,15 @@ public class LockPatternUtils {
     /**
      * @return the pattern lockscreen size
      */
-    public byte getLockPatternSize() {
+    public static byte getLockPatternSize() {
+        return PATTERN_SIZE_DEFAULT;
+        /** needs a rewrite for static use
         try {
             return getLockSettings().getLockPatternSize(getCurrentOrCallingUserId());
         } catch (RemoteException re) {
             return PATTERN_SIZE_DEFAULT;
         }
+        */
     }
 
     /**
@@ -1502,6 +1501,7 @@ public class LockPatternUtils {
      */
     public void setLockBeforeUnlock(boolean enabled) {
         setBoolean(Settings.Secure.LOCK_BEFORE_UNLOCK, enabled);
+    }
 
     /**
      * Determine whether the user has selected any non-system widgets in keyguard

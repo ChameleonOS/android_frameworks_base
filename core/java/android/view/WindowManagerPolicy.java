@@ -1140,11 +1140,6 @@ public interface WindowManagerPolicy {
     public boolean hasNavigationBar();
 
     /**
-     * Specifies whether device can generate KEY_ACTION_MENU keypress
-     */
-    public boolean hasMenuKeyEnabled();
-
-    /**
      * Lock the device now.
      */
     public void lockNow(Bundle options);
@@ -1199,52 +1194,4 @@ public interface WindowManagerPolicy {
      * @param enabled Whether touch exploration is enabled.
      */
     public void setTouchExplorationEnabled(boolean enabled);
-
-    /**
-     * Determine the animation to run for a transition after display
-     * metrics changed.
-     *
-     * @param anim The exiting animation resource id is stored in anim[0], the
-     * entering animation resource id is stored in anim[1].
-     */
-    public void selectDisplayMetricsUpdateAnimationLw(int anim[]);
-
-    /**
-     * A window animation has been scheduled
-     */
-    public void windowAnimationStarted();
-
-    /**
-     * Animating windows has finished
-     */
-    public void windowAnimationFinished();
-    /**
-     * Used to force the status bar to be shown when it is hidden by full screen applications.
-     */
-    public void showStatusBar();
-
-    /**
-     * Used to force the status bar to be hidden when an application is full screen.
-     */
-    public void hideStatusBar();
-
-    /**
-     * Returns true when the status bar is, or should be, hidden because of a full screen application.
-     */
-    public boolean shouldHideStatusBar();
-
-    /**
-     * Used to force the status bar to be shown when it is hidden by full screen applications.
-     */
-    public void showNavbar();
-
-    /**
-     * Used to force the status bar to be hidden when an application is full screen.
-     */
-    public void hideNavbar();
-
-    /**
-     * Returns true when the status bar is, or should be, hidden because of a full screen application.
-     */
-    public boolean shouldHideNavbar();
 }

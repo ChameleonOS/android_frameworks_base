@@ -37,13 +37,6 @@ static const char* const kClassPathName = "android/media/AudioRecord";
 struct fields_t {
     // these fields provide access from C++ to the...
     jmethodID postNativeEventInJava; //... event post callback method
-    int       PCM16;                 //...  format constants
-    int       PCM8;                  //...  format constants
-    int       AMRNB;                 //...  format constants
-    int       AMRWB;                 //...  format constants
-    int       EVRC;                  //...  format constants
-    int       EVRCB;                 //...  format constants
-    int       EVRCWB;                //...  format constants
     jfieldID  nativeRecorderInJavaObj; // provides access to the C++ AudioRecord object
     jfieldID  nativeCallbackCookie;    // provides access to the AudioRecord callback data
 };
@@ -161,24 +154,6 @@ static sp<AudioRecord> setAudioRecord(JNIEnv* env, jobject thiz, const sp<AudioR
     env->SetIntField(thiz, javaAudioRecordFields.nativeRecorderInJavaObj, (int)ar.get());
     return old;
 }
-int getformatrec(int audioformat)
-{
-    if(audioformat==javaAudioRecordFields.PCM16)
-        return AUDIO_FORMAT_PCM_16_BIT;
-#ifdef QCOM_HARDWARE
-    else if(audioformat==javaAudioRecordFields.AMRNB)
-        return AUDIO_FORMAT_AMR_NB;
-    else if(audioformat==javaAudioRecordFields.AMRWB)
-        return AUDIO_FORMAT_AMR_WB;
-    else if(audioformat==javaAudioRecordFields.EVRC)
-        return AUDIO_FORMAT_EVRC;
-    else if(audioformat==javaAudioRecordFields.EVRCB)
-        return AUDIO_FORMAT_EVRCB;
-    else if(audioformat==javaAudioRecordFields.EVRCWB)
-        return AUDIO_FORMAT_EVRCWB;
-#endif
-    return AUDIO_FORMAT_PCM_8_BIT;
-}
 
 // ----------------------------------------------------------------------------
 static int
@@ -198,28 +173,6 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     uint32_t nbChannels = popcount(channelMask);
 
     // compare the format against the Java constants
-    if ((audioFormat != javaAudioRecordFields.PCM16)
-#ifdef QCOM_HARDWARE
-        && (audioFormat != javaAudioRecordFields.AMRNB)
-        && (audioFormat != javaAudioRecordFields.AMRWB)
-        && (audioFormat != javaAudioRecordFields.EVRC)
-        && (audioFormat != javaAudioRecordFields.EVRCB)
-#endif
-        && (audioFormat != javaAudioRecordFields.PCM8)) {
-        ALOGE("Error creating AudioRecord: unsupported audio format.");
-        return AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
-    }
-    int bytesPerSample;
-    if(audioFormat == javaAudioRecordFields.PCM8)
-        bytesPerSample = 1;
-#ifdef QCOM_HARDWARE
-    else if((audioFormat == javaAudioRecordFields.AMRWB) &&
-            ((uint32_t)source != AUDIO_SOURCE_VOICE_COMMUNICATION))
-        bytesPerSample = 61;
-#endif
-    else
-        bytesPerSample = 2;
-    audio_format_t format = (audio_format_t)getformatrec(audioFormat);
     if ((audioFormat != ENCODING_PCM_16BIT)
         && (audioFormat != ENCODING_PCM_8BIT)) {
         ALOGE("Error creating AudioRecord: unsupported audio format.");
@@ -570,17 +523,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     if (result != NO_ERROR) {
         return -1;
     }
-    int bytesPerSample;
-    if(audioFormat == javaAudioRecordFields.PCM8)
-        bytesPerSample = 1;
-#ifdef QCOM_HARDWARE
-    else if(audioFormat == javaAudioRecordFields.AMRWB)
-        bytesPerSample = 61;
-#endif
-    else
-        bytesPerSample = 2;
-
-    return frameCount * nbChannels * bytesPerSample;
+    return frameCount * nbChannels * (audioFormat == ENCODING_PCM_16BIT ? 2 : 1);
 }
 
 
@@ -612,13 +555,6 @@ static JNINativeMethod gMethods[] = {
 
 // field names found in android/media/AudioRecord.java
 #define JAVA_POSTEVENT_CALLBACK_NAME  "postEventFromNative"
-#define JAVA_CONST_PCM16_NAME         "ENCODING_PCM_16BIT"
-#define JAVA_CONST_PCM8_NAME          "ENCODING_PCM_8BIT"
-#define JAVA_CONST_AMRNB_NAME         "ENCODING_AMRNB"
-#define JAVA_CONST_AMRWB_NAME         "ENCODING_AMRWB"
-#define JAVA_CONST_EVRC_NAME          "ENCODING_EVRC"
-#define JAVA_CONST_EVRCB_NAME         "ENCODING_EVRCB"
-#define JAVA_CONST_EVRCWB_NAME        "ENCODING_EVRCWB"
 #define JAVA_NATIVERECORDERINJAVAOBJ_FIELD_NAME  "mNativeRecorderInJavaObj"
 #define JAVA_NATIVECALLBACKINFO_FIELD_NAME       "mNativeCallbackCookie"
 
@@ -660,38 +596,6 @@ int register_android_media_AudioRecord(JNIEnv *env)
             JAVA_NATIVECALLBACKINFO_FIELD_NAME, "I");
     if (javaAudioRecordFields.nativeCallbackCookie == NULL) {
         ALOGE("Can't find AudioRecord.%s", JAVA_NATIVECALLBACKINFO_FIELD_NAME);
-        return -1;
-    }
-
-    // Get the format constants from the AudioFormat class
-    jclass audioFormatClass = NULL;
-    audioFormatClass = env->FindClass(JAVA_AUDIOFORMAT_CLASS_NAME);
-    if (audioFormatClass == NULL) {
-        ALOGE("Can't find %s", JAVA_AUDIOFORMAT_CLASS_NAME);
-        return -1;
-    }
-    if ( !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_PCM16_NAME, &(javaAudioRecordFields.PCM16))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_PCM8_NAME, &(javaAudioRecordFields.PCM8))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_AMRNB_NAME, &(javaAudioRecordFields.AMRNB))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_AMRWB_NAME, &(javaAudioRecordFields.AMRWB))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_EVRC_NAME, &(javaAudioRecordFields.EVRC))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_EVRCB_NAME, &(javaAudioRecordFields.EVRCB))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_EVRCWB_NAME, &(javaAudioRecordFields.EVRCWB))) {
-        // error log performed in getIntConstantFromClass()
         return -1;
     }
 

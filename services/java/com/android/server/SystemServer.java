@@ -78,8 +78,6 @@ import dalvik.system.Zygote;
 import java.io.File;
 import java.util.Timer;
 import java.util.TimerTask;
-import com.stericsson.hardware.fm.FmReceiverService;
-import com.stericsson.hardware.fm.FmTransmitterService;
 
 class ServerThread {
     private static final String TAG = "SystemServer";
@@ -106,7 +104,6 @@ class ServerThread {
         }
     }
 
-    @Override
     public void initAndLoop() {
         EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_SYSTEM_RUN,
             SystemClock.uptimeMillis());
@@ -568,22 +565,6 @@ class ServerThread {
                 } catch (Throwable e) {
                     reportWtf("starting Service Discovery Service", e);
                 }
-            }
-
-            try {
-                Slog.i(TAG, "FM receiver Service");
-                ServiceManager.addService("fm_receiver",
-                        new FmReceiverService(context));
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting FM receiver Service", e);
-            }
-
-            try {
-                Slog.i(TAG, "FM transmitter Service");
-                ServiceManager.addService("fm_transmitter",
-                        new FmTransmitterService(context));
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting FM transmitter Service", e);
             }
 
             if (!disableNonCoreServices) {

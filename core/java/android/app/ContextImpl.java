@@ -86,8 +86,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IUserManager;
-import android.hardware.IIrdaManager;
-import android.hardware.IrdaManager;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.Process;
@@ -130,13 +128,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import com.stericsson.hardware.fm.IFmReceiver;
-import com.stericsson.hardware.fm.IFmTransmitter;
-import com.stericsson.hardware.fm.FmReceiver;
-import com.stericsson.hardware.fm.FmTransmitter;
-import com.stericsson.hardware.fm.FmReceiverImpl;
-import com.stericsson.hardware.fm.FmTransmitterImpl;
 
 class ReceiverRestrictedContext extends ContextWrapper {
     ReceiverRestrictedContext(Context base) {
@@ -584,31 +575,11 @@ class ContextImpl extends Context {
                     return WimaxHelper.createWimaxService(ctx, ctx.mMainThread.getHandler());
                 }});
 
-        registerService("fm_receiver", new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService("fm_receiver");
-                    IFmReceiver service = IFmReceiver.Stub.asInterface(b);
-                    return new FmReceiverImpl(service);
-                }});
-
-        registerService("fm_transmitter", new ServiceFetcher() {
-                public Object createService(ContextImpl ctx) {
-                    IBinder b = ServiceManager.getService("fm_transmitter");
-                    IFmTransmitter service = IFmTransmitter.Stub.asInterface(b);
-                    return new FmTransmitterImpl(service);
-                }});
         registerService(APP_OPS_SERVICE, new ServiceFetcher() {
             public Object createService(ContextImpl ctx) {
                 IBinder b = ServiceManager.getService(APP_OPS_SERVICE);
                 IAppOpsService service = IAppOpsService.Stub.asInterface(b);
                 return new AppOpsManager(ctx, service);
-            }});
-
-        registerService(IRDA_SERVICE, new StaticServiceFetcher() {
-            public Object createStaticService() {
-                IBinder b = ServiceManager.getService(IRDA_SERVICE);
-                IIrdaManager service = IIrdaManager.Stub.asInterface(b);
-                return new IrdaManager(service);
             }});
 
         registerService(CAMERA_SERVICE, new ServiceFetcher() {

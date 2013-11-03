@@ -27,12 +27,12 @@ interface ILockSettings {
     long getLong(in String key, in long defaultValue, in int userId);
     String getString(in String key, in String defaultValue, in int userId);
     byte getLockPatternSize(int userId);
-    void setLockPattern(in byte[] hash, int userId);
-    boolean checkPattern(in byte[] hash, int userId);
+    void setLockPattern(in String pattern, int userId);
+    boolean checkPattern(in String pattern, int userId);
+    void setLockPassword(in String password, int userId);
+    boolean checkPassword(in String password, int userId);
     void setLockGesture(in Gesture gesture, int userId);
     boolean checkGesture(in Gesture gesture, int userId);
-    void setLockPassword(in byte[] hash, int userId);
-    boolean checkPassword(in byte[] hash, int userId);
     boolean havePattern(int userId);
     boolean haveGesture(int userId);
     boolean havePassword(int userId);

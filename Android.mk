@@ -62,7 +62,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/app/IActivityController.aidl \
 	core/java/android/app/IActivityPendingResult.aidl \
 	core/java/android/app/IAlarmManager.aidl \
-	core/java/android/hardware/IIrdaManager.aidl \
 	core/java/android/app/IBackupAgent.aidl \
 	core/java/android/app/IInstrumentationWatcher.aidl \
 	core/java/android/app/INotificationManager.aidl \
@@ -271,20 +270,6 @@ LOCAL_SRC_FILES += \
 	packages/services/PacProcessor/com/android/net/IProxyService.aidl \
 	packages/services/Proxy/com/android/net/IProxyCallback.aidl \
 	packages/services/Proxy/com/android/net/IProxyPortListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IFmReceiver.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IFmTransmitter.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnStateChangedListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnStartedListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnErrorListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnScanListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnForcedPauseListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnForcedResetListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnBlockScanListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnRDSDataFoundListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnSignalStrengthListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnStereoListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnExtraCommandListener.aidl \
-	fmradio/java/com/stericsson/hardware/fm/IOnAutomaticSwitchListener.aidl
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
@@ -320,7 +305,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := framework-base
 LOCAL_DX_FLAGS := --core-library
 
 # Packages to include, use \* wildcard to include descendants.
-LOCAL_JAR_PACKAGES := android\*
+LOCAL_JAR_PACKAGES := android\* cos\*
 
 # List of classes and interfaces which should be loaded by the Zygote.
 LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes

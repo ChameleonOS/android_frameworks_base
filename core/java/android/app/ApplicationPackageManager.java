@@ -769,13 +769,12 @@ final class ApplicationPackageManager extends PackageManager {
             getActivityInfo(activityName, 0).applicationInfo);
     }
 
-    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     @Override public Resources getResourcesForApplication(
         ApplicationInfo app) throws NameNotFoundException {
         if (app.packageName.equals("system")) {
             return mContext.mMainThread.getSystemContext().getResources();
         }
-        Resources r = mContext.mMainThread.getTopLevelResources(app.packageName,
+        Resources r = mContext.mMainThread.getTopLevelResources(
                 app.uid == Process.myUid() ? app.sourceDir : app.publicSourceDir,
                         Display.DEFAULT_DISPLAY, null, mContext.mPackageInfo);
         if (r != null) {

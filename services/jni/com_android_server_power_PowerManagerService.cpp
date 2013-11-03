@@ -33,6 +33,7 @@
 #include <utils/Log.h>
 #include <hardware/power.h>
 #include <hardware_legacy/power.h>
+#include <cutils/android_reboot.h>
 #include <suspend/autosuspend.h>
 
 #include "com_android_server_power_PowerManagerService.h"

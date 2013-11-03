@@ -225,11 +225,6 @@ interface IWindowManager
     boolean hasNavigationBar();
 
     /**
-     * Device can generate KEY_ACTION_MENU keypress
-     */
-    boolean hasMenuKeyEnabled();
-
-    /**
      * Lock the device immediately with the specified options (can be null).
      */
     void lockNow(in Bundle options);
@@ -286,39 +281,4 @@ interface IWindowManager
      * @param enabled Whether touch exploration is enabled.
      */
     void setTouchExplorationEnabled(boolean enabled);
-
-    /**
-     * Used to force the status bar to be shown when it is hidden by full screen applications.
-     */
-    void showStatusBar();
-
-    /**
-     * Used to force the status bar to be hidden when an application is full screen.
-     */
-    void hideStatusBar();
-
-    /**
-     * Returns true when the status bar is, or should be, hidden because of a full screen application.
-     */
-    boolean shouldHideStatusBar();
-
-    /**
-     * Used to force the navigation bar to be shown when it is hidden by expanded desktop.
-     */
-    void showNavbar();
-
-    /**
-     * Used to force the navigation bar to be hidden when using expanded desktop.
-     */
-    void hideNavbar();
-
-    /**
-     * Returns true when the navigation bar is, or should be, hidden because of expanded desktop.
-     */
-    boolean shouldHideNavbar();
-
-    /**
-     * Update the application display metrics
-     */
-    void updateDisplayMetrics();
 }

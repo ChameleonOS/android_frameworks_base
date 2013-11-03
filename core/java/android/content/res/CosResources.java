@@ -19,6 +19,7 @@ package android.content.res;
 import android.content.res.CompatibilityInfo;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -60,8 +61,9 @@ public final class CosResources extends Resources {
         init(null);
     }
 
-    public CosResources(AssetManager assets, DisplayMetrics metrics, Configuration config, CompatibilityInfo compInfo) {
-        super(assets, metrics, config, compInfo);
+    public CosResources(AssetManager assets, DisplayMetrics metrics, Configuration config,
+            CompatibilityInfo compInfo, IBinder token) {
+        super(assets, metrics, config, compInfo, token);
         init(null);
     }
 
