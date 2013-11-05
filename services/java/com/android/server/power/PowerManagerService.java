@@ -63,6 +63,7 @@ import android.util.TimeUtils;
 import android.view.WindowManagerPolicy;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -384,6 +385,8 @@ public final class PowerManagerService extends IPowerManager.Stub
     private long mLastWarningAboutUserActivityPermission = Long.MIN_VALUE;
 
     private native void nativeInit();
+    private static native void nativeShutdown();
+    private static native void nativeReboot(String reason) throws IOException;
 
     private static native void nativeSetPowerState(boolean screenOn, boolean screenBright);
     private static native void nativeAcquireSuspendBlocker(String name);

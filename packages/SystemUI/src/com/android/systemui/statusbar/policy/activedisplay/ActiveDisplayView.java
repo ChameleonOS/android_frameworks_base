@@ -77,7 +77,6 @@ import com.android.internal.widget.multiwaveview.TargetDrawable;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -474,7 +473,6 @@ public class ActiveDisplayView extends FrameLayout {
                 mNotification = getNextAvailableNotification();
             }
             showNotification(mNotification, true);
-            if (mBar instanceof TabletStatusBar) mBar.disable(0xffffffff);
         }
     }
 
@@ -499,7 +497,7 @@ public class ActiveDisplayView extends FrameLayout {
         InsetDrawable[] inactivelayer = new InsetDrawable[2];
         InsetDrawable[] activelayer = new InsetDrawable[2];
         inactivelayer[0] = new InsetDrawable(
-                res.getDrawable(com.android.internal.R.drawable.ic_lockscreen_lock_pressed), 0, 0, 0, 0);
+                res.getDrawable(R.drawable.ic_ad_locked), 0, 0, 0, 0);
         inactivelayer[1] = new InsetDrawable(front, inset, inset, inset, inset);
         activelayer[0] = new InsetDrawable(back, 0, 0, 0, 0);
         activelayer[1] = new InsetDrawable(
@@ -530,7 +528,7 @@ public class ActiveDisplayView extends FrameLayout {
         final InsetDrawable activeBack = new InsetDrawable(blankActiveDrawable, 0, 0, 0, 0);
 
         // Add unlock target
-        storedDraw.add(new TargetDrawable(res, res.getDrawable(com.android.internal.R.drawable.ic_lockscreen_unlock)));
+        storedDraw.add(new TargetDrawable(res, res.getDrawable(R.drawable.ic_ad_unlock)));
         if (mNotificationDrawable != null) {
             storedDraw.add(new TargetDrawable(res, null));
             storedDraw.add(new TargetDrawable(res, null));

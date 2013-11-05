@@ -58,7 +58,6 @@ import com.android.internal.widget.multiwaveview.TargetDrawable;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.chaos.ActionTarget;
-import com.android.systemui.recent.StatusBarTouchProxy;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusBarPanel;
@@ -77,7 +76,6 @@ public class SearchPanelView extends FrameLayout implements
             "com.android.systemui.action_assist_icon";
     private final Context mContext;
     private BaseStatusBar mBar;
-    private StatusBarTouchProxy mStatusBarTouchProxy;
     private SettingsObserver mObserver;
 
     private boolean mShowing;
@@ -353,12 +351,6 @@ public class SearchPanelView extends FrameLayout implements
 
     public void setBar(BaseStatusBar bar) {
         mBar = bar;
-    }
-
-    public void setStatusBarView(final View statusBarView) {
-        if (mStatusBarTouchProxy != null) {
-            mStatusBarTouchProxy.setStatusBar(statusBarView);
-        }
     }
 
     @Override

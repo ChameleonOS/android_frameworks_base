@@ -128,7 +128,7 @@ public class StatusBarIconView extends AnimatedImageView {
         if (!iconEquals || force) {
             Drawable drawable = getIcon(icon);
             if (drawable == null) {
-                Slog.w(TAG, "No icon for slot " + mSlot);
+                Log.w(TAG, "No icon for slot " + mSlot);
                 return false;
             }
             setImageDrawable(drawable);

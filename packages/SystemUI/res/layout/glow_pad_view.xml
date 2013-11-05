@@ -27,10 +27,6 @@
     android:layout_centerInParent="true"
     android:orientation="horizontal"
 
-    prvandroid:targetDrawables="@*android:array/lockscreen_targets_unlock_only"
-    prvandroid:targetDescriptions="@*android:array/lockscreen_target_descriptions_unlock_only"
-    prvandroid:directionDescriptions="@*android:array/lockscreen_direction_descriptions"
-    prvandroid:handleDrawable="@*android:drawable/ic_lockscreen_handle"
     prvandroid:outerRingDrawable="@*android:drawable/ic_lockscreen_outerring"
     prvandroid:outerRadius="@*android:dimen/glowpadview_target_placement_radius"
     prvandroid:innerRadius="@*android:dimen/glowpadview_inner_radius"

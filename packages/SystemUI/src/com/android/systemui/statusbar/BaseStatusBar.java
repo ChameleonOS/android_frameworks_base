@@ -590,7 +590,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                   cancelPreloadingRecentTasksList();
                   break;
              case MSG_OPEN_SEARCH_PANEL:
-                 if (DEBUG) Slog.d(TAG, "opening search panel");
+                 if (DEBUG) Log.d(TAG, "opening search panel");
                  if (mSearchPanelView != null) {
                      mSearchPanelView.show(true, true);
                      onShowSearchPanel();

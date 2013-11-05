@@ -149,9 +149,7 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    public void opaqueStatusBar(boolean opaque) {
-    }
-
     protected void refreshLayout(int layoutDirection) {
     }
+
 }

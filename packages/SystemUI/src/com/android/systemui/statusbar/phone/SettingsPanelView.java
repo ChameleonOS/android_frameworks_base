@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.View;
 import android.util.EventLog;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,13 +38,13 @@ import com.android.systemui.statusbar.policy.RotationLockController;
 public class SettingsPanelView extends PanelView {
     public static final boolean DEBUG_GESTURES = true;
 
-    private QuickSettingsController mQS;
+    private QuickSettings mQS;
     private QuickSettingsContainerView mQSContainer;
 
     Drawable mHandleBar;
     int mHandleBarHeight;
     View mHandleView;
-    
+
     public SettingsPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -60,11 +59,9 @@ public class SettingsPanelView extends PanelView {
         mHandleBar = resources.getDrawable(R.drawable.status_bar_close);
         mHandleBarHeight = resources.getDimensionPixelSize(R.dimen.close_handle_height);
         mHandleView = findViewById(R.id.handle);
-
-        setContentDescription(resources.getString(R.string.accessibility_desc_quick_settings));
     }
 
-    public void setQuickSettings(QuickSettingsController qs) {
+    public void setQuickSettings(QuickSettings qs) {
         mQS = qs;
     }
 

@@ -93,12 +93,6 @@ public class PhoneStatusBarView extends PanelBar {
         pv.setRubberbandingEnabled(!mFullWidthNotifications);
     }
 
-	@Override
-	protected void onDetachedFromWindow() {
-		super.onDetachedFromWindow();
-		mBar.onBarViewDetached();
-	}
-
     @Override
     public boolean panelsEnabled() {
         return mBar.panelsEnabled();
