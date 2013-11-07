@@ -22,6 +22,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.CosResources;
 import android.content.res.Resources;
 import android.content.res.ResourcesKey;
 import android.hardware.display.DisplayManagerGlobal;
@@ -196,7 +197,7 @@ public class ResourcesManager {
         } else {
             config = getConfiguration();
         }
-        r = new Resources(assets, dm, config, compatInfo, token);
+        r = new CosResources(assets, dm, config, compatInfo, token);
         if (false) {
             Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
                     + r.getConfiguration() + " appScale="

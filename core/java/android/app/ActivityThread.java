@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.annotation.CosHook;
+import android.annotation.CosHook.CosHookType;
 import android.app.backup.BackupAgent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -37,6 +39,7 @@ import android.content.pm.ServiceInfo;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.CosResources;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDebug;
@@ -1734,6 +1737,21 @@ public final class ActivityThread {
             LoadedApk pkgInfo) {
         return mResourcesManager.getTopLevelResources(resDir, displayId, overrideConfiguration,
                 pkgInfo.getCompatibilityInfo(), null);
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    Resources getTopLevelResources(String packageName, String resDir,
+                        int displayId, Configuration overrideConfiguration,
+                        LoadedApk pkgInfo) {
+        Resources resources = getTopLevelResources(resDir, displayId, overrideConfiguration, pkgInfo);
+        boolean isThemeCompatibilityModeEnabled;
+        try {
+            isThemeCompatibilityModeEnabled = sPackageManager.isThemeCompatibilityModeEnabled(packageName);
+        } catch (RemoteException e) {
+            isThemeCompatibilityModeEnabled = false;
+        }
+        ((CosResources)resources).init(packageName, isThemeCompatibilityModeEnabled);
+        return resources;
     }
 
     final Handler getHandler() {
