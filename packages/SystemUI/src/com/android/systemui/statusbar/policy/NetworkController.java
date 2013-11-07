@@ -94,7 +94,6 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
     String mContentDescriptionWimax;
     String mContentDescriptionCombinedSignal;
     String mContentDescriptionDataType;
-    String mContentDescriptionEther;
 
     // wifi
     final WifiManager mWifiManager;
@@ -135,11 +134,6 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
     private Locale mLocale = null;
     private Locale mLastLocale = null;
 
-    //ethernet
-    private boolean mEtherConnected = false;
-    private int mEtherIconId = 0;
-    private int mLastEtherIconId = 0;
-
     // our ui
     Context mContext;
     ArrayList<TextView> mCombinedLabelViews = new ArrayList<TextView>();
@@ -167,7 +161,6 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         void setMobileDataIndicators(boolean visible, int strengthIcon,
                 int typeIcon, String contentDescription, String typeContentDescription);
         void setIsAirplaneMode(boolean is, int airplaneIcon);
-        void setEtherIndicators(boolean visible, int etherIcon, String contentDescription);
     }
 
     public interface NetworkSignalChangedCallback {
@@ -289,10 +282,6 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         notifySignalsChangedCallbacks(cb);
     }
 
-    public void removeNetworkSignalChangedCallback(NetworkSignalChangedCallback cb) {
-        mSignalsChangedCallbacks.remove(cb);
-    }
-
     public void refreshSignalCluster(SignalCluster cluster) {
         if (mDemoMode) return;
         cluster.setWifiIndicators(
@@ -300,12 +289,6 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
                 mWifiEnabled && (mWifiConnected || !mHasMobileDataFeature),
                 mWifiIconId,
                 mContentDescriptionWifi);
-
-        cluster.setEtherIndicators(
-                // only show ethernet in the cluster if connected
-                mEtherConnected,
-                mEtherIconId,
-                mContentDescriptionEther);
 
         if (mIsWimaxEnabled && mWimaxConnected) {
             // wimax is special
@@ -620,6 +603,7 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
                 case TelephonyManager.NETWORK_TYPE_HSDPA:
                 case TelephonyManager.NETWORK_TYPE_HSUPA:
                 case TelephonyManager.NETWORK_TYPE_HSPA:
+                case TelephonyManager.NETWORK_TYPE_HSPAP:
                     if (mHspaDataDistinguishable) {
                         mDataIconList = TelephonyIcons.DATA_H[mInetCondition];
                         mDataTypeIconId = R.drawable.stat_sys_data_fully_connected_h;
@@ -633,18 +617,6 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
                         mContentDescriptionDataType = mContext.getString(
                                 R.string.accessibility_data_connection_3g);
                     }
-                    break;
-                case TelephonyManager.NETWORK_TYPE_HSPAP:
-                    mDataIconList = TelephonyIcons.DATA_HP[mInetCondition];
-                    mDataTypeIconId = R.drawable.stat_sys_data_connected_hp;
-                    mContentDescriptionDataType = mContext.getString(
-                            R.string.accessibility_data_connection_HP);
-                    break;
-                case TelephonyManager.NETWORK_TYPE_DCHSPAP:
-                    mDataIconList = TelephonyIcons.DATA_DC[mInetCondition];
-                    mDataTypeIconId = R.drawable.stat_sys_data_connected_dc;
-                    mContentDescriptionDataType = mContext.getString(
-                            R.string.accessibility_data_connection_DC);
                     break;
                 case TelephonyManager.NETWORK_TYPE_CDMA:
                     if (!mShowAtLeastThreeGees) {
@@ -998,16 +970,6 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
             mBluetoothTethered = false;
         }
 
-        if (info != null && info.getType() == ConnectivityManager.TYPE_ETHERNET) {
-            mEtherConnected = info.isConnected();
-            mEtherIconId = (mInetCondition == 1
-                    ? R.drawable.stat_sys_ether_fully
-                    : R.drawable.stat_sys_ether);
-        } else {
-            mEtherConnected = false;
-            mEtherIconId = 0;
-        }
-
         // We want to update all the icons, all at once, for any condition change
         updateDataNetType();
         updateWimaxIcons();
@@ -1095,9 +1057,9 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
                     R.string.accessibility_bluetooth_tether);
         }
 
-        mEtherConnected = (mConnectedNetworkType == ConnectivityManager.TYPE_ETHERNET);
-        if (mEtherConnected) {
-            mContentDescriptionEther = combinedLabel = context.getString(R.string.ethernet_label);
+        final boolean ethernetConnected = (mConnectedNetworkType == ConnectivityManager.TYPE_ETHERNET);
+        if (ethernetConnected) {
+            combinedLabel = context.getString(R.string.ethernet_label);
         }
 
         if (mAirplaneMode &&
@@ -1126,11 +1088,11 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
                 mContentDescriptionCombinedSignal = mContentDescriptionPhoneSignal;
                 combinedSignalIconId = mDataSignalIconId;
             }
-        } else if (!mDataConnected && !mWifiConnected && !mBluetoothTethered
-                && !mWimaxConnected && !mEtherConnected) {
+        }
+        else if (!mDataConnected && !mWifiConnected && !mBluetoothTethered && !mWimaxConnected && !ethernetConnected) {
             // pretty much totally disconnected
 
-            combinedLabel = mContext.getString(R.string.status_bar_settings_signal_meter_disconnected);
+            combinedLabel = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             // On devices without mobile radios, we want to show the wifi icon
             combinedSignalIconId =
                 mHasMobileDataFeature ? mDataSignalIconId : mWifiIconId;
@@ -1186,9 +1148,7 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
          || mLastWimaxIconId                != mWimaxIconId
          || mLastDataTypeIconId             != mDataTypeIconId
          || mLastAirplaneMode               != mAirplaneMode
-         || mLastLocale                     != mLocale
-         || mLastEtherIconId                != mEtherIconId
-         || mLastAirplaneMode               != mAirplaneMode)
+         || mLastLocale                     != mLocale)
         {
             // NB: the mLast*s will be updated later
             for (SignalCluster cluster : mSignalClusters) {
@@ -1226,11 +1186,6 @@ public class NetworkController extends BroadcastReceiver implements DemoMode {
         // the combined data signal icon
         if (mLastCombinedSignalIconId != combinedSignalIconId) {
             mLastCombinedSignalIconId = combinedSignalIconId;
-        }
-
-        // the ethernet icon
-        if (mLastEtherIconId != mEtherIconId) {
-            mLastEtherIconId = mEtherIconId;
         }
 
         // the data network type overlay

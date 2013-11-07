@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import java.util.List;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothAdapter.BluetoothStateChangeCallback;
 import android.content.BroadcastReceiver;
@@ -31,7 +29,6 @@ import android.database.ContentObserver;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.WifiDisplayStatus;
 import android.net.ConnectivityManager;
-import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;

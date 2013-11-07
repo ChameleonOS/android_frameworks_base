@@ -76,8 +76,6 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <include layout="@layout/network_stats" />
-
             <LinearLayout android:id="@+id/statusIcons"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -161,7 +159,4 @@
                 />
         </com.android.systemui.statusbar.phone.TickerView>
     </LinearLayout>
-    <com.android.systemui.statusbar.policy.BatteryBar
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/battery_bar_height"/>
 </com.android.systemui.statusbar.phone.PhoneStatusBarView>

@@ -17,14 +17,9 @@
 package com.android.systemui;
 
 import android.app.Service;
-import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
-import android.os.Handler;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -49,8 +44,6 @@ public class SystemUIService extends Service {
     /**
      * Hold a reference on the stuff we start.
      */
-    private Context mContext;
-
     private final SystemUI[] mServices = new SystemUI[SERVICES.length];
 
     @Override
@@ -72,9 +65,6 @@ public class SystemUIService extends Service {
             Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
         }
-        mContext = this;
-        SettingsObserver settingsObserver = new SettingsObserver(new Handler());
-        settingsObserver.observe();
     }
 
     @Override
@@ -107,24 +97,6 @@ public class SystemUIService extends Service {
                     ui.dump(fd, pw, args);
                 }
             }
-        }
-    }
-    class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.UI_DISPLAY_STATE), false,
-                    this);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            // Dirty way to kill off the SystemUI service so we can restart with the new UI
-            System.exit(1);
         }
     }
 }

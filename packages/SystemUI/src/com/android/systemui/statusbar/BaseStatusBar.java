@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar;
 
-import android.annotation.ChaosLab;
-import android.annotation.ChaosLab.Classification;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
@@ -25,7 +23,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -33,7 +30,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
@@ -51,7 +47,6 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
-import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -79,9 +74,6 @@ import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 import java.util.ArrayList;
 import java.util.Locale;
-
-import com.android.systemui.chaos.lab.gestureanywhere.GestureAnywhereView;
-import com.android.systemui.statusbar.policy.activedisplay.ActiveDisplayView;
 
 public abstract class BaseStatusBar extends SystemUI implements
         CommandQueue.Callbacks {
@@ -155,16 +147,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
-
-    private boolean mShowNotificationCounts;
-
-    protected AppSidebar mAppSidebar;
-    protected int mSidebarPosition;
-
-    protected ActiveDisplayView mActiveDisplayView;
-
-    @ChaosLab(name="GestureAnywhere", classification=Classification.NEW_FIELD)
-    protected GestureAnywhereView mGestureAnywhereView;
 
     private RecentsComponent mRecents;
 
@@ -250,9 +232,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
-        mShowNotificationCounts = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.STATUS_BAR_NOTIF_COUNT, 0) == 1;
-
         mRecents = getComponent(RecentsComponent.class);
 
         mLocale = mContext.getResources().getConfiguration().locale;
@@ -319,8 +298,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        SidebarObserver observer = new SidebarObserver(mHandler);
-        observer.observe();
         mContext.registerReceiver(mBroadcastReceiver, filter);
     }
 
@@ -591,7 +568,7 @@ public abstract class BaseStatusBar extends SystemUI implements
                   break;
              case MSG_OPEN_SEARCH_PANEL:
                  if (DEBUG) Log.d(TAG, "opening search panel");
-                 if (mSearchPanelView != null) {
+                 if (mSearchPanelView != null && mSearchPanelView.isAssistantAvailable()) {
                      mSearchPanelView.show(true, true);
                      onShowSearchPanel();
                  }
@@ -1123,126 +1100,5 @@ public abstract class BaseStatusBar extends SystemUI implements
             mWindowManager.removeViewImmediate(mSearchPanelView);
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
-    }
-
-    class SidebarObserver extends ContentObserver {
-        SidebarObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.APP_SIDEBAR_POSITION), false, this);
-            update();
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            update();
-        }
-
-        public void update() {
-            ContentResolver resolver = mContext.getContentResolver();
-            int sidebarPosition = Settings.System.getInt(
-                    resolver, Settings.System.APP_SIDEBAR_POSITION, AppSidebar.SIDEBAR_POSITION_LEFT);
-            if (sidebarPosition != mSidebarPosition) {
-                mSidebarPosition = sidebarPosition;
-                mWindowManager.updateViewLayout(mAppSidebar, getAppSidebarLayoutParams(sidebarPosition));
-            }
-        }
-    }
-
-    protected void addSidebarView() {
-        mAppSidebar = (AppSidebar)View.inflate(mContext, R.layout.app_sidebar, null);
-        mWindowManager.addView(mAppSidebar, getAppSidebarLayoutParams(mSidebarPosition));
-    }
-
-    protected void removeSidebarView() {
-        if (mAppSidebar != null)
-            mWindowManager.removeView(mAppSidebar);
-    }
-
-    protected WindowManager.LayoutParams getAppSidebarLayoutParams(int position) {
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
-                0
-                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                PixelFormat.TRANSLUCENT);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
-        lp.gravity = Gravity.TOP;// | Gravity.FILL_VERTICAL;
-        lp.gravity |= position == AppSidebar.SIDEBAR_POSITION_LEFT ? Gravity.LEFT : Gravity.RIGHT;
-        lp.setTitle("AppSidebar");
-
-        return lp;
-    }
-
-    protected void addActiveDisplayView() {
-        mActiveDisplayView = (ActiveDisplayView)View.inflate(mContext, R.layout.active_display, null);
-        mWindowManager.addView(mActiveDisplayView, getActiveDisplayViewLayoutParams());
-        mActiveDisplayView.setStatusBar(this);
-    }
-
-    protected void removeActiveDisplayView() {
-        if (mActiveDisplayView != null)
-            mWindowManager.removeView(mActiveDisplayView);
-    }
-
-    protected WindowManager.LayoutParams getActiveDisplayViewLayoutParams() {
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                0
-                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                PixelFormat.TRANSLUCENT);
-        lp.gravity = Gravity.TOP | Gravity.FILL_VERTICAL | Gravity.FILL_HORIZONTAL;
-        lp.setTitle("ActiveDisplayView");
-
-        return lp;
-    }
-
-    @ChaosLab(name="GestureAnywhere", classification=Classification.NEW_METHOD)
-    protected void addGestureAnywhereView() {
-        mGestureAnywhereView = (GestureAnywhereView)View.inflate(
-                mContext, R.layout.gesture_anywhere_overlay, null);
-        mWindowManager.addView(mGestureAnywhereView, getGestureAnywhereViewLayoutParams(Gravity.LEFT));
-        mGestureAnywhereView.setStatusBar(this);
-    }
-
-    @ChaosLab(name="GestureAnywhere", classification=Classification.NEW_METHOD)
-    protected void removeGestureAnywhereView() {
-        if (mGestureAnywhereView != null)
-            mWindowManager.removeView(mGestureAnywhereView);
-    }
-
-    @ChaosLab(name="GestureAnywhere", classification=Classification.NEW_METHOD)
-    protected WindowManager.LayoutParams getGestureAnywhereViewLayoutParams(int gravity) {
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL,
-                0
-                | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                PixelFormat.TRANSLUCENT);
-        lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
-        lp.gravity = Gravity.TOP | gravity;
-        lp.setTitle("GestureAnywhereView");
-
-        return lp;
     }
 }

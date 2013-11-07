@@ -34,11 +34,6 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
-    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_4G_RADIO_DISABLE" />
-    <uses-permission android:name="android.permission.ACCESS_4G_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_4G_STATE" />
-    <uses-permission android:name="com.android.phone.CHANGE_NETWORK_MODE" />
 
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
@@ -56,8 +51,6 @@
     <uses-permission android:name="android.permission.SET_SCREEN_COMPATIBILITY" />
     <uses-permission android:name="android.permission.START_ANY_ACTIVITY" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
-    <uses-permission android:name="android.permission.FORCE_STOP_PACKAGES" />
-
     <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
 
     <!-- WindowManager -->
@@ -71,14 +64,6 @@
     <!-- DreamManager -->
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
     <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />
-
-    <!-- Power widget -->
-    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
-
-    <uses-permission android:name="android.permission.ACCESS_THEME_SERVICE" />
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
     <!-- Alarm clocks -->
     <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
@@ -239,11 +224,6 @@
             </intent-filter>
         </service>
 
-        <provider
-            android:name=".statusbar.sidebar.SidebarContentProvider"
-            android:authorities="org.chameleonos.sidebar.contentprovider" >
-        </provider>
-
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"
             android:icon="@mipmap/ic_launcher_dreams"
@@ -263,14 +243,5 @@
                 <category android:name="android.intent.category.DESK_DOCK" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".statusbar.policy.activedisplay.DummyActivity"
-                  android:label=""
-                  android:taskAffinity=""
-                  android:excludeFromRecents="true"
-                  android:exported="true"
-                  android:theme="@style/Theme.DummyActivity">
-        </activity>
-
     </application>
 </manifest>
