@@ -246,6 +246,15 @@ public class NavigationBarView extends LinearLayout {
     }
 
     // shown when keyguard is visible and camera is available
+
+    protected void updateResources() {
+        final Resources res = mContext.getResources();
+        getIcons(res);
+        ((ImageView)getHomeButton()).setImageDrawable(
+                mVertical ? res.getDrawable(R.drawable.ic_sysbar_home_land) :
+                res.getDrawable(R.drawable.ic_sysbar_home));
+    }
+
     public View getCameraButton() {
         return mCurrentView.findViewById(R.id.camera_button);
     }
