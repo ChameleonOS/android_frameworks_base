@@ -17,6 +17,7 @@ package com.android.internal.policy.impl;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.ChaosBusyDialog;
 import android.app.AppOpsManager;
 import android.app.IUiModeManager;
 import android.app.ProgressDialog;
@@ -4676,7 +4677,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    ProgressDialog mBootMsgDialog = null;
+    ChaosBusyDialog mBootMsgDialog = null;
 
     /** {@inheritDoc} */
     public void showBootMessage(final CharSequence msg, final boolean always) {
@@ -4684,32 +4685,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.post(new Runnable() {
             @Override public void run() {
                 if (mBootMsgDialog == null) {
-                    mBootMsgDialog = new ProgressDialog(mContext) {
-                        // This dialog will consume all events coming in to
-                        // it, to avoid it trying to do things too early in boot.
-                        @Override public boolean dispatchKeyEvent(KeyEvent event) {
-                            return true;
-                        }
-                        @Override public boolean dispatchKeyShortcutEvent(KeyEvent event) {
-                            return true;
-                        }
-                        @Override public boolean dispatchTouchEvent(MotionEvent ev) {
-                            return true;
-                        }
-                        @Override public boolean dispatchTrackballEvent(MotionEvent ev) {
-                            return true;
-                        }
-                        @Override public boolean dispatchGenericMotionEvent(MotionEvent ev) {
-                            return true;
-                        }
-                        @Override public boolean dispatchPopulateAccessibilityEvent(
-                                AccessibilityEvent event) {
-                            return true;
-                        }
-                    };
+                    mBootMsgDialog = new ChaosBusyDialog(mContext, android.R.style.Theme_Translucent_NoTitleBar);
                     mBootMsgDialog.setTitle(R.string.android_upgrading_title);
-                    mBootMsgDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    mBootMsgDialog.setIndeterminate(true);
                     mBootMsgDialog.getWindow().setType(
                             WindowManager.LayoutParams.TYPE_BOOT_PROGRESS);
                     mBootMsgDialog.getWindow().addFlags(
@@ -4722,6 +4699,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mBootMsgDialog.setCancelable(false);
                     mBootMsgDialog.show();
                 }
+                if (!mBootMsgDialog.isShowing())
+                    mBootMsgDialog.show();
                 mBootMsgDialog.setMessage(msg);
             }
         });
