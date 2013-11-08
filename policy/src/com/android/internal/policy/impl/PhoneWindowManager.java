@@ -389,6 +389,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mForcingShowNavBar;
     int mForcingShowNavBarLayer;
 
+    int mExpandedDesktopStyle = -1;
+
     // States of keyguard dismiss.
     private static final int DISMISS_KEYGUARD_NONE = 0; // Keyguard not being dismissed.
     private static final int DISMISS_KEYGUARD_START = 1; // Keyguard needs to be dismissed.
@@ -536,6 +538,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.EXPANDED_DESKTOP_STATE), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.EXPANDED_DESKTOP_STYLE), false, this,
+                    UserHandle.USER_ALL);
+
             updateSettings();
         }
 
@@ -1125,7 +1134,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public void updateSettings() {
         ContentResolver resolver = mContext.getContentResolver();
-        boolean updateRotation = false;
+        boolean updateRotation = false, updateVisibility = false;
         synchronized (mLock) {
             mEndcallBehavior = Settings.System.getIntForUser(resolver,
                     Settings.System.END_BUTTON_BEHAVIOR,
@@ -1135,6 +1144,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT,
                     UserHandle.USER_CURRENT);
+
+            int expandedDesktopStyle = Settings.System.getIntForUser(resolver,
+                    Settings.System.EXPANDED_DESKTOP_STYLE, 0, UserHandle.USER_CURRENT);
+            if (Settings.System.getIntForUser(resolver,
+                        Settings.System.EXPANDED_DESKTOP_STATE, 0, UserHandle.USER_CURRENT) == 0) {
+                expandedDesktopStyle = 0;
+            }
+
+            if (expandedDesktopStyle != mExpandedDesktopStyle) {
+                mExpandedDesktopStyle = expandedDesktopStyle;
+                updateVisibility = true;
+            }
 
             // Configure rotation lock.
             int userRotation = Settings.System.getIntForUser(resolver,
@@ -1179,6 +1200,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (updateRotation) {
             updateRotation(true);
+        } else if (updateVisibility) {
+            updateSystemUiVisibilityLw();
         }
     }
 
@@ -5088,6 +5111,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         WindowState transWin = mKeyguard != null && mKeyguard.isVisibleLw() && !mHideLockScreen
                 ? mKeyguard
                 : mTopFullscreenOpaqueWindowState;
+
+        vis = updateExpandedDesktopVisibility(vis);
         vis = mStatusBarController.applyTranslucentFlagLw(transWin, vis, oldVis);
         vis = mNavigationBarController.applyTranslucentFlagLw(transWin, vis, oldVis);
 
@@ -5109,15 +5134,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // update status bar
         boolean immersiveSticky =
-                (vis & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
+                (vis & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
+                || expandedDesktopHidesNavigationBar();
         boolean hideStatusBarWM =
-                mTopFullscreenOpaqueWindowState != null &&
+                (mTopFullscreenOpaqueWindowState != null &&
                 (mTopFullscreenOpaqueWindowState.getAttrs().flags
-                        & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
+                        & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0)
+                || expandedDesktopHidesStatusBar();
         boolean hideStatusBarSysui =
-                (vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
+                (vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0 ||
+                expandedDesktopHidesStatusBar();
         boolean hideNavBarSysui =
-                (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
+                (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0 ||
+                expandedDesktopHidesNavigationBar();
 
         boolean transientStatusBarAllowed =
                 mStatusBar != null && (
@@ -5395,5 +5424,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mUndockedHdmiRotation="); pw.println(mUndockedHdmiRotation);
         mStatusBarController.dump(pw, prefix);
         mNavigationBarController.dump(pw, prefix);
+    }
+
+    private boolean expandedDesktopHidesStatusBar() {
+        return mExpandedDesktopStyle == 2;
+    }
+
+    private boolean expandedDesktopHidesNavigationBar() {
+        return mExpandedDesktopStyle != 0;
+    }
+
+    private int updateExpandedDesktopVisibility(int vis) {
+        if ((vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != View.SYSTEM_UI_FLAG_FULLSCREEN
+                && expandedDesktopHidesStatusBar()) {
+            vis |= View.SYSTEM_UI_FLAG_FULLSCREEN;
+        } else {
+            vis &= ~View.SYSTEM_UI_FLAG_FULLSCREEN;
+        }
+
+        if ((vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                && expandedDesktopHidesNavigationBar()) {
+            vis |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+            vis |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        } else {
+            vis &= ~(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+
+        return vis;
     }
 }
