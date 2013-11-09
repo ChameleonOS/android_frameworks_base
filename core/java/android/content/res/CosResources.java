@@ -27,13 +27,15 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
-import java.io.InputStream;
+
 import cos.content.res.ExtraConfiguration;
 import cos.content.res.ThemeResources;
 import cos.content.res.ThemeResourcesPackage;
 import cos.content.res.ThemeResourcesSystem;
 import cos.content.res.ThemeZipFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 
 /** {@hide} */
 public final class CosResources extends Resources {
@@ -203,30 +205,31 @@ public final class CosResources extends Resources {
         Drawable drawable = null;
         String file;
         ThemeZipFile.ThemeFileInfo info;
-        file = value.string.toString();
-        info = mThemeResources.getThemeFileStream(getCookieType(value.assetCookie), file);
-        if (info == null && file.contains("-sw")) {
-            file = file.substring(0, file.indexOf('-')) + file.substring(file.lastIndexOf('-'));
+        try {
+            file = value.string.toString();
             info = mThemeResources.getThemeFileStream(getCookieType(value.assetCookie), file);
-        }
-        if(info != null) {
-            BitmapFactory.Options opts = null;
-            if(info.mDensity > 0 && value.density != 65535) {
-                opts = new BitmapFactory.Options();
-                opts.inDensity = info.mDensity;
+            if (info == null && file.contains("-sw")) {
+                file = file.substring(0, file.indexOf('-')) + file.substring(file.lastIndexOf('-'));
+                info = mThemeResources.getThemeFileStream(getCookieType(value.assetCookie), file);
             }
-            InputStream inputstream = info.mInput;
-            if(file.endsWith(".9.png"))
-                inputstream = SimulateNinePngUtil.convertIntoNinePngStream(inputstream);
-            drawable = Drawable.createFromResourceStream(this, value, inputstream, file, opts);
-            try {
+            if(info != null) {
+                BitmapFactory.Options opts = null;
+                if(info.mDensity > 0 && value.density != 65535) {
+                    opts = new BitmapFactory.Options();
+                    opts.inDensity = info.mDensity;
+                }
+                InputStream inputstream = info.mInput;
+                if(file.endsWith(".9.png"))
+                    inputstream = SimulateNinePngUtil.convertIntoNinePngStream(inputstream);
+                drawable = Drawable.createFromResourceStream(this, value, inputstream, file, opts);
                 info.mInput.close();
+            } else {
+                if (DBG)
+                    Log.d(TAG, "loadOverlayDrawable: info was null for " + file);
+                mSkipFiles.put(id, Boolean.valueOf(true));
             }
-            catch(Exception exception) { }
-        } else {
-            if (DBG)
-                Log.d(TAG, "loadOverlayDrawable: info was null for " + file);
-            mSkipFiles.put(id, Boolean.valueOf(true));
+        } catch (IOException e) {
+            drawable = null;
         }
 
         return drawable;
