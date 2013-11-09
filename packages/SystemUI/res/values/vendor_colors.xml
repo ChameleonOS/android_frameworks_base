@@ -18,6 +18,11 @@
 -->
 <resources>
 
+    <!-- quick settings text color -->
+    <color name="quick_settings_text_color">#cccccc</color>
+    <color name="quick_settings_alarm_text_color">#ff3a3b39</color>
+    <color name="quick_settings_clock_text_color">#ff33b5e5</color>
+
     <!-- app sidebar trigger region color -->
     <color name="trigger_region_color">#8015a0e5</color>
 

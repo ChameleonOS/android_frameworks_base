@@ -59,6 +59,9 @@ public class LocationController extends BroadcastReceiver {
     private ArrayList<LocationSettingsChangeCallback> mSettingsChangeCallbacks =
             new ArrayList<LocationSettingsChangeCallback>();
 
+    private ArrayList<LocationGpsStateChangeCallback> mChangeCallbacks =
+            new ArrayList<LocationGpsStateChangeCallback>();
+
     /**
      * A callback for change in location settings (the user has enabled/disabled location).
      */
@@ -70,6 +73,13 @@ public class LocationController extends BroadcastReceiver {
          *                        is enabled in settings.
          */
         public void onLocationSettingsChanged(boolean locationEnabled);
+    }
+
+    /**
+     * A callback for change in gps state.
+     */
+    public interface LocationGpsStateChangeCallback {
+        public void onLocationGpsStateChanged(boolean inUse, String description);
     }
 
     public LocationController(Context context) {
@@ -106,6 +116,13 @@ public class LocationController extends BroadcastReceiver {
      */
     public void addSettingsChangedCallback(LocationSettingsChangeCallback cb) {
         mSettingsChangeCallbacks.add(cb);
+    }
+
+    /**
+     * Add a callback to listen for changes in gps state.
+     */
+    public void addGpsStateChangedCallback(LocationGpsStateChangeCallback cb) {
+        mChangeCallbacks.add(cb);
     }
 
     /**
@@ -217,8 +234,39 @@ public class LocationController extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
+        final boolean gpsEnabled = intent.getBooleanExtra(LocationManager.EXTRA_GPS_ENABLED, false);
+
+        boolean visible;
+        int iconId, textResId;
+
         if (LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)) {
             updateActiveLocationRequests();
+        } else {
+            if (action.equals(LocationManager.GPS_FIX_CHANGE_ACTION) && gpsEnabled) {
+                // GPS is getting fixes
+                iconId = com.android.internal.R.drawable.stat_sys_gps_on;
+                textResId = R.string.gps_notification_found_text;
+                visible = true;
+            } else if (action.equals(LocationManager.GPS_ENABLED_CHANGE_ACTION) && !gpsEnabled) {
+                // GPS is off
+                visible = false;
+                iconId = textResId = 0;
+            } else {
+                // GPS is on, but not receiving fixes
+                iconId = R.drawable.stat_sys_gps_acquiring_anim;
+                textResId = R.string.gps_notification_searching_text;
+                visible = true;
+            }
+            if (visible) {
+                final String text = mContext.getText(textResId).toString();
+                for (LocationGpsStateChangeCallback cb : mChangeCallbacks) {
+                    cb.onLocationGpsStateChanged(true, text);
+                }
+            } else {
+                for (LocationGpsStateChangeCallback cb : mChangeCallbacks) {
+                    cb.onLocationGpsStateChanged(false, null);
+                }
+            }
         }
     }
 }
