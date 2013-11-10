@@ -44,11 +44,11 @@
     <string name="global_action_screenshot">Snímek obrazovky</string>
 
     <!-- label for item that toggles expand desktop mode -->
-    <string name="global_actions_toggle_expanded_desktop_mode">Rozšířená plocha</string>
+    <string name="global_actions_toggle_global_immersive_mode">Rozšířená plocha</string>
     <!-- status message in phone options dialog for when expand desktop mode is on -->
-    <string name="global_actions_expanded_desktop_mode_on_status">Zapnuto</string>
+    <string name="global_actions_global_immersive_mode_on_status">Zapnuto</string>
     <!-- status message in phone options dialog for when expand desktop mode is off -->
-    <string name="global_actions_expanded_desktop_mode_off_status">Vypnuto</string>
+    <string name="global_actions_global_immersive_mode_off_status">Vypnuto</string>
 
     <!-- Reboot Progress Dialog. This is shown if the user chooses to reboot the phone. -->
     <string name="reboot_progress">Restart\u2026</string>

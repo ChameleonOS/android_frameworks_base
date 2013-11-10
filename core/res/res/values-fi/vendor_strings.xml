@@ -32,9 +32,9 @@
     <string name="reboot_system" product="tablet">Käynnistä tablet uudelleen</string>
     <string name="reboot_system" product="default">Käynnistä puhelin uudelleen</string>
     <string name="global_action_screenshot">Kuvakaappaus</string>
-    <string name="global_actions_toggle_expanded_desktop_mode">Laajennettu työpöytä</string>
-    <string name="global_actions_expanded_desktop_mode_on_status">Käytössä</string>
-    <string name="global_actions_expanded_desktop_mode_off_status">Pois käytöstä</string>
+    <string name="global_actions_toggle_global_immersive_mode">Laajennettu työpöytä</string>
+    <string name="global_actions_global_immersive_mode_on_status">Käytössä</string>
+    <string name="global_actions_global_immersive_mode_off_status">Pois käytöstä</string>
     <string name="reboot_reboot">Käynnistä uudelleen</string>
     <string name="reboot_recovery">Recovery-tila</string>
     <string name="reboot_bootloader">Bootloader-tila</string>

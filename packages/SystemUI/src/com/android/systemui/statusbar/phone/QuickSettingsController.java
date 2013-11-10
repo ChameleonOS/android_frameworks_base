@@ -24,7 +24,7 @@ import static com.android.internal.util.chaos.QSConstants.TILE_BLUETOOTH;
 import static com.android.internal.util.chaos.QSConstants.TILE_BRIGHTNESS;
 import static com.android.internal.util.chaos.QSConstants.TILE_CAMERA;
 import static com.android.internal.util.chaos.QSConstants.TILE_DELIMITER;
-import static com.android.internal.util.chaos.QSConstants.TILE_EXPANDEDDESKTOP;
+import static com.android.internal.util.chaos.QSConstants.TILE_IMMERSIVEMODE;
 import static com.android.internal.util.chaos.QSConstants.TILE_GPS;
 import static com.android.internal.util.chaos.QSConstants.TILE_LOCKSCREEN;
 import static com.android.internal.util.chaos.QSConstants.TILE_LTE;
@@ -70,7 +70,7 @@ import com.android.systemui.quicksettings.BluetoothTile;
 import com.android.systemui.quicksettings.BrightnessTile;
 import com.android.systemui.quicksettings.BugReportTile;
 import com.android.systemui.quicksettings.CameraTile;
-import com.android.systemui.quicksettings.ExpandedDesktopTile;
+import com.android.systemui.quicksettings.ImmersiveModeTile;
 import com.android.systemui.quicksettings.GPSTile;
 import com.android.systemui.quicksettings.InputMethodTile;
 import com.android.systemui.quicksettings.LteTile;
@@ -252,10 +252,10 @@ public class QuickSettingsController {
                 qs = new QuietHoursTile(mContext, this);
             } else if (tile.equals(TILE_VOLUME)) {
                 qs = new VolumeTile(mContext, this, mHandler);
-            } else if (tile.equals(TILE_EXPANDEDDESKTOP)) {
-                mTileStatusUris.add(Settings.System.getUriFor(Settings.System.EXPANDED_DESKTOP_STYLE));
-                if (QSUtils.expandedDesktopEnabled(resolver)) {
-                    qs = new ExpandedDesktopTile(mContext, this, mHandler);
+            } else if (tile.equals(TILE_IMMERSIVEMODE)) {
+                mTileStatusUris.add(Settings.System.getUriFor(Settings.System.GLOBAL_IMMERSIVE_MODE_STYLE));
+                if (QSUtils.globalImmersiveModeEnabled(resolver)) {
+                    qs = new ImmersiveModeTile(mContext, this, mHandler);
                 }
             } else if (tile.equals(TILE_NETWORKADB)) {
                 mTileStatusUris.add(Settings.Global.getUriFor(Settings.Global.ADB_ENABLED));

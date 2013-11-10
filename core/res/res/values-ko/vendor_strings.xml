@@ -38,11 +38,11 @@
     <string name="global_action_screenshot">스크린샷</string>
 
     <!-- label for item that toggles expand desktop mode -->
-    <string name="global_actions_toggle_expanded_desktop_mode">데스크탑 확장</string>
+    <string name="global_actions_toggle_global_immersive_mode">데스크탑 확장</string>
     <!-- status message in phone options dialog for when expand desktop mode is on -->
-    <string name="global_actions_expanded_desktop_mode_on_status">활성화됨</string>
+    <string name="global_actions_global_immersive_mode_on_status">활성화됨</string>
     <!-- status message in phone options dialog for when expand desktop mode is off -->
-    <string name="global_actions_expanded_desktop_mode_off_status">비활성화됨</string>
+    <string name="global_actions_global_immersive_mode_off_status">비활성화됨</string>
 
     <!-- Button to reboot the phone, within the Reboot Options dialog -->
     <string name="reboot_reboot">다시 시작</string>

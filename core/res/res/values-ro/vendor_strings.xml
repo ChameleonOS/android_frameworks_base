@@ -34,9 +34,9 @@
     <string name="profileGroupGmail">"Gmail"</string>
     <string name="profileGroupEmail">"Email"</string>
     <string name="profileGroupSMS">"SMS"</string>
-    <string name="global_actions_toggle_expanded_desktop_mode">"Desktop extins"</string>
-    <string name="global_actions_expanded_desktop_mode_on_status">"Activat"</string>
-    <string name="global_actions_expanded_desktop_mode_off_status">"Dezactivat"</string>
+    <string name="global_actions_toggle_global_immersive_mode">"Desktop extins"</string>
+    <string name="global_actions_global_immersive_mode_on_status">"Activat"</string>
+    <string name="global_actions_global_immersive_mode_off_status">"Dezactivat"</string>
     <string name="global_action_reboot">"Repornire"</string>
     <string name="global_action_choose_profile">"Profil"</string>
     <string name="lockscreen_discharging">"Descărcare, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>

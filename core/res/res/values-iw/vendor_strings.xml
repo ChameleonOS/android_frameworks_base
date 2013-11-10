@@ -47,11 +47,11 @@
     <string name="global_action_screenshot">צלם מסך</string>
 
     <!-- label for item that toggles expand desktop mode -->
-    <string name="global_actions_toggle_expanded_desktop_mode">שולחן עבודה מורחב</string>
+    <string name="global_actions_toggle_global_immersive_mode">שולחן עבודה מורחב</string>
     <!-- status message in phone options dialog for when expand desktop mode is on -->
-    <string name="global_actions_expanded_desktop_mode_on_status">פועל</string>
+    <string name="global_actions_global_immersive_mode_on_status">פועל</string>
     <!-- status message in phone options dialog for when expand desktop mode is off -->
-    <string name="global_actions_expanded_desktop_mode_off_status">מושבת</string>
+    <string name="global_actions_global_immersive_mode_off_status">מושבת</string>
     <!-- label for item that reboots the phone in phone options dialog -->
     <string name="global_action_reboot">הפעלה מחדש</string>
     <!-- label for item that opens the profile choosing dialog -->

@@ -31,9 +31,9 @@
     <string name="wildcardProfile">Outro</string>
     <string name="reboot_system" product="tablet">Reiniciar tablet</string>
     <string name="global_action_screenshot">Capturar tela</string>
-    <string name="global_actions_toggle_expanded_desktop_mode">Área de trabalho expandida</string>
-    <string name="global_actions_expanded_desktop_mode_on_status">Ativada</string>
-    <string name="global_actions_expanded_desktop_mode_off_status">Desativada</string>
+    <string name="global_actions_toggle_global_immersive_mode">Área de trabalho expandida</string>
+    <string name="global_actions_global_immersive_mode_on_status">Ativada</string>
+    <string name="global_actions_global_immersive_mode_off_status">Desativada</string>
     <string name="reboot_reboot">Reiniciar</string>
     <string name="reboot_recovery">Recuperação</string>
     <string name="reboot_bootloader">Bootloader</string>

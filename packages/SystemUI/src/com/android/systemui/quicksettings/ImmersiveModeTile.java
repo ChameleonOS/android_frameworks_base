@@ -14,10 +14,10 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.QuickSettingsContainerView;
 import com.android.systemui.statusbar.phone.QuickSettingsController;
 
-public class ExpandedDesktopTile extends QuickSettingsTile {
+public class ImmersiveModeTile extends QuickSettingsTile {
     private boolean mEnabled = false;
 
-    public ExpandedDesktopTile(Context context, 
+    public ImmersiveModeTile(Context context, 
             QuickSettingsController qsc, Handler handler) {
         super(context, qsc);
 
@@ -26,7 +26,7 @@ public class ExpandedDesktopTile extends QuickSettingsTile {
             public void onClick(View v) {
                 // Change the system setting
                 Settings.System.putIntForUser(mContext.getContentResolver(),
-                        Settings.System.EXPANDED_DESKTOP_STATE, mEnabled ? 0 : 1,
+                        Settings.System.GLOBAL_IMMERSIVE_MODE_STATE, mEnabled ? 0 : 1,
                         UserHandle.USER_CURRENT);
             }
         };
@@ -42,7 +42,7 @@ public class ExpandedDesktopTile extends QuickSettingsTile {
             }
         };
 
-        Uri stateUri = Settings.System.getUriFor(Settings.System.EXPANDED_DESKTOP_STATE);
+        Uri stateUri = Settings.System.getUriFor(Settings.System.GLOBAL_IMMERSIVE_MODE_STATE);
         qsc.registerObservedContent(stateUri, this);
     }
 
@@ -59,13 +59,13 @@ public class ExpandedDesktopTile extends QuickSettingsTile {
 
     private synchronized void updateTile() {
         mEnabled = Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.EXPANDED_DESKTOP_STATE, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.System.GLOBAL_IMMERSIVE_MODE_STATE, 0, UserHandle.USER_CURRENT) == 1;
         if (mEnabled) {
-            mDrawable = R.drawable.ic_qs_expanded_desktop_on;
-            mLabel = mContext.getString(R.string.quick_settings_expanded_desktop);
+            mDrawable = R.drawable.ic_qs_immersive_mode_on;
+            mLabel = mContext.getString(R.string.quick_settings_immersive_mode);
         } else {
-            mDrawable = R.drawable.ic_qs_expanded_desktop_off;
-            mLabel = mContext.getString(R.string.quick_settings_expanded_desktop_off);
+            mDrawable = R.drawable.ic_qs_immersive_mode_off;
+            mLabel = mContext.getString(R.string.quick_settings_immersive_mode_off);
         }
     }
 

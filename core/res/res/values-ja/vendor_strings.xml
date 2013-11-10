@@ -19,9 +19,9 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
     <string name="lockscreen_discharging">放電中, <xliff:g id="number">%d</xliff:g><xliff:g id="percent">%%</xliff:g></string>
-    <string name="global_actions_toggle_expanded_desktop_mode">拡張デスクトップ</string>
-    <string name="global_actions_expanded_desktop_mode_on_status">有効</string>
-    <string name="global_actions_expanded_desktop_mode_off_status">無効</string>
+    <string name="global_actions_toggle_global_immersive_mode">拡張デスクトップ</string>
+    <string name="global_actions_global_immersive_mode_on_status">有効</string>
+    <string name="global_actions_global_immersive_mode_off_status">無効</string>
     <string name="reboot_confirm" product="tablet">タブレットは再起動します。</string>
     <string name="reboot_confirm" product="default">携帯電話は再起動します。</string>
     <string name="toast_rotation_unlocked">ディスプレイの回転をロック解除しました</string>

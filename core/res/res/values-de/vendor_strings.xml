@@ -56,9 +56,9 @@
     <string name="global_action_screenshot">Bildschirmfoto</string>
 
     <!-- Expand desktop mode -->
-    <string name="global_actions_toggle_expanded_desktop_mode">Erweiterter Desktop</string>
-    <string name="global_actions_expanded_desktop_mode_on_status">Aktiviert</string>
-    <string name="global_actions_expanded_desktop_mode_off_status">Deaktiviert</string>
+    <string name="global_actions_toggle_global_immersive_mode">Erweiterter Desktop</string>
+    <string name="global_actions_global_immersive_mode_on_status">Aktiviert</string>
+    <string name="global_actions_global_immersive_mode_off_status">Deaktiviert</string>
 
     <!-- Reboot menu -->
     <string name="reboot_reboot">Neu starten</string>

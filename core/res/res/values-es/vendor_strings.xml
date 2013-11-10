@@ -32,9 +32,9 @@
     <string name="reboot_system" product="tablet">Reiniciar tablet</string>
     <string name="reboot_system" product="default">Reiniciar teléfono</string>
     <string name="global_action_screenshot">Captura de pantalla</string>
-    <string name="global_actions_toggle_expanded_desktop_mode">Escritorio extendido</string>
-    <string name="global_actions_expanded_desktop_mode_on_status">Activado</string>
-    <string name="global_actions_expanded_desktop_mode_off_status">Desactivado</string>
+    <string name="global_actions_toggle_global_immersive_mode">Escritorio extendido</string>
+    <string name="global_actions_global_immersive_mode_on_status">Activado</string>
+    <string name="global_actions_global_immersive_mode_off_status">Desactivado</string>
     <string name="reboot_reboot">Reiniciar</string>
     <string name="reboot_recovery">Modo Recovery</string>
     <string name="reboot_bootloader">Modo Bootloader</string>

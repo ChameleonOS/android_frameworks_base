@@ -391,6 +391,8 @@ public class IconCustomizer {
         } catch (Exception e) {
             Log.e(TAG, "saveCustomizedIconBitmap", e);
         }
+        file.setReadable(true, false);
+        file.setWritable(true, false);
     }
 
 

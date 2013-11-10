@@ -3098,16 +3098,16 @@ public final class Settings {
         public static final String STATUS_BAR_NETWORK_STATS_UPDATE_INTERVAL = "status_bar_network_stats_update_frequency";
 
          /**
-         * Expanded desktop on/off state
+         * Global immersive mode on/off state
          * @hide
          */
-        public static final String EXPANDED_DESKTOP_STATE = "expanded_desktop_state";
+        public static final String GLOBAL_IMMERSIVE_MODE_STATE = "global_immersive_mode_state";
 
         /**
-         * Expanded desktop style (with status bar or without status bar)
+         * Global immersive mode style (with status bar or without status bar)
          * @hide
          */
-        public static final String EXPANDED_DESKTOP_STYLE = "expanded_desktop_style";
+        public static final String GLOBAL_IMMERSIVE_MODE_STYLE = "global_immersive_mode_style";
 
         /**
          * Show status bar when notification comes in and status bar is not visible due to
@@ -3286,7 +3286,7 @@ public final class Settings {
          * Whether power menu expanded desktop is enabled
          * @hide
          */
-        public static final String POWER_MENU_EXPANDED_DESKTOP_ENABLED = "power_menu_expanded_desktop_enabled";
+        public static final String POWER_MENU_GLOBAL_IMMERSIVE_MODE_ENABLED = "power_menu_global_immersive_mode_enabled";
 
         /**
          * Whether power menu profiles switcher is enabled

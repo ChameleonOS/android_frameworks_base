@@ -31,9 +31,9 @@
     <string name="wildcardProfile">Anders</string>
     <string name="reboot_system" product="tablet">Tablet herstarten</string>
     <string name="global_action_screenshot">Schermafdruk</string>
-    <string name="global_actions_toggle_expanded_desktop_mode">Uitgebreid bureaublad</string>
-    <string name="global_actions_expanded_desktop_mode_on_status">Ingeschakeld</string>
-    <string name="global_actions_expanded_desktop_mode_off_status">Uitgeschakeld</string>
+    <string name="global_actions_toggle_global_immersive_mode">Uitgebreid bureaublad</string>
+    <string name="global_actions_global_immersive_mode_on_status">Ingeschakeld</string>
+    <string name="global_actions_global_immersive_mode_off_status">Uitgeschakeld</string>
     <string name="reboot_reboot">Herstarten</string>
     <string name="reboot_recovery">Recovery</string>
     <string name="reboot_bootloader">Bootloader</string>
