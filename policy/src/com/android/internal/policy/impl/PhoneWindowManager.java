@@ -5197,8 +5197,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // update status bar
         boolean immersiveSticky =
-                (vis & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
-                || expandedDesktopHidesNavigationBar();
+                (vis & View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0;
         boolean hideStatusBarWM =
                 (mTopFullscreenOpaqueWindowState != null &&
                 (mTopFullscreenOpaqueWindowState.getAttrs().flags
@@ -5236,7 +5235,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean oldImmersiveMode = isImmersiveMode(oldVis);
         boolean newImmersiveMode = isImmersiveMode(vis);
         if (win != null && oldImmersiveMode != newImmersiveMode) {
-            final String pkg = win.getOwningPackage();
+            final String pkg = expandedDesktopHidesNavigationBar()
+                    ? "android" : win.getOwningPackage();
             mImmersiveModeConfirmation.immersiveModeChanged(pkg, newImmersiveMode);
         }
 
