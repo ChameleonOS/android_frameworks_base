@@ -3100,7 +3100,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             dcf.right = mSystemRight;
             dcf.bottom = mSystemBottom;
             final boolean inheritTranslucentDecor = (attrs.privateFlags
-                    & WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) != 0;
+                    & WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) != 0
+                    || expandedDesktopHidesNavigationBar();
             final boolean isAppWindow =
                     attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW &&
                     attrs.type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
