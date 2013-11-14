@@ -2826,6 +2826,13 @@ public final class Settings {
         public static final String STATUS_BAR_CENTER_CLOCK = "status_bar_center_clock";
 
         /**
+         * Whether or not to display battery percentage
+         *
+         * @hide
+         */
+        public static final String STATUS_BAR_SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
+
+        /**
          * Whether or not to use the app sidebar
          *
          * @hide

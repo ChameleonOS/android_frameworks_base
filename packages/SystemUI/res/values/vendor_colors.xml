@@ -32,4 +32,7 @@
     <!-- app sidebar item text shadow color -->
     <color name="sidebar_item_text_shadow_color">#ff000000</color>
 
+    <!-- Battery percentage text color -->
+    <color name="battery_percentage_text_color">#ff000000</color>
+
 </resources>
