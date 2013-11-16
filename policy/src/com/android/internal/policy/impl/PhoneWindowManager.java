@@ -313,6 +313,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mFocusedWindow;
     IApplicationToken mFocusedApp;
 
+    // Behavior of volume wake
+    boolean mVolumeWakeScreen;
+
     private final class PointerLocationPointerEventListener implements PointerEventListener {
         @Override
         public void onPointerEvent(MotionEvent motionEvent) {
@@ -526,6 +529,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR), false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.VOLUME_WAKE_SCREEN), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.ACCELEROMETER_ROTATION), false, this,
@@ -1200,6 +1206,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
                     Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR_DEFAULT,
                     UserHandle.USER_CURRENT);
+            mVolumeWakeScreen = (Settings.System.getIntForUser(resolver,
+                    Settings.System.VOLUME_WAKE_SCREEN, 0, UserHandle.USER_CURRENT) == 1);
 
             int immersiveModeStyle = Settings.System.getIntForUser(resolver,
                     Settings.System.GLOBAL_IMMERSIVE_MODE_STYLE, 0, UserHandle.USER_CURRENT);
@@ -3885,7 +3893,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         final boolean canceled = event.isCanceled();
-        final int keyCode = event.getKeyCode();
+        int keyCode = event.getKeyCode();
 
         final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
 
@@ -4014,6 +4022,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // If music is playing but we decided not to pass the key to the
                         // application, handle the volume change here.
                         handleVolumeKey(AudioManager.STREAM_MUSIC, keyCode);
+                        break;
+                    }
+                    if (isScreenOn || !mVolumeWakeScreen) {
+                        break;
+                    } else if (keyguardActive) {
+                        keyCode = KeyEvent.KEYCODE_POWER;
+                    } else {
+                        result |= ACTION_WAKE_UP;
                         break;
                     }
                 }
