@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2013 The Linux Foundation. All rights reserved
+ * Not a Contribution.
  * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -98,16 +100,28 @@ public interface BluetoothProfile {
     static public final int GATT_SERVER = 8;
 
     /**
+     * MAP Profile
+     * @hide
+     */
+    public static final int MAP = 9;
+
+    /**
      * SAP
      * @hide
      */
     public static final int SAP = 20;
 
-    /**
-     * MAP Profile
+     /**
+     * Handsfree Client - HFP HF Role
      * @hide
      */
-    public static final int MAP = 9;
+    public static final int HANDSFREE_CLIENT = 10;
+
+    /**
+     * DUN
+     * @hide
+     */
+    public static final int DUN = 21;
 
     /**
      * Default priority for devices that we try to auto-connect to and
