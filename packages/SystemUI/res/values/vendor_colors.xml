@@ -35,4 +35,7 @@
     <!-- Battery percentage text color -->
     <color name="battery_percentage_text_color">#ff000000</color>
 
+    <!-- Circle battery percentage text color -->
+    <color name="circle_battery_percentage_text_color">#ffffffff</color>
+
 </resources>

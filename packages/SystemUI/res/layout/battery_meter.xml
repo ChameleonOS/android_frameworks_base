@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<com.android.systemui.battery.BatteryMeterLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/battery"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="@dimen/battery_meter_size"
+    android:layout_marginStart="4dip">
+
+    <!-- battery must be padded below by 2px to match assets -->
+    <com.android.systemui.battery.BatteryMeterView
+        android:id="@+id/battery_meter"
+        android:layout_height="match_parent"
+        android:layout_width="10.5dp"
+        android:layout_marginBottom="0.33dp"
+        android:visibility="gone"
+        />
+
+    <com.android.systemui.battery.CircleBatteryView
+        android:id="@+id/circle_battery"
+        android:layout_width="@dimen/battery_meter_size"
+        android:layout_height="@dimen/battery_meter_size"
+        android:visibility="gone"
+        />
+
+    <com.android.systemui.battery.PieBatteryView
+        android:id="@+id/pie_battery"
+        android:layout_width="@dimen/battery_meter_size"
+        android:layout_height="@dimen/battery_meter_size"
+        android:visibility="gone"
+        />
+
+</com.android.systemui.battery.BatteryMeterLayout>

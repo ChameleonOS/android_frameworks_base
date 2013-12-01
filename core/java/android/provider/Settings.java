@@ -2830,7 +2830,7 @@ public final class Settings {
          *
          * @hide
          */
-        public static final String STATUS_BAR_SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
+        public static final String STATUS_BAR_BATTERY_STYLE = "status_bar_battery_style";
 
         /**
          * Whether or not to use the app sidebar

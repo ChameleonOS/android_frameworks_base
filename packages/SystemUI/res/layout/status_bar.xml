@@ -97,14 +97,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     />
-                <!-- battery must be padded below to match assets -->
-                <com.android.systemui.BatteryMeterView
-                    android:id="@+id/battery"
-                    android:layout_height="16dp"
-                    android:layout_width="10.5dp"
-                    android:layout_marginBottom="0.33dp"
-                    android:layout_marginStart="4dip"
-                    />
+
+                <include layout="@layout/battery_meter" />
+
             </LinearLayout>
     
             <com.android.systemui.statusbar.policy.Clock

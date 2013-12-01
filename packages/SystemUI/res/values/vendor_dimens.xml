@@ -68,4 +68,7 @@
     <!-- Network stats text size -->
     <dimen name="network_stats_text_size">10dp</dimen>
 
+    <!-- Battery meter size -->
+    <dimen name="battery_meter_size">16dp</dimen>
+
 </resources>
