@@ -27,7 +27,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
@@ -141,23 +140,12 @@ public final class ThemeZipFile {
     protected static ThemeZipFile getThemeZipFile(ThemeResources.MetaData metadata,
                                                   String componentName,
                                                   Resources resources) {
-        ThemeZipFile zipFile = null;
         String path = metadata.themePath + componentName;
-        WeakReference ref = new WeakReference<ThemeZipFile>(sThemeZipFiles.get(path));
-        if (ref != null)
-            zipFile = (ThemeZipFile) ref.get();
-        else
-            zipFile = null;
+        ThemeZipFile zipFile = sThemeZipFiles.get(path);
         if (zipFile == null) {
             synchronized (sThemeZipFiles) {
-                ref = new WeakReference<ThemeZipFile>(sThemeZipFiles.get(path));
-                if (ref != null)
-                    zipFile = (ThemeZipFile) ref.get();
-                if (zipFile == null) {
-                    zipFile = new ThemeZipFile(path, metadata, getPackageName(componentName), resources);
-                    ref = new WeakReference<ThemeZipFile>(zipFile);
-                    sThemeZipFiles.put(path, (ThemeZipFile) ref.get());
-                }
+                zipFile = new ThemeZipFile(path, metadata, getPackageName(componentName), resources);
+                sThemeZipFiles.put(path, zipFile);
             }
         }
 

@@ -18,6 +18,8 @@ package android.app;
 
 import static android.app.ActivityThread.DEBUG_CONFIGURATION;
 
+import android.annotation.CosHook;
+import android.annotation.CosHook.CosHookType;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
@@ -148,6 +150,7 @@ public class ResourcesManager {
      * @param compatInfo the compability info. Must not be null.
      * @param token the application token for determining stack bounds.
      */
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public Resources getTopLevelResources(String resDir, int displayId,
             Configuration overrideConfiguration, CompatibilityInfo compatInfo, IBinder token) {
         final float scale = compatInfo.applicationScale;
@@ -220,6 +223,7 @@ public class ResourcesManager {
         }
     }
 
+    @CosHook(CosHook.CosHookType.CHANGE_CODE)
     public final boolean applyConfigurationToResourcesLocked(Configuration config,
             CompatibilityInfo compat) {
         if (mResConfiguration == null) {
@@ -241,6 +245,8 @@ public class ResourcesManager {
                     | ActivityInfo.CONFIG_SCREEN_SIZE
                     | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
         }
+
+        ThemeHelper.handleExtraConfigurationChanges(changes);
 
         // set it for java, this also affects newly created Resources
         if (config.locale != null) {
