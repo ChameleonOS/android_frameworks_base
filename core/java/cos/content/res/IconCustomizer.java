@@ -18,16 +18,13 @@ package cos.content.res;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.IThemeManagerService;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
@@ -36,25 +33,19 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
-import android.os.SystemProperties;
-import android.os.FileUtils;
-import android.text.TextUtils;
-import android.util.DisplayMetrics;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.NumberFormatException;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -62,7 +53,6 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import com.android.internal.util.XmlUtils;
 
-import cos.util.CommandLineUtils;
 import cos.util.DisplayUtils;
 
 public class IconCustomizer {
@@ -356,43 +346,12 @@ public class IconCustomizer {
     }
 
     public static void saveCustomizedIconBitmap(String fileName, Bitmap icon) {
-        String pathName = ("/data/system/customized_icons/" + fileName);
-        if (DBG)
-            Log.d(TAG, String.format("saveCustomizedIconBitmap(%s, icon) - %s", fileName, pathName));
-        File file = new File(pathName);
-        FileOutputStream outputStream = null;
+        IThemeManagerService ts = IThemeManagerService.Stub.asInterface(ServiceManager.getService("ThemeService"));
         try {
-            outputStream = new FileOutputStream(file);
-            FileUtils.setPermissions(pathName, 436, -1, -1);
-        } catch (FileNotFoundException fileNotFoundException) {
-            Log.e(TAG, "saveCustomizedIconBitmap", fileNotFoundException);
-            return;
-        } catch (IOException ioException) {
-            Log.e(TAG, "saveCustomizedIconBitmap", ioException);
-            return;
+            ts.saveCustomizedIcon(fileName, icon);
+        } catch (RemoteException e) {
+            Log.w(TAG, "saveCustomizedIconBitmap", e);
         }
-
-        if (outputStream == null) {
-            File parent = file.getParentFile();
-            parent.mkdirs();
-            FileUtils.setPermissions(parent.getPath(), 1023, -1, -1);
-            try {
-                outputStream = new FileOutputStream(file);
-            } catch (Exception e) {
-                Log.e(TAG, "saveCustomizedIconBitmap", e);
-                return;
-            }
-        }
-
-        icon.compress(CompressFormat.PNG, 100, outputStream);
-        try {
-            outputStream.flush();
-            outputStream.close();
-        } catch (Exception e) {
-            Log.e(TAG, "saveCustomizedIconBitmap", e);
-        }
-        file.setReadable(true, false);
-        file.setWritable(true, false);
     }
 
 

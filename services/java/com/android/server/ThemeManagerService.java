@@ -19,7 +19,6 @@ package com.android.server;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.WallpaperManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -40,12 +39,10 @@ import android.view.WindowManager;
 import com.android.server.power.ShutdownThread;
 
 import cos.content.res.ExtraConfiguration;
-import cos.util.CommandLineUtils;
 import cos.util.TTFUtils;
 
 import java.io.*;
 import java.lang.Process;
-import java.lang.RuntimeException;
 import java.lang.String;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -357,6 +354,31 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         Message msg = Message.obtain();
         msg.what = ThemeWorkerHandler.MESSAGE_RESET_DIALER;
         mHandler.sendMessage(msg);
+    }
+
+    public void saveCustomizedIcon(String fileName, Bitmap icon) {
+        if (!iconsDirExists()) createIconsDir();
+        String pathName = (CUSTOMIZED_ICONS_DIR + File.separator + fileName);
+        File file = new File(pathName);
+        FileOutputStream outputStream = null;
+        try {
+            outputStream = new FileOutputStream(file);
+        } catch (FileNotFoundException fileNotFoundException) {
+            Log.e(TAG, "saveCustomizedIcon", fileNotFoundException);
+            return;
+        } catch (IOException ioException) {
+            Log.e(TAG, "saveCustomizedIcon", ioException);
+            return;
+        }
+
+        icon.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+        try {
+            outputStream.flush();
+            outputStream.close();
+        } catch (Exception e) {
+            Log.e(TAG, "saveCustomizedIcon", e);
+        }
+        file.setReadable(true, false);
     }
 
     /**

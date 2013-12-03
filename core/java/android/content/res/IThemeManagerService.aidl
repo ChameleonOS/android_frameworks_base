@@ -16,6 +16,8 @@
 
 package android.content.res;
 
+import android.graphics.Bitmap;
+
 /** {@hide} */
 interface IThemeManagerService
 {
@@ -38,6 +40,7 @@ interface IThemeManagerService
     void applyThemeContacts(String themeURI);
     void applyThemeDialer(String themeURI);
     void updateSystemUI();
+    void saveCustomizedIcon(String fileName, in Bitmap icon);
 
     void resetThemeIcons();
     void resetThemeWallpaper();
