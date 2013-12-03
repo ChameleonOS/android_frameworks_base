@@ -270,19 +270,23 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public View getRecentsButton() {
-        return mCurrentView.findViewById(R.id.recent_apps);
+        return mCurrentView.findViewWithTag(NavbarEditor.NAVBAR_RECENT);
     }
 
     public View getMenuButton() {
-        return mCurrentView.findViewById(R.id.menu);
+        View v = mCurrentView.findViewWithTag(NavbarEditor.NAVBAR_ALWAYS_MENU);
+        if (v == null) {
+            v = mCurrentView.findViewWithTag(NavbarEditor.NAVBAR_CONDITIONAL_MENU);
+        }
+        return v;
     }
 
     public View getBackButton() {
-        return mCurrentView.findViewById(R.id.back);
+        return mCurrentView.findViewWithTag(NavbarEditor.NAVBAR_BACK);
     }
 
     public View getHomeButton() {
-        return mCurrentView.findViewById(R.id.home);
+        return mCurrentView.findViewWithTag(NavbarEditor.NAVBAR_HOME);
     }
 
     // for when home is disabled, but search isn't
@@ -425,9 +429,6 @@ public class NavigationBarView extends LinearLayout {
         setButtonWithTagVisibility(NavbarEditor.NAVBAR_ALWAYS_MENU, disableRecent ? View.INVISIBLE : View.VISIBLE);
         setButtonWithTagVisibility(NavbarEditor.NAVBAR_MENU_BIG, disableRecent ? View.INVISIBLE : View.VISIBLE);
         setButtonWithTagVisibility(NavbarEditor.NAVBAR_SEARCH, disableRecent ? View.INVISIBLE : View.VISIBLE);
-//        getBackButton()   .setVisibility(disableBack       ? View.INVISIBLE : View.VISIBLE);
-//        getHomeButton()   .setVisibility(disableHome       ? View.INVISIBLE : View.VISIBLE);
-//        getRecentsButton().setVisibility(disableRecent     ? View.INVISIBLE : View.VISIBLE);
 
         final boolean shouldShowSearch = disableHome && !disableSearch;
         getSearchLight().setVisibility(shouldShowSearch ? View.VISIBLE : View.GONE);
@@ -482,7 +483,6 @@ public class NavigationBarView extends LinearLayout {
         mShowMenu = show;
 
         setButtonWithTagVisibility(NavbarEditor.NAVBAR_CONDITIONAL_MENU, mShowMenu ? View.VISIBLE : View.INVISIBLE);
-//        getMenuButton().setVisibility(mShowMenu ? View.VISIBLE : View.INVISIBLE);
     }
 
     @Override
@@ -685,10 +685,6 @@ public class NavigationBarView extends LinearLayout {
         final View back = mCurrentView.findViewWithTag("back");
         final View home = mCurrentView.findViewWithTag("home");
         final View recent = mCurrentView.findViewWithTag("recent");
-//        final View back = getBackButton();
-//        final View home = getHomeButton();
-//        final View recent = getRecentsButton();
-//        final View menu = getMenuButton();
 
         pw.println("      back: "
                 + PhoneStatusBar.viewInfo(back)
