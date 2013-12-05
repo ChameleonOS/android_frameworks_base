@@ -797,7 +797,13 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
                 crc32.reset();
                 int size = 0;
                 ByteBuffer buffer = ByteBuffer.wrap(bytes);
-                line = String.format("%d %d %s\n", scaledWidth, scaledHeight, info[2]);
+                // support for custom background color
+                if (info.length == 6) {
+                    line = String.format("%d %d %s %s %s %s\n",
+                            scaledWidth, scaledHeight, info[2], info[3], info[4], info[5]);
+                } else {
+                    line = String.format("%d %d %s\n", scaledWidth, scaledHeight, info[2]);
+                }
                 buffer.put(line.getBytes());
                 size += line.getBytes().length;
                 crc32.update(line.getBytes());
