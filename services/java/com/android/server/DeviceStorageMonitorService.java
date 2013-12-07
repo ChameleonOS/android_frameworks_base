@@ -87,7 +87,6 @@ public class DeviceStorageMonitorService extends Binder {
     private boolean mLowMemFlag=false;
     private boolean mMemFullFlag=false;
     private Context mContext;
-
     private ContentResolver mResolver;
     private long mTotalMemory;  // on /data
     private StatFs mDataFileStats;

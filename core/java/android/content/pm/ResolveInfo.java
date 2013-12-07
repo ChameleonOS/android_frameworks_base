@@ -17,7 +17,6 @@
 package android.content.pm;
 
 import android.annotation.CosHook;
-import android.annotation.CosHook.CosHookType;
 import android.app.ThemeHelper;
 import android.content.ComponentName;
 import android.content.IntentFilter;

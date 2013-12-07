@@ -877,5 +877,4 @@ public final class BatteryService extends Binder {
         }
         return false;
     }
-
 }

@@ -227,6 +227,7 @@ public class RingtoneManager {
 
     private boolean mIncludeDrm;
 
+    
     /**
      * Constructs a RingtoneManager. This constructor is recommended as its
      * constructed instance manages cursor(s).

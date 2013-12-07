@@ -44,16 +44,16 @@
     <dimen name="status_bar_content_number_size">48sp</dimen>
     <!-- Height of the system bar (combined status & navigation); used by
          SystemUI internally, not respected by the window manager. -->
-    <dimen name="system_bar_height">40dp</dimen>
+    <dimen name="system_bar_height">@dimen/navigation_bar_height</dimen>
     <!-- Height of notification icons in the system bar -->
-    <dimen name="system_bar_icon_size">24dip</dimen>
+    <dimen name="system_bar_icon_size">32dip</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
 
     <!-- Minimum size of the fastscroll overlay -->
     <dimen name="fastscroll_overlay_size">104dp</dimen>
     <!-- Text size of the fastscroll overlay -->
-    <dimen name="fastscroll_overlay_text_size">24sp</dimen>
+    <dimen name="fastscroll_overlay_text_size">52sp</dimen>
     <!-- Padding of the fastscroll overlay -->
     <dimen name="fastscroll_overlay_padding">16dp</dimen>
     <!-- Width of the fastscroll thumb -->
@@ -311,7 +311,7 @@
     <dimen name="keyguard_security_width">320dp</dimen>
 
     <!-- Height of the sliding KeyguardSecurityContainer (includes 2x keyguard_security_view_margin) -->
-    <dimen name="keyguard_security_height">350dp</dimen>
+    <dimen name="keyguard_security_height">400dp</dimen>
 
     <!-- Margin around the various security views -->
     <dimen name="keyguard_security_view_margin">8dp</dimen>
