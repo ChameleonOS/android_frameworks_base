@@ -55,6 +55,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Display;
 
 import java.lang.ref.WeakReference;
@@ -779,6 +780,7 @@ final class ApplicationPackageManager extends PackageManager {
                 app.uid == Process.myUid() ? app.sourceDir : app.publicSourceDir,
                         Display.DEFAULT_DISPLAY, null, mContext.mPackageInfo);
         if (r != null) {
+            setActivityIcons(app, r);
             return r;
         }
         throw new NameNotFoundException("Unable to open " + app.publicSourceDir);
@@ -788,6 +790,22 @@ final class ApplicationPackageManager extends PackageManager {
         String appPackageName) throws NameNotFoundException {
         return getResourcesForApplication(
             getApplicationInfo(appPackageName, 0));
+    }
+
+    @CosHook(CosHook.CosHookType.NEW_METHOD)
+    private void setActivityIcons(ApplicationInfo ai, Resources r) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setPackage(ai.packageName);
+        List<ResolveInfo> activities = queryIntentActivities(intent, 0);
+
+        if (activities != null) {
+            SparseArray<ComponentName> iconResources = new SparseArray<ComponentName>();
+            for (ResolveInfo ri : activities ) {
+                iconResources.put(ri.getIconResource(),
+                        new ComponentName(ai.packageName, ri.activityInfo.name));
+            }
+            r.setIconResources(iconResources);
+        }
     }
 
     /** @hide */

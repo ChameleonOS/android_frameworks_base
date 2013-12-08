@@ -16,8 +16,13 @@
 
 package android.content.res;
 
+import android.content.ComponentName;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.util.SparseArray;
 import com.android.internal.util.XmlUtils;
 
+import cos.content.res.IconCustomizer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -125,6 +130,8 @@ public class Resources {
 
     private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
     private WeakReference<IBinder> mToken;
+
+    private SparseArray<ComponentName> mIcons;
 
     static {
         sPreloadedDrawables = new LongSparseArray[2];
@@ -756,7 +763,22 @@ public class Resources {
             }
         }
 
-        Drawable res = loadDrawable(value, id);
+        Drawable res = null;
+        ComponentName cn = mIcons != null ? mIcons.get(id) : null;
+        if (cn != null) {
+            final String pkg = cn.getPackageName();
+            final String cls = cn.getClassName();
+            res = IconCustomizer.getCustomizedIconDrawable(pkg, cls);
+            if (res == null) {
+                final Bitmap bmp = BitmapFactory.decodeResource(this, id);
+                if (bmp != null) {
+                    res = IconCustomizer.generateIconDrawable(bmp);
+                    IconCustomizer.saveCustomizedIconBitmap(IconCustomizer.getFileName(pkg, cls),
+                            ((BitmapDrawable)res).getBitmap());
+                }
+            }
+        }
+        if (res == null) res = loadDrawable(value, id);
         synchronized (mAccessLock) {
             if (mTmpValue == null) {
                 mTmpValue = value;
@@ -2142,6 +2164,12 @@ public class Resources {
             }
         }
 
+        ComponentName cn = mIcons != null ? mIcons.get(id) : null;
+        if (cn != null) {
+            final Drawable d = getCustomizedIcon(id, cn.getPackageName(), cn.getClassName());
+            if (d != null) dr = d;
+        }
+
         if (dr != null) {
             dr.setChangingConfigurations(value.changingConfigurations);
             cs = dr.getConstantState();
@@ -2181,6 +2209,20 @@ public class Resources {
                         }
                     }
                 }
+            }
+        }
+
+        return dr;
+    }
+
+    private Drawable getCustomizedIcon(int resId, final String pkg, final String cls) {
+        Drawable dr = IconCustomizer.getCustomizedIconDrawable(pkg, cls);
+        if (dr == null) {
+            final Bitmap bmp = BitmapFactory.decodeResource(this, resId);
+            if (bmp != null) {
+                dr = IconCustomizer.generateIconDrawable(bmp);
+                IconCustomizer.saveCustomizedIconBitmap(IconCustomizer.getFileName(pkg, cls),
+                        ((BitmapDrawable)dr).getBitmap());
             }
         }
 
@@ -2424,8 +2466,14 @@ public class Resources {
         }
     }
 
-    @CosHook(CosHook.CosHookType.CHANGE_ACCESS)
-    public Resources() {
+    /** @hide */
+    @CosHook(CosHookType.NEW_METHOD)
+    public void setIconResources(SparseArray<ComponentName> icons) {
+        mIcons = icons;
+    }
+
+    @CosHook(CosHookType.CHANGE_ACCESS)
+    Resources() {
         mAssets = AssetManager.getSystem();
         // NOTE: Intentionally leaving this uninitialized (all values set
         // to zero), so that anyone who tries to do something that requires

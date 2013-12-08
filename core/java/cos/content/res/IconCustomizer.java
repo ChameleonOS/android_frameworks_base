@@ -231,6 +231,10 @@ public class IconCustomizer {
         return scaleDrawable(composeIcon(drawableToBitmap(base)));
     }
 
+    public static BitmapDrawable generateIconDrawable(Bitmap base) {
+        return scaleDrawable(composeIcon(scaleBitmap(base, sIconWidth, sIconHeight)));
+    }
+
     public static BitmapDrawable generateShortcutIconDrawable(Drawable base) {
         return scaleDrawable(composeShortcutIcon(drawableToBitmap(base)));
     }

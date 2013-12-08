@@ -19,8 +19,11 @@ package com.android.server;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.WallpaperManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.IThemeManagerService;
 import android.graphics.Bitmap;
@@ -45,6 +48,7 @@ import java.io.*;
 import java.lang.Process;
 import java.lang.String;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
@@ -542,6 +546,23 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
         } catch (Exception e) {}
     }
 
+    private void killLauncher() {
+        final IntentFilter filter = new IntentFilter(Intent.ACTION_MAIN);
+        filter.addCategory(Intent.CATEGORY_HOME);
+
+        List<IntentFilter> filters = new ArrayList<IntentFilter>();
+        filters.add(filter);
+
+        List<ComponentName> activities = new ArrayList<ComponentName>();
+
+        // You can use name of your package here as third argument
+        mContext.getPackageManager().getPreferredActivities(filters, activities, null);
+
+        for (ComponentName activity : activities) {
+            killProcess(activity.getPackageName());
+        }
+    }
+
     private void notifyThemeUpdate(long configChange) {
         try {
             // now notifiy activity manager of the configuration change
@@ -553,7 +574,7 @@ public class ThemeManagerService extends IThemeManagerService.Stub {
             // restart launcher
             if ((configChange & (ExtraConfiguration.THEME_FLAG_LAUNCHER | ExtraConfiguration.THEME_FLAG_ICON |
                     ExtraConfiguration.THEME_FLAG_FRAMEWORK)) != 0)
-                killProcess(ExtraConfiguration.LAUNCHER_PKG_NAME);
+                killLauncher();
             // restart mms if needed
             if ((configChange & (ExtraConfiguration.THEME_FLAG_MMS |
                     ExtraConfiguration.THEME_FLAG_FRAMEWORK)) != 0)
